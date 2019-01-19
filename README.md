@@ -1,2 +1,0 @@
-# OMRE-SIUE
-OMRE
