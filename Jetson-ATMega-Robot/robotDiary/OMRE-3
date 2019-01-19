@@ -1,0 +1,2 @@
+Output of motorboard is giving opposite polarities to motor 0, fixed by changing positive/negative terminal input.
+

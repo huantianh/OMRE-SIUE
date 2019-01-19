@@ -1,0 +1,7 @@
+Robot Setup on new Jetson
+- sudo apt install  arduino
+- Move the folder called SimpleTimer in the repo to ~/sketchbook/libraries/
+- sudo apt install python3-serial   (DONT FORGET THE 3)
+- sudo apt install python3-numpy    (DONT FORGET THE 3
+- Install TightVNC http://ubuntuhandbook.org/index.php/2016/07/remote-access-ubuntu-16-04/
+-    
