@@ -1,0 +1,10 @@
++OMRE-2:
+	####okay things####
+Motors
+Encoder
+Ultrasound sensors
+Infared sensors
+
+	####Problems####
+PID gains for motors
+IMU
