@@ -4,7 +4,7 @@
 
 
 
-#define ENCODER_0INTERRUPT_PIN 5// pin  18that interrupts on both rising and falling of A and B channels of encoder
+#define ENCODER_0INTERRUPT_PIN 5 // pin  18that interrupts on both rising and falling of A and B channels of encoder
 #define ENCODER_1INTERRUPT_PIN 4 // pin 19 https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/ to see the encoder pin number
 #define ENCODER_2INTERRUPT_PIN 3 // pin 20
 
@@ -43,11 +43,16 @@ double Ki2 = 0.007;
 double Kp3 = 0.5; 
 double Ki3 = 0.007;
 
-double sum[3]        = {0,0,0};
-double error[3]      = {0,0,0};
-double setpoint[3]   = {0,0,0};
-double pwmValue[3]   = {0,0,0};
-double rpms[3]  = {0,0,0};
+double sum[3]        = {
+  0,0,0};
+double error[3]      = {
+  0,0,0};
+double setpoint[3]   = {
+  0,0,0};
+double pwmValue[3]   = {
+  0,0,0};
+double rpms[3]  = {
+  0,0,0};
 
 unsigned long lastTime[3]   = {
   0,0,0};
@@ -78,7 +83,7 @@ char pidSwitch = '1';
 
 void setup() {
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   for(int i =0;i<6;i++)
   {
     pinMode(ultrasonicSensorTrigPins[i], OUTPUT);
@@ -156,121 +161,121 @@ void updateRPM() {
 void pi() 
 {
   //////////////////////// motor 0 
-   if(setpoint[0] != 0)
-   {
-      //updateRPM();
-      timeChange[0] = (millis() - lastTime[0]);
-      lastTime[0] = millis();
-      error[0] = setpoint[0] -rpmValues[0];
-      sum[0] = (sum[0] +(error[0]*(double)timeChange[0]));
-      //pwmValue[0] = (Kp * error[0]) + (Ki * sum[0]); 
-      pwmValue[0] = (Kp1 * error[0]) + (Ki1 * sum[0]); 
-      
-      if(pwmValue[0] < 0)
-      {
-        motor(0,pwmValue[0]*-1,0);
-      } 
-      else
-      {
-        motor(0,pwmValue[0],1);
-      }
-      
-      delay(15); 
-      
-        Serial.print(millis()*0.001);
-        Serial.print("  ,  ");
-        //Serial.print("rpm0 ");
-        Serial.print(rpmValues[0]);
-        Serial.print("  ,  ");
-        //Serial.print("rpm1 ");
-        Serial.print(rpmValues[1]);
-        Serial.print("  ,  ");
-        //Serial.print("rpm2 ");
-        Serial.println(rpmValues[2]); 
-   }
-   else
-   {
-      error[0] = 0;
-      sum[0]   = 0;
-      motor(0,0,0);
-   }
-   
-////////////////////////////// motor 1 
-   if(setpoint[1] != 0)
-   {         
-      timeChange[1] = (millis() - lastTime[1]);
-      lastTime[1] = millis();
-      error[1] = setpoint[1] -rpmValues[1];
-      sum[1] = (sum[1] +(error[1]*(double)timeChange[1]));
-      //pwmValue[1] = (Kp * error[1]) + (Ki * sum[1]);
-      pwmValue[1] = (Kp2 * error[1]) + (Ki2 * sum[1]);
-      
-      if(pwmValue[1] < 0)
-      {
-        motor(1,pwmValue[1]*-1,0);
-      } 
-      else
-      {
-        motor(1,pwmValue[1],1);
-      }
-       
-       delay(15); 
-       
-        Serial.print(millis()*0.001);
-        Serial.print("  ,  ");
-        //Serial.print("rpm0 ");
-        Serial.print(rpmValues[0]);
-        Serial.print("  ,  ");
-        //Serial.print("rpm1 ");
-        Serial.print(rpmValues[1]);
-        Serial.print("  ,  ");
-        //Serial.print("rpm2 ");
-        Serial.println(rpmValues[2]); 
-   }
-   else
-   {
-        error[1] = 0;
-        sum[1]   = 0;
-        motor(1,0,0);
-   }
-   
-////////////////////////////// motor 2    
-  if(setpoint[2] != 0)
-  {  
-      timeChange[2] = (millis() - lastTime[2]);
-      lastTime[2] = millis();
-      error[2] = setpoint[2] -rpmValues[2];
-      sum[2] = (sum[2] +(error[2]*(double)timeChange[2]));
-      //pwmValue[2] = (Kp * error[2]) + (Ki * sum[2]);
-      pwmValue[2] = (Kp3 * error[2]) + (Ki3 * sum[1]); 
-      
-      if(pwmValue[2] < 0)
-      {
-        motor(2,pwmValue[2]*-1,0);
-      } 
-      else
-      {
-        motor(2,pwmValue[2],1);
-      }
-       
-       delay(15); 
-       
-        Serial.print(millis()*0.001);
-        Serial.print("  ,  ");
-        //Serial.print("rpm0 ");
-        Serial.print(rpmValues[0]);
-        Serial.print("  ,  ");
-        //Serial.print("rpm1 ");
-        Serial.print(rpmValues[1]);
-        Serial.print("  ,  ");
-        //Serial.print("rpm2 ");
-        Serial.println(rpmValues[2]);   
+  if(setpoint[0] != 0)
+  {
+    //updateRPM();
+    timeChange[0] = (millis() - lastTime[0]);
+    lastTime[0] = millis();
+    error[0] = setpoint[0] -rpmValues[0];
+    sum[0] = (sum[0] +(error[0]*(double)timeChange[0]));
+    //pwmValue[0] = (Kp * error[0]) + (Ki * sum[0]); 
+    pwmValue[0] = (Kp1 * error[0]) + (Ki1 * sum[0]); 
+
+    if(pwmValue[0] < 0)
+    {
+      motor(0,pwmValue[0]*-1,0);
+    } 
+    else
+    {
+      motor(0,pwmValue[0],1);
+    }
+
+    delay(15); 
+
+    Serial.print(millis()*0.001);
+    Serial.print("  ,  ");
+    //Serial.print("rpm0 ");
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    //Serial.print("rpm1 ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    //Serial.print("rpm2 ");
+    Serial.println(rpmValues[2]); 
   }
   else
   {
-       error[2] = 0;
-       sum[2]   = 0;
-       motor(2,0,0);
+    error[0] = 0;
+    sum[0]   = 0;
+    motor(0,0,0);
+  }
+
+  ////////////////////////////// motor 1 
+  if(setpoint[1] != 0)
+  {         
+    timeChange[1] = (millis() - lastTime[1]);
+    lastTime[1] = millis();
+    error[1] = setpoint[1] -rpmValues[1];
+    sum[1] = (sum[1] +(error[1]*(double)timeChange[1]));
+    //pwmValue[1] = (Kp * error[1]) + (Ki * sum[1]);
+    pwmValue[1] = (Kp2 * error[1]) + (Ki2 * sum[1]);
+
+    if(pwmValue[1] < 0)
+    {
+      motor(1,pwmValue[1]*-1,0);
+    } 
+    else
+    {
+      motor(1,pwmValue[1],1);
+    }
+
+    delay(15); 
+
+    Serial.print(millis()*0.001);
+    Serial.print("  ,  ");
+    //Serial.print("rpm0 ");
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    //Serial.print("rpm1 ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    //Serial.print("rpm2 ");
+    Serial.println(rpmValues[2]); 
+  }
+  else
+  {
+    error[1] = 0;
+    sum[1]   = 0;
+    motor(1,0,0);
+  }
+
+  ////////////////////////////// motor 2    
+  if(setpoint[2] != 0)
+  {  
+    timeChange[2] = (millis() - lastTime[2]);
+    lastTime[2] = millis();
+    error[2] = setpoint[2] -rpmValues[2];
+    sum[2] = (sum[2] +(error[2]*(double)timeChange[2]));
+    //pwmValue[2] = (Kp * error[2]) + (Ki * sum[2]);
+    pwmValue[2] = (Kp3 * error[2]) + (Ki3 * sum[1]); 
+
+    if(pwmValue[2] < 0)
+    {
+      motor(2,pwmValue[2]*-1,0);
+    } 
+    else
+    {
+      motor(2,pwmValue[2],1);
+    }
+
+    delay(15); 
+
+    Serial.print(millis()*0.001);
+    Serial.print("  ,  ");
+    //Serial.print("rpm0 ");
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    //Serial.print("rpm1 ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    //Serial.print("rpm2 ");
+    Serial.println(rpmValues[2]);   
+  }
+  else
+  {
+    error[2] = 0;
+    sum[2]   = 0;
+    motor(2,0,0);
   }   
 }
 
@@ -377,7 +382,7 @@ void parseCommand()
   //  double distance = get_IR(value);
   switch(command)
   {
-    
+
   case 'E':
   case 'e':
     int encoderNum;
@@ -387,7 +392,7 @@ void parseCommand()
     //itoa(encoderCounts[encoderNum],TXBuffer,10);   // serial.print can not handle printing a 64bit int so we turn it  into a string
     Serial.println(counts);
     break;
-    
+
   case 'M':
   case 'm':
     int  motorNumber;
@@ -397,7 +402,7 @@ void parseCommand()
     sscanf(&rcv_buffer[1], " %d %d %d \r",&motorNumber, &motorPWM, &motorDirection);
     motor(motorNumber,motorPWM,motorDirection);
     break;
-    
+
   case 'u':
   case 'U':
     int ultrasonicNumber;
@@ -410,10 +415,10 @@ void parseCommand()
     delayMicroseconds(10);
     digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], LOW);
     start = micros();
-    
+
     while(digitalRead(ultrasonicSensorEchoPins[ultrasonicNumber]) == LOW);
     start = micros();
-    
+
     while(micros()-start <= 6000)
     {
       if(digitalRead(ultrasonicSensorEchoPins[ultrasonicNumber]) == LOW)
@@ -423,8 +428,8 @@ void parseCommand()
       }
       //duration = micros()-start;
     }
-    
-    
+
+
     //duration = pulseIn(ultrasonicSensorEchoPins[ultrasonicNumber], HIGH);
     cm = (duration/2) / 29.1;
     //Serial.println(duration);
@@ -443,7 +448,7 @@ void parseCommand()
     distance = get_IR(value);
     Serial.println (distance);
     break;
-    
+
   case 'v':
   case 'V':
 
@@ -459,25 +464,25 @@ void parseCommand()
     rpms[1] = (double)(rpm1/10);
     rpms[2] = (double)(rpm2/10);
 
-   for(int i = 0;i<3;i++)
-   {
-     // when the setpoint is in a 30 +/- range do not set the sum to 0, aka if major velocity change set your sum
-     // to 0. if small then don't change it
-     if(!(setpoint[i]+30 >= rpms[i] && setpoint[i]-30 <= rpms[i]))
-     {
-            //error[i] = 0;
-            sum[i]   = 0;
-     }
-   }
-    
+    for(int i = 0;i<3;i++)
+    {
+      // when the setpoint is in a 30 +/- range do not set the sum to 0, aka if major velocity change set your sum
+      // to 0. if small then don't change it
+      if(!(setpoint[i]+30 >= rpms[i] && setpoint[i]-30 <= rpms[i]))
+      {
+        //error[i] = 0;
+        sum[i]   = 0;
+      }
+    }
+
     setpoint[0] = rpms[0];
     setpoint[1] = rpms[1];
     setpoint[2] = rpms[2];
     break;
-    
+
   case 'p':
   case 'P':
-   
+
     setpoint[0] = 0;
     setpoint[1] = 0;
     setpoint[2] = 0;
@@ -486,42 +491,42 @@ void parseCommand()
     motor(2,0,0);
     sscanf(&rcv_buffer[1], " %c \r",&pidSwitch);
     break;
-    
+
   case 'r':
   case 'R':
     int rpmNum;
     sscanf(&rcv_buffer[1], " %d \r",&rpmNum);
     printDouble(rpmValues[rpmNum],1000000000);
-   break;
-  
-//  case 'k':
-//  case 'K':
-//     char  pValue[20];
-//     char  iValue[20];
-//     sscanf(&rcv_buffer[1], " %s %s \r",&pValue,&iValue);
-//     char *ptr;
-//     Kp = strtod(pValue,&ptr);
-//     Ki = strtod(iValue,&ptr);
-//     break;
-     
-   case 'w':
-   case 'W':
-     char  p1[20];
-     char  p2[20];
-     char  p3[20];
-     char  i1[20];
-     char  i2[20];
-     char  i3[20];    
-     sscanf(&rcv_buffer[1], " %s %s %s %s %s %s \r",&p1,&p2,&p3,&i1,&i2,&i3);
-     char *ptr;
-     Kp1 = strtod(p1,&ptr);
-     Kp2 = strtod(p2,&ptr);
-     Kp3 = strtod(p3,&ptr);
-     Ki1 = strtod(i1,&ptr);
-     Ki2 = strtod(i2,&ptr);
-     Ki3 = strtod(i3,&ptr);
-     break;
- 
+    break;
+
+    //  case 'k':
+    //  case 'K':
+    //     char  pValue[20];
+    //     char  iValue[20];
+    //     sscanf(&rcv_buffer[1], " %s %s \r",&pValue,&iValue);
+    //     char *ptr;
+    //     Kp = strtod(pValue,&ptr);
+    //     Ki = strtod(iValue,&ptr);
+    //     break;
+
+  case 'w':
+  case 'W':
+    char  p1[20];
+    char  p2[20];
+    char  p3[20];
+    char  i1[20];
+    char  i2[20];
+    char  i3[20];    
+    sscanf(&rcv_buffer[1], " %s %s %s %s %s %s \r",&p1,&p2,&p3,&i1,&i2,&i3);
+    char *ptr;
+    Kp1 = strtod(p1,&ptr);
+    Kp2 = strtod(p2,&ptr);
+    Kp3 = strtod(p3,&ptr);
+    Ki1 = strtod(i1,&ptr);
+    Ki2 = strtod(i2,&ptr);
+    Ki3 = strtod(i3,&ptr);
+    break;
+
   }
 }
 
@@ -548,6 +553,3 @@ void printDouble( double val, unsigned int precision){
     frac = (int(val)- val ) * precision;
   Serial.println(frac,DEC) ;
 } 
-
-
-
