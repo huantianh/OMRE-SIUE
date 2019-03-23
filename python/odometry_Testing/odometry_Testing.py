@@ -7,7 +7,7 @@ import libomni
 import os
 
 
-ser = serial.Serial('/dev/ttyACM0',115200, timeout=.4);
+ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
 time.sleep(1)
 ser.reset_input_buffer()
 ser.reset_output_buffer()

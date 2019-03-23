@@ -5,7 +5,7 @@ import time
 import numpy as np
 import libomni
 
-ser = serial.Serial('/dev/ttyACM0',115200, timeout=.4);
+ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
 
 #time.sleep(1)
 
@@ -30,10 +30,7 @@ def readEncoder(encoderNum):
 	ser.write(("e %d \r" % (encoderNum)).encode())
 	
 	encoderValue = (ser.readline().decode("ascii"))
-	#print(encoderValue)
-	data = float(encoderValue.strip())
-	#print(data)
-	return data
+	
 
 def PIValues(Kp,Ki):
 	ser.reset_input_buffer()

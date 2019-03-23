@@ -1,5 +1,5 @@
 import serial
-import math, time, os, libomni
+import math, time, os
 import numpy as np
 import sys
 
@@ -12,7 +12,7 @@ ser.reset_output_buffer()
 #joy = xbox.Joystick()
 
 #folder where saving all the data
-save_folder = "Data_Testing/PWM_Testing/"
+save_folder = "PWM_Testing/"
 current_directory = os.getcwd()
 save_directory = os.path.join(current_directory, save_folder)
 
@@ -29,7 +29,7 @@ def readEncoder(encoderNum):
 def PWMValues(pwm):
 	ser.reset_input_buffer()
 	for x in range(3):
-		ser.write(("m %s %s %s \r" % (x,abs(int(pwm)),0)).encode())
+		ser.write(("m %s %s %s \r" % (x,abs(int(pwm)),int(pwm>=0))).encode())
 
 def PIDValues(Kp,Ki,Kd):
 	ser.reset_input_buffer()
@@ -54,6 +54,11 @@ def motors(m1,m2,m3):
 		ser.write(("m %d %d %d\r" % (x, abs(motorValues[x]), int(motorValues[x]>=0))).encode())
 		#print(ser.readline().decode("ascii"))
 	#readEncoders()
+def velocityValues(m1,m2,m3):
+	motorValues = [m1,m2,m3]
+	print(motorValues)
+	ser.write(('v %d %d %d \r'  % (motorValues[0],motorValues[1],motorValues[2])).encode())
+	
 
 mode = str(input("Enter mode: s for serial, p for PWM testing "))
 
@@ -66,13 +71,12 @@ if(mode == 's'):
 		ser.write(command.encode())
 		print (ser.readline().decode())
 
-
 elif mode == 'p':
 	pid = 0
 	enablePID(pid)
 			 
 	#~ motor_num = int(input("enter motor number: "))
-	f = open("pwmvalues _longertime.txt",'r')
+	f = open("pwmvalues.txt",'r')
 	lines = f.readlines()
 	timer = []
 	pwm = []

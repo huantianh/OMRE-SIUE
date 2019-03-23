@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 #sets up serial connection to arduino atMega
-ser = serial.Serial('/dev/ttyACM0',115200, timeout=.4);
+ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
 
 #clear buffers just incase garbage inside
 ser.reset_input_buffer()
