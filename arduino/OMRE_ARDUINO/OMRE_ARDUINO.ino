@@ -8,6 +8,7 @@
 
 #define FORWARD 0
 #define BACKWARD 1
+
 #define INFRARED_SENSOR_0 A0
 #define INFRARED_SENSOR_1 A1
 #define INFRARED_SENSOR_2 A2
@@ -22,17 +23,26 @@ const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
 const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
 const int infraredSensorPins[]             = {0, 1, 2, 3};
 
+//double Kp = 1.9;
+//double Ki = 0.09;
+//double Kd = 0.2;
+
 double Kp = 1;
-double Ki = 0.0007;
+double Ki = 0.1;
+double Kd = 0;
 
-double sum[3]        = {0, 0, 0};
-double error[3]      = {0, 0, 0};
-double setpoint[3]   = {0, 0, 0};
-double pwmValue[3]   = {0, 0, 0};
-double rpms[3]       = {0, 0, 0};
+double ITerm[3]       = {0, 0, 0};
+double lastInput[3]   = {0, 0, 0};
+double error[3]       = {0, 0, 0};
+double dInput[3]      = {0, 0, 0};
+double setpoint[3]    = {0, 0, 0};
+double pwm_pid[3]     = {0, 0, 0};
+double rpms[3]        = {0, 0, 0};
 
+unsigned long now[3]        = {0, 0, 0};
 unsigned long lastTime[3]   = {0, 0, 0};
 unsigned long timeChange[3] = {0, 0, 0};
+int SampleTime = 1000;
 
 int rpmValues[3]         = {0, 0, 0};
 double pastEncoderValues[3]  = {0, 0, 0};
@@ -41,12 +51,13 @@ unsigned long pastTimes[3] = {0, 0, 0};// millis() works for up to 50days! we'll
 char rcv_buffer[64];  // holds commands recieved
 char TXBuffer[64];    // temp storage for large data sent
 
-void motor(int, int, bool);
+void motor(int, int);
 
-double changeInEncoders;
-double changeInRevolutions;
-double changeInTimeSeconds;
-char pidSwitch = '0';
+double changeInEncoders[3] = {0, 0, 0};
+double changeInRevolutions[3] = {0, 0, 0};
+double changeInTimeSeconds[3] = {0, 0, 0};
+
+char pidSwitch = '1';
 
 
 ////////////////////////////////////////////////////////////////           SET UP
@@ -103,29 +114,29 @@ void updateRPM() {
 
   for ( int i = 0; i < 3; i++)
   {
-    changeInEncoders = encoderCounts[i] - pastEncoderValues[i];
-    changeInTimeSeconds = ((micros() - pastTimes[i]) * 0.000001); // *.001 to convert to seconds
-    changeInRevolutions = changeInEncoders / 2248.6;
+    changeInEncoders[i] = encoderCounts[i] - pastEncoderValues[i];
+    changeInTimeSeconds[i] = ((micros() - pastTimes[i]) * 0.000001); // *.001 to convert to seconds
+    changeInRevolutions[i] = changeInEncoders[i] / 2248.6;
 
-    rpmValues[i] = (changeInRevolutions / (changeInTimeSeconds)) * 60; // *60 to get Revolutions per MINUTE
+    rpmValues[i] = (changeInRevolutions[i] / (changeInTimeSeconds[i])) * 60; // *60 to get Revolutions per MINUTE
 
     // update our values to be used next time around
     pastTimes[i] = micros();
     pastEncoderValues[i] = encoderCounts[i];
 
-   
-      Serial.print(micros() * 0.000001);
-      Serial.print("  ,  ");
-      Serial.print(abs(rpmValues[0]));
-      Serial.print("  ,  ");
-      Serial.print(abs(rpmValues[1]));
-      Serial.print("  ,  ");
-      Serial.println(abs(rpmValues[2]));
-    
+
+    //    Serial.print(micros() * 0.000001);
+    //    Serial.print("  ,  ");
+    //    Serial.print(rpmValues[0]);
+    //    Serial.print("  ,  ");
+    //    Serial.print(rpmValues[1]);
+    //    Serial.print("  ,  ");
+    //    Serial.println(rpmValues[2]);
+
   }
 }
 
-/////////////////////////////////////////////////////////////           PI loop
+/////////////////////////////////////////////////////////////        PID loop
 void pi() {
 
   for (int i = 0; i < 3; i++)
@@ -133,41 +144,65 @@ void pi() {
     if (setpoint[i] != 0)
     {
       //updateRPM();
-      timeChange[i] = (micros() - lastTime[i]);
-      lastTime[i] = micros();
+      now[i] = micros();
+      timeChange[i] = (now[i] - lastTime[i]);
 
-      error[i] = setpoint[i] - rpmValues[i];
-      sum[i] = (sum[i] + (error[i] * (double)timeChange[i]));
+      if (timeChange[i] >= SampleTime)
+      {
 
-      pwmValue[i] = (Kp * error[i]) + (Ki * sum[i]);
+        ///////////////////////////////////////////        Error Variables
+        error[i] = setpoint[i] - rpmValues[i];
+        ITerm[i] += (Ki * error[i]);
+        
+        if (ITerm[i] > 255)
+        {
+          ITerm[i] = 255;
+        }
+        if (ITerm[i] < -255)
+        {
+          ITerm[i] = -255;
+        }
+        
+        dInput[i] = (rpmValues[i] - lastInput[i]);
 
-      if (pwmValue[i] < 0) {
-        motor(i, pwmValue[i] * -1, 0);
+        ////////////////////////////////////////////       PID output
+        pwm_pid[i] = (Kp * error[i]) + ITerm[i] - (Kd * dInput[i]);
+
+        if (pwm_pid[i] > 255)
+        {
+          pwm_pid[i] = 255;
+        }
+        if (pwm_pid[i] < -255)
+        {
+          pwm_pid[i] = -255;
+        }
+
+        ///////////////////////////////////////////        Run Motor
+        motor(i, pwm_pid[i]);
+
+        //////////////////////////////////////////         Remember Variables for next time
+        lastInput[i] = rpmValues[i];
+        lastTime[i] = now[i];
+
+        Serial.print(rpmValues[0]);
+        Serial.print("  ,  ");
+        Serial.print(rpmValues[1]);
+        Serial.print("  ,  ");
+        Serial.println(rpmValues[2]);
       }
-      else {
-        motor(i, pwmValue[i], 1);
-      }
-
-      Serial.print(rpmValues[0]);
-      Serial.print("  ,  ");
-      Serial.print(rpmValues[1]);
-      Serial.print("  ,  ");
-      Serial.println(rpmValues[2]);
     }
     else
     {
-      error[i] = 0;
-      sum[i]   = 0;
-      motor(i, 0, 0);
+      motor(i, 0);
     }
   }
 }
 
-///////////////////////////////////////////////////            COUNTING ENCODERS
+////////////////////////////////////////////////////////////            COUNTING ENCODERS
 void encoder0_ISR() // encoder0 interrupt service routine
 {
   noInterrupts();
-  if (motorDir[0])
+  if (motorDir[0] == 0)
   {
     encoderCounts[0]++;
   }
@@ -180,7 +215,7 @@ void encoder0_ISR() // encoder0 interrupt service routine
 void encoder1_ISR()
 {
   noInterrupts();
-  if (motorDir[1])
+  if (motorDir[1] == 0)
   {
     encoderCounts[1]++;
   }
@@ -193,7 +228,7 @@ void encoder1_ISR()
 void encoder2_ISR()
 {
   noInterrupts();
-  if (motorDir[2])
+  if (motorDir[2] == 0)
   {
     encoderCounts[2]++;
   }
@@ -204,15 +239,35 @@ void encoder2_ISR()
   interrupts();
 }
 
-//////////////////////////////////////////////////////             RUNNING MOTORS
-void motor(int motorNumber, int pwm, bool dir)
+/////////////////////////////////////////////////////////////////             RUNNING MOTORS
+void motor(int motorNumber, int pwm)
 {
-  motorDir[motorNumber] = dir;
-  digitalWrite(motorDirPins[motorNumber], dir);
-  analogWrite(motorPWMPins[motorNumber], pwm);
+  if (pwm > 255) {
+    pwm = 255;
+  }
+  if (pwm < -255) {
+    pwm = -255;
+  }
+
+  if (pwm > 0)
+  {
+    digitalWrite(motorDirPins[motorNumber], 0);
+    analogWrite(motorPWMPins[motorNumber], pwm);
+  }
+  if (pwm < 0)
+  {
+    digitalWrite(motorDirPins[motorNumber], 1);
+    analogWrite(motorPWMPins[motorNumber], pwm);
+  }
+  if (pwm == 0)
+  {
+    digitalWrite(motorDirPins[motorNumber], 1);
+    analogWrite(motorPWMPins[motorNumber], pwm);
+  }
+
 }
 
-///////////////////////////////////////////////////////             RECEIVE BYTE
+///////////////////////////////////////////////////////////////////             RECEIVE BYTE
 void receiveBytes()
 {
   static byte index = 0;
@@ -239,7 +294,7 @@ void receiveBytes()
   }
 }
 
-////////////////////////////////////////////////////////////////      BUFFER FLUSH
+///////////////////////////////////////////////////////////////////      BUFFER FLUSH
 void buffer_Flush(char *ptr)
 {
   for (int i = 0; i < 64; i++)
@@ -248,13 +303,13 @@ void buffer_Flush(char *ptr)
   }
 }
 
-//////////////////////////////////////////////////////////////        GIVING COMMAND
+/////////////////////////////////////////////////////////////////        GIVING COMMAND
 void parseCommand()
 {
   char command = rcv_buffer[0]; // our first byte tells us the command char is equivalent to byte
   switch (command)
   {
-    ///////////////////////////////////// ENCODER
+    ///////////////////////////////////////////////////////////////      ENCODER
     case 'E':
     case 'e':
       int encoderNum;
@@ -265,17 +320,17 @@ void parseCommand()
       Serial.println(counts);
       break;
 
-    ////////////////////////////////////  MOTOR
+    ////////////////////////////////////////////////////////////////    MOTOR
     case 'M':
     case 'm':
       int  motorNumber;
       int  motorPWM;
       int  motorDirection;
-      sscanf(&rcv_buffer[1], " %d %d %d \r", &motorNumber, &motorPWM, &motorDirection);
-      motor(motorNumber, motorPWM, motorDirection);
+      sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
+      motor(motorNumber, motorPWM);
       break;
 
-    ////////////////////////////////////  ULTRASOUND
+    ////////////////////////////////////////////////////////////////    ULTRASOUND
     case 'u':
     case 'U':
       int ultrasonicNumber;
@@ -327,37 +382,29 @@ void parseCommand()
       int rpm1;
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
+
       rpms[0] = (double)(rpm0);
       rpms[1] = (double)(rpm1);
       rpms[2] = (double)(rpm2);
-      for (int i = 0; i < 3; i++)
-      {
-        // when the setpoint is in a 30 +/- range do not set the sum to 0, aka if major velocity change set your sum
-        // to 0. if small then don't change it
-        if (!(setpoint[i] + 30 >= rpms[i] && setpoint[i] - 30 <= rpms[i]))
-        {
-          //error[i] = 0;
-          sum[i]   = 0;
-        }
-      }
+
       setpoint[0] = rpms[0];
       setpoint[1] = rpms[1];
       setpoint[2] = rpms[2];
       break;
 
-    ////////////////////////////////////  PID Switch
+    ////////////////////////////////////////////////////////////////////  PID Switch ON/OFF
     case 'p':
     case 'P':
       setpoint[0] = 0;
       setpoint[1] = 0;
       setpoint[2] = 0;
-      motor(0, 0, 0);
-      motor(1, 0, 0);
-      motor(2, 0, 0);
+      motor(0, 0);
+      motor(1, 0);
+      motor(2, 0);
       sscanf(&rcv_buffer[1], " %c \r", &pidSwitch);
       break;
 
-    ////////////////////////////////////  RPM
+    /////////////////////////////////////////////////////////////////   Check  RPM
     case 'r':
     case 'R':
       int rpmNum;
@@ -365,7 +412,7 @@ void parseCommand()
       printDouble(rpmValues[rpmNum], 1000000000);
       break;
 
-    ////////////////////////////////////  ENTER GAINS K
+    ///////////////////////////////////////////////////////////////    ENTER GAINS K
     case 'k':
     case 'K':
       char  pValue[20];
@@ -376,12 +423,12 @@ void parseCommand()
       Ki = strtod(iValue, &ptr);
       break;
 
-    ////////////////////////////////////  STOP
+    ///////////////////////////////////////////////////////////////////  STOP
     case 's':
     case 'S':
       for (int i = 0; i < 3; i++)
       {
-        motor(i, 0, 0);
+        motor(i, 0);
       }
 
       //    default:

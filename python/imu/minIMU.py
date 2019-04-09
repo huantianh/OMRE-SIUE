@@ -14,13 +14,9 @@ class minIMU(LIS3MDL, LSM6DS33):
     ACC_GAIN = 0.122 / 1000.0 * 981.0
     ALPHA = 2.0 / 6.0
     
-    #~ ALPHA_Accel_x = 2.0 / 6.0
-    #~ ALPHA_Accel_y = 2.0 / 6.0
-    #~ ALPHA_Accel_z = 2.0 / 6.0
- 
-    ALPHA_Accel_x = 7.0/10
-    ALPHA_Accel_y = 7.0/10
-    ALPHA_Accel_z = 7.0/10
+    ALPHA_Accel_x = 2.0 / 6.0
+    ALPHA_Accel_y = 2.0 / 6.0
+    ALPHA_Accel_z = 2.0 / 6.0
  
     
     # Private methods

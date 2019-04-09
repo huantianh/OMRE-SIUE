@@ -72,7 +72,7 @@ elif mode == 'p':
 	enablePID(pid)
 			 
 	#~ motor_num = int(input("enter motor number: "))
-	f = open("pwmvalues _longertime.txt",'r')
+	f = open("pwmvalues.txt",'r')
 	lines = f.readlines()
 	timer = []
 	pwm = []

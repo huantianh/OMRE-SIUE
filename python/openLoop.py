@@ -17,9 +17,11 @@ ser.reset_output_buffer()
 oldEncoder0 = 0
 oldEncoder1 = 0
 oldEncoder2 = 0
+
 newEncoder0 = 0
 newEncoder1 = 0
 newEncoder2 = 0
+
 current_x = 0
 current_y = 0
 current_t = 0
@@ -28,7 +30,6 @@ current_t = 0
 def readEncoder(encoderNum):
 	ser.reset_input_buffer()
 	ser.write(("e %d \r" % (encoderNum)).encode())
-	
 	encoderValue = (ser.readline().decode("ascii"))
 	
 
@@ -36,10 +37,6 @@ def PIValues(Kp,Ki):
 	ser.reset_input_buffer()
 	ser.write(("k %s %s \r" % (Kp,Ki)).encode())
 
-
-#def readUltraSound():
-
-#def readInfrared():
 
 # Fun function that takes all 3 motor PWM value from -255  to 255 and interprets it 
 # into the correct command to send to arduino. Remember with Python3  Pyserial pretty much
@@ -56,11 +53,6 @@ def velocityValues(m1,m2,m3):
 	print(motorValues)
 	ser.write(('v %d %d %d \r'  % (motorValues[0],motorValues[1],motorValues[2])).encode())
 	
-	#for x in range(3):
-	#	time.sleep(.5)
-	#	ser.write(('v %d %d \n \r' % (x,motorValues[x])).encode()) #turning into int should fix !!!!!!!!!!!!!!!!!!
-	#print("Finished all commands")
-
 
 theta = 0
 def velocityToPWM(velocity):
@@ -128,14 +120,13 @@ def xyThetaToWheelV(xd,yd,thetad):
 	print("Wheel0 RPM: " +str(wheel0RPM))
 	print("Wheel1 RPM: " +str(wheel1RPM))
 	print("Wheel2 RPM: " +str(wheel2RPM))
-	wheel0RPM *= 10
-	wheel1RPM *= 10
-	wheel2RPM *= 10
+	#~ wheel0RPM *= 10
+	#~ wheel1RPM *= 10
+	#~ wheel2RPM *= 10
 	
 
 	velocityValues(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
-	
-	#motors(100,100,100)
+
 def initOdemetry():
 	global current_x
 	global current_y
@@ -158,6 +149,7 @@ def odemetryCalc(xk,yk,thetak,l=0.19):
 	newEncoder0 = readEncoder(0)
 	newEncoder1 = readEncoder(1)
 	newEncoder2 = readEncoder(2)
+	
 	deltaEncoder0 = newEncoder0 - oldEncoder0
 	deltaEncoder1 = newEncoder1 - oldEncoder1
 	deltaEncoder2 = newEncoder2 - oldEncoder2
@@ -186,8 +178,6 @@ def odemetryCalc(xk,yk,thetak,l=0.19):
 	oldEncoder2 = newEncoder2
 
 	return  newPos_mat
-	
-	
 	
 	
 def DValue(deltaEncoder0,deltaEncoder1,deltaEncoder2, r=0.03, N=2249):
@@ -254,16 +244,10 @@ def newEncoder_destination(delta_destination0, delta_destination1, delta_destina
 	
 	
 	
-
 #distance formula 
 def distForm(cx,cy,dx,dy):
 	return np.sqrt(((dx-cx)**2)+((dy-cy)**2))
 
-
-
-#velocityValues(0,0,0)
-#xyThetaToWheelV(0,0,0)
-#readEncoders()
 
 
 mode = str(input("Enter mode. s for serial, t for input tester, c for controller, g for graph mode "))
@@ -354,7 +338,7 @@ elif mode == 'o':
 		start = time.time()
 		xyThetaToWheelV(x,y,theta)
 		
-		initOdemetry()
+		#~ initOdemetry()
 				
 		file = open("data_x_"+str(x)+",y_"+str(y)+",theta_"+str(theta)+",time_"+str(timer)+".txt","w+")
 		

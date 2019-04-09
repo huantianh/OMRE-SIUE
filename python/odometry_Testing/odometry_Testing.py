@@ -11,7 +11,7 @@ ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
 time.sleep(1)
 ser.reset_input_buffer()
 ser.reset_output_buffer()
-#joy = xbox.Joystick()
+
 
 #folder where saving all the data
 save_folder = "Odometry_Test_Data/"
@@ -187,55 +187,6 @@ elif mode == 't':
 		time.sleep(mytime)
 		xyThetaToWheelV(0,0,0)
 
-#velocityValues(1800,1800,1800)
-
-############### Contoller demo for testing  ################
-
-elif mode == 'c':
-	joy = xbox.Joystick()
-	theta = 0
-	while True:
-		theta = 0
-		time.sleep(0)
-		if(joy.B()):
-			joy.close()
-			motors(0,0,0)
-			quit()
-		(x,y) = joy.leftStick()
-		(x1,y1) = joy.rightStick()
-		print("x: "+str(y))
-		print("y: "+str(x1))
-	
-		xyThetaToWheelV(y/1.5,-x/1.5,x1*np.pi)
-
-
-###################### GRAPH  ##############################
-
-elif mode == 'g':
-	count = 0
-	pid = 1	
-	i = 0	
-
-	while True:
-		p = input("enter Kp: ")
-		i = input("enter Ki: ")
-		PIValues(p,i)
-		command = input("Enter Command: ")
-		command = command+'\r'
-		ser.write(command.encode())
-		file = open("data_kp_"+p+",ki_"+i+".txt","w+")		
-		while True:
-			data = [0]
-			if(ser.inWaiting() > 0):				
-				data = (ser.readline().decode("ascii"))
-				print (data)
-				file.writelines(data)
-				count = count + 1
-			if (count > 8000):
-				print('quitting')
-				velocityValues(0,0,0)
-				file.close()
-				break
 
 elif mode == 'o':
 	while True:
@@ -284,9 +235,7 @@ elif mode == 'o':
 				xyThetaToWheelV(0,0,0)
 				file.close()
 				break
-			
 				
-		
 elif mode == 'p':
 	while True:
 		p = input("enter Kp: ")
