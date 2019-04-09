@@ -44,16 +44,16 @@ unsigned long lastTime[3]   = {0, 0, 0};
 unsigned long timeChange[3] = {0, 0, 0};
 int SampleTime = 1000;
 
-int rpmValues[3]         = {0, 0, 0};
+int rpmValues[3]             = {0, 0, 0};
 double pastEncoderValues[3]  = {0, 0, 0};
-unsigned long pastTimes[3] = {0, 0, 0};// millis() works for up to 50days! we'll need an unsigned long for it
+unsigned long pastTimes[3]   = {0, 0, 0};// millis() works for up to 50days! we'll need an unsigned long for it
 
 char rcv_buffer[64];  // holds commands recieved
 char TXBuffer[64];    // temp storage for large data sent
 
 void motor(int, int);
 
-double changeInEncoders[3] = {0, 0, 0};
+double changeInEncoders[3]    = {0, 0, 0};
 double changeInRevolutions[3] = {0, 0, 0};
 double changeInTimeSeconds[3] = {0, 0, 0};
 
@@ -95,13 +95,11 @@ void setup() {
 
 }
 //////////////////////////////////////////////////////////////////    LOOP
-void loop() {
-
+void loop()
+{
   updateRPM();
-
   // determines if we have any serial commands and interpruts them
   receiveBytes();
-
   // proportional integral controller
   if (pidSwitch == '1')
   {
@@ -110,8 +108,8 @@ void loop() {
 }
 
 ////////////////////////////////////////////////////////////     Update RPM
-void updateRPM() {
-
+void updateRPM()
+{
   for ( int i = 0; i < 3; i++)
   {
     changeInEncoders[i] = encoderCounts[i] - pastEncoderValues[i];
@@ -123,7 +121,6 @@ void updateRPM() {
     // update our values to be used next time around
     pastTimes[i] = micros();
     pastEncoderValues[i] = encoderCounts[i];
-
 
     //    Serial.print(micros() * 0.000001);
     //    Serial.print("  ,  ");
@@ -137,8 +134,8 @@ void updateRPM() {
 }
 
 /////////////////////////////////////////////////////////////        PID loop
-void pi() {
-
+void pi()
+{
   for (int i = 0; i < 3; i++)
   {
     if (setpoint[i] != 0)
@@ -153,7 +150,7 @@ void pi() {
         ///////////////////////////////////////////        Error Variables
         error[i] = setpoint[i] - rpmValues[i];
         ITerm[i] += (Ki * error[i]);
-        
+
         if (ITerm[i] > 255)
         {
           ITerm[i] = 255;
@@ -162,7 +159,7 @@ void pi() {
         {
           ITerm[i] = -255;
         }
-        
+
         dInput[i] = (rpmValues[i] - lastInput[i]);
 
         ////////////////////////////////////////////       PID output
