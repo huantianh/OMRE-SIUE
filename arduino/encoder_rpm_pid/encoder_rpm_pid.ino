@@ -126,7 +126,7 @@ void count_encoder_3()
     encoder_counts_3 ++;
   else
     encoder_counts_3 --;
-  //  Serial.println(encoder_counts_3);
+    Serial.println(encoder_counts_3);
 }
 
 ////////////////////////////////////////////// Running Motor
@@ -234,13 +234,13 @@ void RPM()
     old_encoder_2 = encoder_counts_2;
     old_encoder_3 = encoder_counts_3;
     
-    Serial.print(total_time);
-    Serial.print("  ,  ");
-    Serial.print(motor_rpm_1);
-    Serial.print("  ,  ");
-    Serial.print(motor_rpm_2);
-    Serial.print("  ,  ");
-    Serial.println(motor_rpm_3);
+//    Serial.print(total_time);
+//    Serial.print("  ,  ");
+//    Serial.print(motor_rpm_1);
+//    Serial.print("  ,  ");
+//    Serial.print(motor_rpm_2);
+//    Serial.print("  ,  ");
+//    Serial.println(motor_rpm_3);
   }
 }
 

@@ -1,13 +1,8 @@
-
 #include <HardwareSerial.h>
 #include <SimpleTimer.h>
 
-#define ENCODER_0INTERRUPT_PIN 5 // pin 18 that interrupts on both rising and falling of A and B channels of encoder
-#define ENCODER_1INTERRUPT_PIN 4 // pin 19 https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/ to see the encoder pin number
-#define ENCODER_2INTERRUPT_PIN 3 // pin 20
-
-#define FORWARD 0
-#define BACKWARD 1
+#define FORWARD LOW
+#define BACKWARD HIGH
 
 #define INFRARED_SENSOR_0 A0
 #define INFRARED_SENSOR_1 A1
@@ -15,21 +10,27 @@
 #define INFRARED_SENSOR_3 A3
 
 volatile long encoderCounts[]              = { 0, 0, 0}; // variables accesed inside of an interrupt need to be volatile
-bool motorDir[3]                           = {FORWARD, FORWARD, FORWARD};
+
+const int encoder_interrupt_pin_0          = 18;
+const int encoder_interrupt_pin_1          = 19;
+const int encoder_interrupt_pin_2          = 20;
 
 const int motorPWMPins[3]                  = {8, 9, 10};
 const int motorDirPins[3]                  = {29, 28, 27};
+
 const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
 const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
 const int infraredSensorPins[]             = {0, 1, 2, 3};
+
+int mark_start = 0;
 
 //double Kp = 1.9;
 //double Ki = 0.09;
 //double Kd = 0.2;
 
-double Kp = 1;
-double Ki = 0.1;
-double Kd = 0;
+double Kp[] = {0.5, 0.5, 0.5};
+double Ki[] = {0.1, 0.1, 0.1};
+double Kd[] = {0.7, 0.7, 0.7};
 
 double ITerm[3]       = {0, 0, 0};
 double lastInput[3]   = {0, 0, 0};
@@ -37,12 +38,12 @@ double error[3]       = {0, 0, 0};
 double dInput[3]      = {0, 0, 0};
 double setpoint[3]    = {0, 0, 0};
 double pwm_pid[3]     = {0, 0, 0};
-double rpms[3]        = {0, 0, 0};
+int rpms[3]           = {0, 0, 0};
 
 unsigned long now[3]        = {0, 0, 0};
 unsigned long lastTime[3]   = {0, 0, 0};
 unsigned long timeChange[3] = {0, 0, 0};
-int SampleTime = 1000;
+int SampleTime              = 1000;
 
 int rpmValues[3]             = {0, 0, 0};
 double pastEncoderValues[3]  = {0, 0, 0};
@@ -89,9 +90,9 @@ void setup() {
 
   while (! Serial);
 
-  attachInterrupt(ENCODER_0INTERRUPT_PIN, encoder0_ISR, CHANGE);
-  attachInterrupt(ENCODER_1INTERRUPT_PIN, encoder1_ISR, CHANGE);
-  attachInterrupt(ENCODER_2INTERRUPT_PIN, encoder2_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_0), encoder0_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_1), encoder1_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_2), encoder2_ISR, CHANGE);
 
 }
 //////////////////////////////////////////////////////////////////    LOOP
@@ -103,7 +104,7 @@ void loop()
   // proportional integral controller
   if (pidSwitch == '1')
   {
-    pi();
+    speed_pid();
   }
 }
 
@@ -134,11 +135,11 @@ void updateRPM()
 }
 
 /////////////////////////////////////////////////////////////        PID loop
-void pi()
+void speed_pid()
 {
   for (int i = 0; i < 3; i++)
   {
-    if (setpoint[i] != 0)
+    if (setpoint[i])
     {
       //updateRPM();
       now[i] = micros();
@@ -149,7 +150,7 @@ void pi()
 
         ///////////////////////////////////////////        Error Variables
         error[i] = setpoint[i] - rpmValues[i];
-        ITerm[i] += (Ki * error[i]);
+        ITerm[i] += (Ki[i] * error[i]);
 
         if (ITerm[i] > 255)
         {
@@ -163,7 +164,7 @@ void pi()
         dInput[i] = (rpmValues[i] - lastInput[i]);
 
         ////////////////////////////////////////////       PID output
-        pwm_pid[i] = (Kp * error[i]) + ITerm[i] - (Kd * dInput[i]);
+        pwm_pid[i] = (Kp[i] * error[i]) + ITerm[i] - (Kd[i] * dInput[i]);
 
         if (pwm_pid[i] > 255)
         {
@@ -186,9 +187,12 @@ void pi()
         Serial.print(rpmValues[1]);
         Serial.print("  ,  ");
         Serial.println(rpmValues[2]);
+
+
+        delay(2);
       }
     }
-    else
+    if (setpoint[i] == 0)
     {
       motor(i, 0);
     }
@@ -199,41 +203,29 @@ void pi()
 void encoder0_ISR() // encoder0 interrupt service routine
 {
   noInterrupts();
-  if (motorDir[0] == 0)
-  {
+  if (digitalRead(motorDirPins[0]) == LOW)
     encoderCounts[0]++;
-  }
   else
-  {
     encoderCounts[0]--;
-  }
   interrupts();
+  //  Serial.println(encoderCounts[0]);
 }
 void encoder1_ISR()
 {
   noInterrupts();
-  if (motorDir[1] == 0)
-  {
+  if (digitalRead(motorDirPins[1]) == LOW)
     encoderCounts[1]++;
-  }
   else
-  {
     encoderCounts[1]--;
-  }
   interrupts();
 }
 void encoder2_ISR()
 {
-  noInterrupts();
-  if (motorDir[2] == 0)
-  {
+  if (digitalRead(motorDirPins[2]) == LOW)
     encoderCounts[2]++;
-  }
   else
-  {
     encoderCounts[2]--;
-  }
-  interrupts();
+  //  Serial.println(encoderCounts[2]);
 }
 
 /////////////////////////////////////////////////////////////////             RUNNING MOTORS
@@ -248,17 +240,29 @@ void motor(int motorNumber, int pwm)
 
   if (pwm > 0)
   {
-    digitalWrite(motorDirPins[motorNumber], 0);
+//    if (mark_start >= 0) {
+//      digitalWrite(motorDirPins[motorNumber], FORWARD);
+//      analogWrite(motorPWMPins[motorNumber], pwm + 150);
+//      mark_start -= 1;
+//    }
+    digitalWrite(motorDirPins[motorNumber], FORWARD);
     analogWrite(motorPWMPins[motorNumber], pwm);
   }
+
   if (pwm < 0)
   {
-    digitalWrite(motorDirPins[motorNumber], 1);
-    analogWrite(motorPWMPins[motorNumber], pwm);
+//    if (mark_start >= 0) {
+//      digitalWrite(motorDirPins[motorNumber], BACKWARD);
+//      analogWrite(motorPWMPins[motorNumber], -pwm - 150);
+//      mark_start -= 1;
+//    }
+    digitalWrite(motorDirPins[motorNumber], BACKWARD);
+    analogWrite(motorPWMPins[motorNumber], -pwm);
   }
+
   if (pwm == 0)
   {
-    digitalWrite(motorDirPins[motorNumber], 1);
+    digitalWrite(motorDirPins[motorNumber], BACKWARD);
     analogWrite(motorPWMPins[motorNumber], pwm);
   }
 
@@ -375,18 +379,19 @@ void parseCommand()
     ////////////////////////////////////  ENTER RPM_GOAL
     case 'v':
     case 'V':
+      mark_start = 0;
       int rpm0;
       int rpm1;
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
 
-      rpms[0] = (double)(rpm0);
-      rpms[1] = (double)(rpm1);
-      rpms[2] = (double)(rpm2);
+      //      rpms[0] = int(rpm0);
+      //      rpms[1] = int(rpm1);
+      //      rpms[2] = int(rpm2);
 
-      setpoint[0] = rpms[0];
-      setpoint[1] = rpms[1];
-      setpoint[2] = rpms[2];
+      setpoint[0] = rpm0;
+      setpoint[1] = rpm1;
+      setpoint[2] = rpm2;
       break;
 
     ////////////////////////////////////////////////////////////////////  PID Switch ON/OFF
@@ -416,8 +421,11 @@ void parseCommand()
       char  iValue[20];
       sscanf(&rcv_buffer[1], " %s %s \r", &pValue, &iValue);
       char *ptr;
-      Kp = strtod(pValue, &ptr);
-      Ki = strtod(iValue, &ptr);
+      for (int i = 0; i < 3; i++)
+      {
+        Kp[i] = strtod(pValue, &ptr);
+        Ki[i] = strtod(iValue, &ptr);
+      }
       break;
 
     ///////////////////////////////////////////////////////////////////  STOP
