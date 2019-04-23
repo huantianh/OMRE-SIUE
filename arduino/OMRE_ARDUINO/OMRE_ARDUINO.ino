@@ -1,5 +1,6 @@
 #include <HardwareSerial.h>
 #include <SimpleTimer.h>
+#include <Wire.h>
 
 #define FORWARD LOW
 #define BACKWARD HIGH
@@ -9,11 +10,11 @@
 #define INFRARED_SENSOR_2 A2
 #define INFRARED_SENSOR_3 A3
 
-volatile long encoderCounts[]              = { 0, 0, 0}; // variables accesed inside of an interrupt need to be volatile
+volatile long encoderCounts[]              = {0, 0, 0}; // variables accesed inside of an interrupt need to be volatile
 
 const int encoder_interrupt_pin_0          = 18;
-const int encoder_interrupt_pin_1          = 19;
-const int encoder_interrupt_pin_2          = 20;
+const int encoder_interrupt_pin_1          = 2;         //can change to 19
+const int encoder_interrupt_pin_2          = 3;         //can change to 20
 
 const int motorPWMPins[3]                  = {8, 9, 10};
 const int motorDirPins[3]                  = {29, 28, 27};
@@ -22,15 +23,13 @@ const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
 const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
 const int infraredSensorPins[]             = {0, 1, 2, 3};
 
-int mark_start = 0;
-
 //double Kp = 1.9;
 //double Ki = 0.09;
 //double Kd = 0.2;
 
 double Kp[] = {0.5, 0.5, 0.5};
 double Ki[] = {0.1, 0.1, 0.1};
-double Kd[] = {0.7, 0.7, 0.7};
+double Kd[] = {0, 0, 0};
 
 double ITerm[3]       = {0, 0, 0};
 double lastInput[3]   = {0, 0, 0};
@@ -106,13 +105,14 @@ void loop()
   {
     speed_pid();
   }
-  Serial.print(micros() * 0.000001);
-  Serial.print("  ,  ");
-  Serial.print(rpmValues[0]);
-  Serial.print("  ,  ");
-  Serial.print(rpmValues[1]);
-  Serial.print("  ,  ");
-  Serial.println(rpmValues[2]);
+
+  //  Serial.print(micros() * 0.000001);
+  //  Serial.print("  ,  ");
+  //  Serial.print(rpmValues[0]);
+  //  Serial.print("  ,  ");
+  //  Serial.print(rpmValues[1]);
+  //  Serial.print("  ,  ");
+  //  Serial.println(rpmValues[2]);
 }
 
 ////////////////////////////////////////////////////////////     Update RPM
@@ -188,16 +188,12 @@ void speed_pid()
         lastInput[i] = rpmValues[i];
         lastTime[i] = now[i];
 
+        Serial.print(rpmValues[0]);
+        Serial.print("  ,  ");
+        Serial.print(rpmValues[1]);
+        Serial.print("  ,  ");
+        Serial.println(rpmValues[2]);
 
-
-        //        Serial.print(micros() * 0.000001);
-        //        Serial.print("  ,  ");
-
-        //        Serial.print(rpmValues[0]);
-        //        Serial.print("  ,  ");
-        //        Serial.print(rpmValues[1]);
-        //        Serial.print("  ,  ");
-        //        Serial.println(rpmValues[2]);
         delay(2);
       }
     }
@@ -388,15 +384,11 @@ void parseCommand()
     ////////////////////////////////////  ENTER RPM_GOAL
     case 'v':
     case 'V':
-      mark_start = 0;
+
       int rpm0;
       int rpm1;
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
-
-      //      rpms[0] = int(rpm0);
-      //      rpms[1] = int(rpm1);
-      //      rpms[2] = int(rpm2);
 
       setpoint[0] = rpm0;
       setpoint[1] = rpm1;

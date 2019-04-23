@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 #sets up serial connection to arduino atMega
-ser = serial.Serial('/dev/ttyACM0',115200, timeout=.4);
+ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
 
 #clear buffers just incase garbage inside
 ser.reset_input_buffer()
@@ -46,15 +46,15 @@ def motorVelocity(m1,m2,m3):
 def encoder(encoderNum):
 	ser.reset_input_buffer()
 	ser.write(("e %d \r" % (encoderNum)).encode())
-	
-	encoderValue = (ser.readline().decode("ascii"))
+	if ser.inWaiting() > 0:
+		encoderValue = (ser.readline().decode("ascii"))
 	return int(encoderValue.rstrip())
 
-def ultrasound(ultraSoundNum):
-	ser.reset_input_buffer()
-	ser.write(("u %d \r" % (ultraSoundNum)).encode())
-	ultraSoundValue = (ser.readline().decode("ascii"))
-	return int(ultraSoundValue.rstrip())
+#~ def ultrasound(ultraSoundNum):
+	#~ ser.reset_input_buffer()
+	#~ ser.write(("u %d \r" % (ultraSoundNum)).encode())
+	#~ ultraSoundValue = (ser.readline().decode("ascii"))
+	#~ return int(ultraSoundValue.rstrip())
 
 def infrared(infraredNum):
 	ser.reset_input_buffer()
@@ -94,9 +94,9 @@ def move(xd,yd,thetad):
  
 	motor_spd_vec = np.dot(IK_M,vel_des, out=None)
  
-	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
+	wheel1RPM = motor_spd_vec[2] # motor 2 speed [rpm]
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
+	wheel2RPM = motor_spd_vec[0] # motor 3 speed [rpm]
 	
 	maxAllowedSpeed = 150
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
@@ -363,7 +363,7 @@ while True:
 			xd = float(input("enter x desired: "))
 			yd = float(input("enter y desired: "))
 			thetad = float(input("enter theta desired: "))	
-			print(str(ultrasound(1)))
+			#~ print(str(ultrasound(1)))
 			goToGoal(xd,yd,thetad)
 	if mode == 't':
 		while True:

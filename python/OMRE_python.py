@@ -39,6 +39,7 @@ def readEncoder(encoderNum):
 	ser.reset_input_buffer()
 	ser.write(("e %d \r" % (encoderNum)).encode())
 	encoderValue = (ser.readline().decode("ascii"))
+	return int(encoderValue.rstrip())
 	
 
 # Fun function that takes all 3 motor PWM value from -255  to 255 and interprets it 
@@ -53,7 +54,7 @@ def motors(m1,m2,m3):
 	#readEncoders()
 def velocityValues(m1,m2,m3):
 	motorValues = [m1,m2,m3]
-	print(motorValues)
+	#~ print(motorValues)
 	ser.write(('v %d %d %d \r'  % (motorValues[0],motorValues[1],motorValues[2])).encode())
 	
 
@@ -99,9 +100,9 @@ def xyThetaToWheelV(xd,yd,thetad):
  
 	motor_spd_vec = np.dot(IK_M,vel_des)
 	
-	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
+	wheel1RPM = motor_spd_vec[2] # motor 2 speed [rpm]
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
+	wheel2RPM = motor_spd_vec[0] # motor 3 speed [rpm]
 	
 	if (abs(wheel1RPM) > 200 or abs(wheel0RPM) > 200 or abs(wheel2RPM) > 200):
 		if  (abs(wheel0RPM) > abs(wheel1RPM) and abs(wheel0RPM) > abs(wheel2RPM)):

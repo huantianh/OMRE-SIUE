@@ -1,4 +1,68 @@
-//IMU setup
+#include <HardwareSerial.h>
+#include <SimpleTimer.h>
+#include <Wire.h>
+
+#define FORWARD LOW
+#define BACKWARD HIGH
+
+#define INFRARED_SENSOR_0 A0
+#define INFRARED_SENSOR_1 A1
+#define INFRARED_SENSOR_2 A2
+#define INFRARED_SENSOR_3 A3
+
+volatile long encoderCounts[]              = {0, 0, 0}; // variables accesed inside of an interrupt need to be volatile
+
+const int encoder_interrupt_pin_0          = 18;
+const int encoder_interrupt_pin_1          = 2;         //can change to 19
+const int encoder_interrupt_pin_2          = 3;         //can change to 20
+
+const int motorPWMPins[3]                  = {8, 9, 10};
+const int motorDirPins[3]                  = {29, 28, 27};
+
+const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
+const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
+const int infraredSensorPins[]             = {0, 1, 2, 3};
+
+//double Kp = 1.9;
+//double Ki = 0.09;
+//double Kd = 0.2;
+
+double Kp[] = {0.5, 0.5, 0.5};
+double Ki[] = {0.1, 0.1, 0.1};
+double Kd[] = {0, 0, 0};
+
+double ITerm[3]       = {0, 0, 0};
+double lastInput[3]   = {0, 0, 0};
+double error[3]       = {0, 0, 0};
+double dInput[3]      = {0, 0, 0};
+double setpoint[3]    = {0, 0, 0};
+double pwm_pid[3]     = {0, 0, 0};
+int rpms[3]           = {0, 0, 0};
+
+unsigned long now[3]        = {0, 0, 0};
+unsigned long lastTime[3]   = {0, 0, 0};
+unsigned long timeChange[3] = {0, 0, 0};
+int SampleTime              = 1000;
+
+int rpmValues[3]             = {0, 0, 0};
+double pastEncoderValues[3]  = {0, 0, 0};
+unsigned long pastTimes[3]   = {0, 0, 0};// millis() works for up to 50days! we'll need an unsigned long for it
+
+char rcv_buffer[64];  // holds commands recieved
+char TXBuffer[64];    // temp storage for large data sent
+
+void motor(int, int);
+
+double changeInEncoders[3]    = {0, 0, 0};
+double changeInRevolutions[3] = {0, 0, 0};
+double changeInTimeSeconds[3] = {0, 0, 0};
+
+char pidSwitch = '1';
+
+////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////        MINIMU
+int IMUsetup = 0;
+#define IMU_V5
 int SENSOR_SIGN[9] = {1, 1, 1, -1, -1, -1, 1, 1, 1}; //Correct directions x,y,z - gyro, accelerometer, magnetometer
 #include <Wire.h>
 // accelerometer: 8 g sensitivity
@@ -14,41 +78,32 @@ int SENSOR_SIGN[9] = {1, 1, 1, -1, -1, -1, 1, 1, 1}; //Correct directions x,y,z 
 #define Gyro_Scaled_X(x) ((x)*ToRad(Gyro_Gain_X)) //Return the scaled ADC raw data of the gyro in radians for second
 #define Gyro_Scaled_Y(x) ((x)*ToRad(Gyro_Gain_Y)) //Return the scaled ADC raw data of the gyro in radians for second
 #define Gyro_Scaled_Z(x) ((x)*ToRad(Gyro_Gain_Z)) //Return the scaled ADC raw data of the gyro in radians for second
-
 // LSM303/LIS3MDL magnetometer calibration constants; use the Calibrate example from
 // the Pololu LSM303 or LIS3MDL library to find the right values for your board
-
 #define M_X_MIN -1000
 #define M_Y_MIN -1000
 #define M_Z_MIN -1000
 #define M_X_MAX +1000
 #define M_Y_MAX +1000
 #define M_Z_MAX +1000
-
 #define Kp_ROLLPITCH 0.02
 #define Ki_ROLLPITCH 0.00002
 #define Kp_YAW 1.2
 #define Ki_YAW 0.00002
-
 /*For debugging purposes*/
 //OUTPUTMODE=1 will print the corrected data,
 //OUTPUTMODE=0 will print uncorrected data of the gyros (with drift)
 #define OUTPUTMODE 1
-
 #define PRINT_DCM 0     //Will print the whole direction cosine matrix
 #define PRINT_ANALOGS 0 //Will print the analog raw data
 #define PRINT_EULER 1   //Will print the Euler angles Roll, Pitch and Yaw
-
 #define STATUS_LED 13
-
 float G_Dt = 0.02;  // Integration time (DCM algorithm)  We will run the integration loop at 50Hz if possible
-
 long timer = 0; //general purpuse timer
 long timer_old;
 long timer24 = 0; //Second timer used to print values
 int AN[6]; //array that stores the gyro and accelerometer data
 int AN_OFFSET[6] = {0, 0, 0, 0, 0, 0}; //Array that stores the Offset of the sensors
-
 int gyro_x;
 int gyro_y;
 int gyro_z;
@@ -62,25 +117,20 @@ float c_magnetom_x;
 float c_magnetom_y;
 float c_magnetom_z;
 float MAG_Heading;
-
 float Accel_Vector[3] = {0, 0, 0}; //Store the acceleration in a vector
 float Gyro_Vector[3] = {0, 0, 0}; //Store the gyros turn rate in a vector
 float Omega_Vector[3] = {0, 0, 0}; //Corrected Gyro_Vector data
 float Omega_P[3] = {0, 0, 0}; //Omega Proportional correction
 float Omega_I[3] = {0, 0, 0}; //Omega Integrator
 float Omega[3] = {0, 0, 0};
-
 // Euler angles
 float roll;
 float pitch;
 float yaw;
-
 float errorRollPitch[3] = {0, 0, 0};
 float errorYaw[3] = {0, 0, 0};
-
 unsigned int counter = 0;
 byte gyro_sat = 0;
-
 float DCM_Matrix[3][3] = {
   {
     1, 0, 0
@@ -93,8 +143,6 @@ float DCM_Matrix[3][3] = {
   }
 };
 float Update_Matrix[3][3] = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}}; //Gyros here
-
-
 float Temporary_Matrix[3][3] = {
   {
     0, 0, 0
@@ -106,143 +154,6 @@ float Temporary_Matrix[3][3] = {
     0, 0, 0
   }
 };
-
-void setup()
-{
-  Serial.begin(115200);
-  pinMode (STATUS_LED, OUTPUT); // Status LED
-
-  I2C_Init();
-
-  Serial.println("Pololu MinIMU-9 + Arduino AHRS");
-
-  digitalWrite(STATUS_LED, LOW);
-  delay(1500);
-
-  Accel_Init();
-  Compass_Init();
-  Gyro_Init();
-
-  delay(20);
-
-  for (int i = 0; i < 32; i++) // We take some readings...
-  {
-    Read_Gyro();
-    Read_Accel();
-    for (int y = 0; y < 6; y++) // Cumulate values
-      AN_OFFSET[y] += AN[y];
-    delay(20);
-  }
-
-  for (int y = 0; y < 6; y++)
-    AN_OFFSET[y] = AN_OFFSET[y] / 32;
-
-  AN_OFFSET[5] -= GRAVITY * SENSOR_SIGN[5];
-
-  //Serial.println("Offset:");
-  for (int y = 0; y < 6; y++)
-    Serial.println(AN_OFFSET[y]);
-
-  delay(2000);
-  digitalWrite(STATUS_LED, HIGH);
-
-  timer = millis();
-  delay(20);
-  counter = 0;
-}
-
-void loop() //Main Loop
-{
-  if ((millis() - timer) >= 20) // Main loop runs at 50Hz
-  {
-    counter++;
-    timer_old = timer;
-    timer = millis();
-    if (timer > timer_old)
-    {
-      G_Dt = (timer - timer_old) / 1000.0; // Real time of loop run. We use this on the DCM algorithm (gyro integration time)
-      if (G_Dt > 0.2)
-        G_Dt = 0; // ignore integration times over 200 ms
-    }
-    else
-      G_Dt = 0;
-
-
-
-    // *** DCM algorithm
-    // Data adquisition
-    Read_Gyro();   // This read gyro data
-    Read_Accel();     // Read I2C accelerometer
-
-    if (counter > 5)  // Read compass data at 10Hz... (5 loop runs)
-    {
-      counter = 0;
-      Read_Compass();    // Read I2C magnetometer
-      Compass_Heading(); // Calculate magnetic heading
-    }
-
-    // Calculations...
-    Matrix_update();
-    Normalize();
-    Drift_correction();
-    Euler_angles();
-    // ***
-
-    printdata();
-  }
-
-}
-
-
-////////////////////////////////////////////////Main Code
-#include <HardwareSerial.h>
-#include <SimpleTimer.h>
-
-#define ENCODER_0INTERRUPT_PIN 5 // pin 18 that interrupts on both rising and falling of A and B channels of encoder
-#define ENCODER_1INTERRUPT_PIN 4 // pin 19 https://www.arduino.cc/reference/en/language/functions/external-interrupts/attachinterrupt/ to see the encoder pin number
-#define ENCODER_2INTERRUPT_PIN 3 // pin 20
-
-#define FORWARD 0
-#define BACKWARD 1
-#define INFRARED_SENSOR_0 A0
-#define INFRARED_SENSOR_1 A1
-#define INFRARED_SENSOR_2 A2
-#define INFRARED_SENSOR_3 A3
-
-volatile long encoderCounts[]              = { 0, 0, 0}; // variables accesed inside of an interrupt need to be volatile
-bool motorDir[3]                           = {FORWARD, FORWARD, FORWARD};
-
-const int motorPWMPins[3]                  = {8, 9, 10};
-const int motorDirPins[3]                  = {29, 28, 27};
-const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
-const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
-const int infraredSensorPins[]             = {0, 1, 2, 3};
-
-double Kp = 1;
-double Ki = 0.0007;
-
-double sum[3]        = {0, 0, 0};
-double error[3]      = {0, 0, 0};
-double setpoint[3]   = {0, 0, 0};
-double pwmValue[3]   = {0, 0, 0};
-double rpms[3]       = {0, 0, 0};
-
-unsigned long lastTime[3]   = {0, 0, 0};
-unsigned long timeChange[3] = {0, 0, 0};
-
-int rpmValues[3]         = {0, 0, 0};
-double pastEncoderValues[3]  = {0, 0, 0};
-unsigned long pastTimes[3] = {0, 0, 0};// millis() works for up to 50days! we'll need an unsigned long for it
-
-char rcv_buffer[64];  // holds commands recieved
-char TXBuffer[64];    // temp storage for large data sent
-
-void motor(int, int, bool);
-
-double changeInEncoders;
-double changeInRevolutions;
-double changeInTimeSeconds;
-char pidSwitch = '0';
 
 
 ////////////////////////////////////////////////////////////////           SET UP
@@ -267,148 +178,266 @@ void setup() {
   }
 
   pinMode(18, INPUT_PULLUP);
-  pinMode(19, INPUT_PULLUP);
-  pinMode(20, INPUT_PULLUP);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
 
   buffer_Flush(rcv_buffer);
 
   while (! Serial);
 
-  attachInterrupt(ENCODER_0INTERRUPT_PIN, encoder0_ISR, CHANGE);
-  attachInterrupt(ENCODER_1INTERRUPT_PIN, encoder1_ISR, CHANGE);
-  attachInterrupt(ENCODER_2INTERRUPT_PIN, encoder2_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_0), encoder0_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_1), encoder1_ISR, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_2), encoder2_ISR, CHANGE);
 
+  ///////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////     MINIMU SETUP
+  pinMode (STATUS_LED, OUTPUT); // Status LED
+  I2C_Init();
+  digitalWrite(STATUS_LED, LOW);
+  delay(1500);
+  Accel_Init();
+  Compass_Init();
+  Gyro_Init();
+  delay(20);
+  for (int i = 0; i < 32; i++) // We take some readings...
+  {
+    Read_Gyro();
+    Read_Accel();
+    for (int y = 0; y < 6; y++) // Cumulate values
+      AN_OFFSET[y] += AN[y];
+    delay(20);
+  }
+  for (int y = 0; y < 6; y++)
+    AN_OFFSET[y] = AN_OFFSET[y] / 32;
+  AN_OFFSET[5] -= GRAVITY * SENSOR_SIGN[5];
+  //Serial.println("Offset:");
+  for (int y = 0; y < 6; y++)
+    //    Serial.println(AN_OFFSET[y]);
+    delay(2000);
+  digitalWrite(STATUS_LED, HIGH);
+  timer = millis();
+  delay(20);
+  counter = 0;
+  Serial.print("Finished Calibrating for IMU!");
 }
+
 //////////////////////////////////////////////////////////////////    LOOP
-void loop() {
-
+void loop()
+{
   updateRPM();
-
   // determines if we have any serial commands and interpruts them
   receiveBytes();
-
   // proportional integral controller
   if (pidSwitch == '1')
   {
-    pi();
+    speed_pid();
+  }
+
+  //  Serial.print(micros() * 0.000001);
+  //  Serial.print("  ,  ");
+  //  Serial.print(rpmValues[0]);
+  //  Serial.print("  ,  ");
+  //  Serial.print(rpmValues[1]);
+  //  Serial.print("  ,  ");
+  //  Serial.println(rpmValues[2]);
+
+  ////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////          MINIMU  LOOP
+  if ((millis() - timer) >= 20) // Main loop runs at 50Hz
+  {
+    counter++;
+    timer_old = timer;
+    timer = millis();
+    if (timer > timer_old)
+    {
+      G_Dt = (timer - timer_old) / 1000.0; // Real time of loop run. We use this on the DCM algorithm (gyro integration time)
+      if (G_Dt > 0.2)
+        G_Dt = 0; // ignore integration times over 200 ms
+    }
+    else
+      G_Dt = 0;
+    // *** DCM algorithm
+    // Data adquisition
+    Read_Gyro();   // This read gyro data
+    Read_Accel();     // Read I2C accelerometer
+    if (counter > 5)  // Read compass data at 10Hz... (5 loop runs)
+    {
+      counter = 0;
+      Read_Compass();    // Read I2C magnetometer
+      Compass_Heading(); // Calculate magnetic heading
+    }
+    // Calculations...
+    Matrix_update();
+    Normalize();
+    Drift_correction();
+    Euler_angles();
+    // ***
+  }
+  if (IMUsetup == 1)
+  {
+    printdataIMU();
   }
 }
 
 ////////////////////////////////////////////////////////////     Update RPM
-void updateRPM() {
-
+void updateRPM()
+{
   for ( int i = 0; i < 3; i++)
   {
-    changeInEncoders = encoderCounts[i] - pastEncoderValues[i];
-    changeInTimeSeconds = ((micros() - pastTimes[i]) * 0.000001); // *.001 to convert to seconds
-    changeInRevolutions = changeInEncoders / 2248.6;
+    changeInEncoders[i] = encoderCounts[i] - pastEncoderValues[i];
+    changeInTimeSeconds[i] = ((micros() - pastTimes[i]) * 0.000001); // *.001 to convert to seconds
+    changeInRevolutions[i] = changeInEncoders[i] / 2248.6;
 
-    rpmValues[i] = (changeInRevolutions / (changeInTimeSeconds)) * 60; // *60 to get Revolutions per MINUTE
+    rpmValues[i] = (changeInRevolutions[i] / (changeInTimeSeconds[i])) * 60; // *60 to get Revolutions per MINUTE
 
     // update our values to be used next time around
     pastTimes[i] = micros();
     pastEncoderValues[i] = encoderCounts[i];
-
-
-    Serial.print(micros() * 0.000001);
-    Serial.print("  ,  ");
-    Serial.print(abs(rpmValues[0]));
-    Serial.print("  ,  ");
-    Serial.print(abs(rpmValues[1]));
-    Serial.print("  ,  ");
-    Serial.println(abs(rpmValues[2]));
+    //    Serial.print(micros() * 0.000001);
+    //    Serial.print("  ,  ");
+    //    Serial.print(rpmValues[0]);
+    //    Serial.print("  ,  ");
+    //    Serial.print(rpmValues[1]);
+    //    Serial.print("  ,  ");
+    //    Serial.println(rpmValues[2]);
 
   }
 }
 
-/////////////////////////////////////////////////////////////           PI loop
-void pi() {
-
+/////////////////////////////////////////////////////////////        PID loop
+void speed_pid()
+{
   for (int i = 0; i < 3; i++)
   {
-    if (setpoint[i] != 0)
+    if (setpoint[i])
     {
       //updateRPM();
-      timeChange[i] = (micros() - lastTime[i]);
-      lastTime[i] = micros();
+      now[i] = micros();
+      timeChange[i] = (now[i] - lastTime[i]);
 
-      error[i] = setpoint[i] - rpmValues[i];
-      sum[i] = (sum[i] + (error[i] * (double)timeChange[i]));
+      if (timeChange[i] >= SampleTime)
+      {
 
-      pwmValue[i] = (Kp * error[i]) + (Ki * sum[i]);
+        ///////////////////////////////////////////               Error Variables
+        error[i] = setpoint[i] - rpmValues[i];
+        ITerm[i] += (Ki[i] * error[i]);
 
-      if (pwmValue[i] < 0) {
-        motor(i, pwmValue[i] * -1, 0);
+        if (ITerm[i] > 255)
+        {
+          ITerm[i] = 255;
+        }
+        if (ITerm[i] < -255)
+        {
+          ITerm[i] = -255;
+        }
+
+        dInput[i] = (rpmValues[i] - lastInput[i]);
+
+        ////////////////////////////////////////////               PID output
+        pwm_pid[i] = (Kp[i] * error[i]) + ITerm[i] - (Kd[i] * dInput[i]);
+
+        if (pwm_pid[i] > 255)
+        {
+          pwm_pid[i] = 255;
+        }
+        if (pwm_pid[i] < -255)
+        {
+          pwm_pid[i] = -255;
+        }
+
+        ///////////////////////////////////////////        Run Motor
+        motor(i, pwm_pid[i]);
+
+        //////////////////////////////////////////         Remember Variables for next time
+        lastInput[i] = rpmValues[i];
+        lastTime[i] = now[i];
+
+        Serial.print(rpmValues[0]);
+        Serial.print("  ,  ");
+        Serial.print(rpmValues[1]);
+        Serial.print("  ,  ");
+        Serial.println(rpmValues[2]);
+
+        delay(2);
       }
-      else {
-        motor(i, pwmValue[i], 1);
-      }
-
-      Serial.print(rpmValues[0]);
-      Serial.print("  ,  ");
-      Serial.print(rpmValues[1]);
-      Serial.print("  ,  ");
-      Serial.println(rpmValues[2]);
     }
-    else
+    if (setpoint[i] == 0)
     {
-      error[i] = 0;
-      sum[i]   = 0;
-      motor(i, 0, 0);
+      motor(i, 0);
     }
   }
 }
 
-///////////////////////////////////////////////////            COUNTING ENCODERS
+////////////////////////////////////////////////////////////            COUNTING ENCODERS
 void encoder0_ISR() // encoder0 interrupt service routine
 {
   noInterrupts();
-  if (motorDir[0])
-  {
+  if (digitalRead(motorDirPins[0]) == LOW)
     encoderCounts[0]++;
-  }
   else
-  {
     encoderCounts[0]--;
-  }
   interrupts();
+  //  Serial.println(encoderCounts[0]);
 }
 void encoder1_ISR()
 {
   noInterrupts();
-  if (motorDir[1])
-  {
+  if (digitalRead(motorDirPins[1]) == LOW)
     encoderCounts[1]++;
-  }
   else
-  {
     encoderCounts[1]--;
-  }
   interrupts();
 }
 void encoder2_ISR()
 {
-  noInterrupts();
-  if (motorDir[2])
-  {
+  if (digitalRead(motorDirPins[2]) == LOW)
     encoderCounts[2]++;
-  }
   else
-  {
     encoderCounts[2]--;
-  }
-  interrupts();
+  //  Serial.println(encoderCounts[2]);
 }
 
-//////////////////////////////////////////////////////             RUNNING MOTORS
-void motor(int motorNumber, int pwm, bool dir)
+/////////////////////////////////////////////////////////////////             RUNNING MOTORS
+void motor(int motorNumber, int pwm)
 {
-  motorDir[motorNumber] = dir;
-  digitalWrite(motorDirPins[motorNumber], dir);
-  analogWrite(motorPWMPins[motorNumber], pwm);
+  if (pwm > 255) {
+    pwm = 255;
+  }
+  if (pwm < -255) {
+    pwm = -255;
+  }
+
+  if (pwm > 0)
+  {
+    //    if (mark_start >= 0) {
+    //      digitalWrite(motorDirPins[motorNumber], FORWARD);
+    //      analogWrite(motorPWMPins[motorNumber], pwm + 150);
+    //      mark_start -= 1;
+    //    }
+    digitalWrite(motorDirPins[motorNumber], FORWARD);
+    analogWrite(motorPWMPins[motorNumber], pwm);
+  }
+
+  if (pwm < 0)
+  {
+    //    if (mark_start >= 0) {
+    //      digitalWrite(motorDirPins[motorNumber], BACKWARD);
+    //      analogWrite(motorPWMPins[motorNumber], -pwm - 150);
+    //      mark_start -= 1;
+    //    }
+    digitalWrite(motorDirPins[motorNumber], BACKWARD);
+    analogWrite(motorPWMPins[motorNumber], -pwm);
+  }
+
+  if (pwm == 0)
+  {
+    digitalWrite(motorDirPins[motorNumber], BACKWARD);
+    analogWrite(motorPWMPins[motorNumber], pwm);
+  }
+
 }
 
-///////////////////////////////////////////////////////             RECEIVE BYTE
+///////////////////////////////////////////////////////////////////             RECEIVE BYTE
 void receiveBytes()
 {
   static byte index = 0;
@@ -435,7 +464,7 @@ void receiveBytes()
   }
 }
 
-////////////////////////////////////////////////////////////////      BUFFER FLUSH
+///////////////////////////////////////////////////////////////////      BUFFER FLUSH
 void buffer_Flush(char *ptr)
 {
   for (int i = 0; i < 64; i++)
@@ -444,13 +473,13 @@ void buffer_Flush(char *ptr)
   }
 }
 
-//////////////////////////////////////////////////////////////        GIVING COMMAND
+/////////////////////////////////////////////////////////////////        GIVING COMMAND
 void parseCommand()
 {
   char command = rcv_buffer[0]; // our first byte tells us the command char is equivalent to byte
   switch (command)
   {
-    ///////////////////////////////////// ENCODER
+    ///////////////////////////////////////////////////////////////      ENCODER
     case 'E':
     case 'e':
       int encoderNum;
@@ -461,17 +490,17 @@ void parseCommand()
       Serial.println(counts);
       break;
 
-    ////////////////////////////////////  MOTOR
+    ////////////////////////////////////////////////////////////////    MOTOR
     case 'M':
     case 'm':
       int  motorNumber;
       int  motorPWM;
       int  motorDirection;
-      sscanf(&rcv_buffer[1], " %d %d %d \r", &motorNumber, &motorPWM, &motorDirection);
-      motor(motorNumber, motorPWM, motorDirection);
+      sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
+      motor(motorNumber, motorPWM);
       break;
 
-    ////////////////////////////////////  ULTRASOUND
+    ////////////////////////////////////////////////////////////////    ULTRASOUND
     case 'u':
     case 'U':
       int ultrasonicNumber;
@@ -519,41 +548,30 @@ void parseCommand()
     ////////////////////////////////////  ENTER RPM_GOAL
     case 'v':
     case 'V':
+
       int rpm0;
       int rpm1;
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
-      rpms[0] = (double)(rpm0);
-      rpms[1] = (double)(rpm1);
-      rpms[2] = (double)(rpm2);
-      for (int i = 0; i < 3; i++)
-      {
-        // when the setpoint is in a 30 +/- range do not set the sum to 0, aka if major velocity change set your sum
-        // to 0. if small then don't change it
-        if (!(setpoint[i] + 30 >= rpms[i] && setpoint[i] - 30 <= rpms[i]))
-        {
-          //error[i] = 0;
-          sum[i]   = 0;
-        }
-      }
-      setpoint[0] = rpms[0];
-      setpoint[1] = rpms[1];
-      setpoint[2] = rpms[2];
+
+      setpoint[0] = rpm0;
+      setpoint[1] = rpm1;
+      setpoint[2] = rpm2;
       break;
 
-    ////////////////////////////////////  PID Switch
+    ////////////////////////////////////////////////////////////////////  PID Switch ON/OFF
     case 'p':
     case 'P':
       setpoint[0] = 0;
       setpoint[1] = 0;
       setpoint[2] = 0;
-      motor(0, 0, 0);
-      motor(1, 0, 0);
-      motor(2, 0, 0);
+      motor(0, 0);
+      motor(1, 0);
+      motor(2, 0);
       sscanf(&rcv_buffer[1], " %c \r", &pidSwitch);
       break;
 
-    ////////////////////////////////////  RPM
+    /////////////////////////////////////////////////////////////////   Check  RPM
     case 'r':
     case 'R':
       int rpmNum;
@@ -561,25 +579,36 @@ void parseCommand()
       printDouble(rpmValues[rpmNum], 1000000000);
       break;
 
-    ////////////////////////////////////  ENTER GAINS K
+    ///////////////////////////////////////////////////////////////    ENTER GAINS K
     case 'k':
     case 'K':
       char  pValue[20];
       char  iValue[20];
       sscanf(&rcv_buffer[1], " %s %s \r", &pValue, &iValue);
       char *ptr;
-      Kp = strtod(pValue, &ptr);
-      Ki = strtod(iValue, &ptr);
-      break;
-
-    ////////////////////////////////////  STOP
-    case 's':
-    case 'S':
       for (int i = 0; i < 3; i++)
       {
-        motor(i, 0, 0);
+        Kp[i] = strtod(pValue, &ptr);
+        Ki[i] = strtod(iValue, &ptr);
       }
+      break;
 
+    ///////////////////////////////////////////////////////////////////  STOP
+    case 's':
+    case 'S':
+      IMUsetup = 0;
+      for (int i = 0; i < 3; i++)
+      {
+        motor(i, 0);
+        setpoint[i] = 0;
+      }
+      break;
+
+    //////////////////////////////////////////////////////////////////     PRINT IMU DATA
+    case 'a':
+    case 'A':
+      IMUsetup = 1;
+      break;
       //    default:
       //      Serial.println("Error: Serial input incorrect");
   }
