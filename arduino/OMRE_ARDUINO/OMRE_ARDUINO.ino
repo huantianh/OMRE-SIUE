@@ -1,6 +1,5 @@
 #include <HardwareSerial.h>
 #include <SimpleTimer.h>
-#include <Wire.h>
 
 #define FORWARD LOW
 #define BACKWARD HIGH
@@ -29,7 +28,7 @@ const int infraredSensorPins[]             = {0, 1, 2, 3};
 
 double Kp[] = {0.5, 0.5, 0.5};
 double Ki[] = {0.1, 0.1, 0.1};
-double Kd[] = {0, 0, 0};
+double Kd[] = {0.7, 0.7, 0.7};
 
 double ITerm[3]       = {0, 0, 0};
 double lastInput[3]   = {0, 0, 0};
@@ -106,13 +105,13 @@ void loop()
     speed_pid();
   }
 
-  //  Serial.print(micros() * 0.000001);
-  //  Serial.print("  ,  ");
-  //  Serial.print(rpmValues[0]);
-  //  Serial.print("  ,  ");
-  //  Serial.print(rpmValues[1]);
-  //  Serial.print("  ,  ");
-  //  Serial.println(rpmValues[2]);
+    Serial.print(micros() * 0.000001);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    Serial.println(rpmValues[2]);
 }
 
 ////////////////////////////////////////////////////////////     Update RPM
@@ -188,11 +187,11 @@ void speed_pid()
         lastInput[i] = rpmValues[i];
         lastTime[i] = now[i];
 
-        Serial.print(rpmValues[0]);
-        Serial.print("  ,  ");
-        Serial.print(rpmValues[1]);
-        Serial.print("  ,  ");
-        Serial.println(rpmValues[2]);
+//        Serial.print(rpmValues[0]);
+//        Serial.print("  ,  ");
+//        Serial.print(rpmValues[1]);
+//        Serial.print("  ,  ");
+//        Serial.println(rpmValues[2]);
 
         delay(2);
       }
