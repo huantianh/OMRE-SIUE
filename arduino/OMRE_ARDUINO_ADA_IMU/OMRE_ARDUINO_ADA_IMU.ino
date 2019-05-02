@@ -1,3 +1,49 @@
+/******************************   ADA_IMU Library   ********************************************/
+#include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_LSM9DS1.h>
+#include <Adafruit_Sensor.h>  // not used in this demo but required!
+
+// i2c
+Adafruit_LSM9DS1 lsm = Adafruit_LSM9DS1();
+
+#define LSM9DS1_SCK A5
+#define LSM9DS1_MISO 12
+#define LSM9DS1_MOSI A4
+#define LSM9DS1_XGCS 6
+#define LSM9DS1_MCS 5
+
+
+
+float accel_x;
+float accel_filter_x;
+float gyro_x;
+float last_accel_x;
+int countx   = 0;
+
+double alpha = 0.02;
+double prev_accel;
+
+double vx;
+unsigned long present       = 0;
+unsigned long last          = 0;
+
+float filter_accel;
+float dt = 0.5;
+
+
+void setupSensor()
+{
+  // 1.) Set the accelerometer range
+  lsm.setupAccel(lsm.LSM9DS1_ACCELRANGE_2G);
+  // 2.) Set the magnetometer sensitivity
+  lsm.setupMag(lsm.LSM9DS1_MAGGAIN_4GAUSS);
+  // 3.) Setup the gyroscope
+  lsm.setupGyro(lsm.LSM9DS1_GYROSCALE_245DPS);
+}
+
+/*************************************************************    ROBOT SETUP  ************************/
+
 #include <HardwareSerial.h>
 #include <SimpleTimer.h>
 
@@ -34,7 +80,7 @@ double ITerm[3]       = {0, 0, 0};
 double lastInput[3]   = {0, 0, 0};
 double error[3]       = {0, 0, 0};
 double dInput[3]      = {0, 0, 0};
-double setpoint[3]    = {0, 0, 0};
+double rpm_setpoint[3]    = {0, 0, 0};
 double pwm_pid[3]     = {0, 0, 0};
 int rpms[3]           = {0, 0, 0};
 
@@ -58,8 +104,13 @@ double changeInTimeSeconds[3] = {0, 0, 0};
 
 char pidSwitch = '1';
 
+/******************************** PRINT DATA SETUP *************************************************/
+int print_setup = 0;
+#define PRINT_IMU  0
+#define PRINT_VELO  1
+/***************************************************************************************************/
 
-////////////////////////////////////////////////////////////////           SET UP
+/*************************************************************          MAIN  SETUP FUNCTION    *********************************************/  
 void setup() {
   Serial.begin(115200);
   for (int i = 0; i < 6; i++)
@@ -81,8 +132,8 @@ void setup() {
   }
 
   pinMode(18, INPUT_PULLUP);
-  pinMode(19, INPUT_PULLUP);
-  pinMode(20, INPUT_PULLUP);
+  pinMode(2, INPUT_PULLUP);
+  pinMode(3, INPUT_PULLUP);
 
   buffer_Flush(rcv_buffer);
 
@@ -92,8 +143,28 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_1), encoder1_ISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_2), encoder2_ISR, CHANGE);
 
+  /******************************************** ADA_IMU Setup ***************************************************/
+  while (!Serial)
+  {
+    delay(1); // will pause Zero, Leonardo, etc until serial console opens
+  }
+  Serial.println("LSM9DS1 data read demo");
+
+  // Try to initialise and warn if we couldn't detect the chip
+  if (!lsm.begin())
+  {
+    Serial.println("Oops ... unable to initialize the LSM9DS1. Check your wiring!");
+    while (1);
+  }
+  Serial.println("Found LSM9DS1 9DOF");
+
+  // helper to just set the default scaling we want, see above!
+  setupSensor();
+
 }
-//////////////////////////////////////////////////////////////////    LOOP
+/***************************************************************************************************************************************/
+
+/*****************************************************************   MAIN LOOP  ********************************************************/
 void loop()
 {
   updateRPM();
@@ -104,7 +175,6 @@ void loop()
   {
     speed_pid();
   }
-
   //    Serial.print(micros() * 0.000001);
   //    Serial.print("  ,  ");
   //    Serial.print(rpmValues[0]);
@@ -112,9 +182,91 @@ void loop()
   //    Serial.print(rpmValues[1]);
   //    Serial.print("  ,  ");
   //    Serial.println(rpmValues[2]);
+
+  /*********************************************************************  ADA_IMU Loop ****************************/
+  lsm.read(); //read Ada_IMU
+  /* Get a new sensor event */
+  sensors_event_t a, m, g, temp;
+  lsm.getEvent(&a, &m, &g, &temp);
+
+  if (print_setup == 1)
+  {
+    printdata(); //print data IMU
+  }
+
+  updatePos();
+
+}
+/***************************************************************************************************************************************/
+
+/**********************************************************************  Update Pos_IMU ************************************************/
+void updatePos()
+{
+  /* Get a new sensor event */
+  sensors_event_t a, m, g, temp;
+  lsm.getEvent(&a, &m, &g, &temp);
+
+  // alpha = 0:1;
+  accel_x = a.acceleration.x;
+  accel_filter_x = alpha *  accel_x + (1 - alpha) * last_accel_x;
+
+  if (( accel_filter_x  <= 0.01) && ( accel_filter_x >= -0.01)) //Discrimination window applied
+  {
+    accel_filter_x = 0; // to the X axis acceleration
+  }
+
+  present = micros() * 0.000001;
+  dt = (present - last);
+
+  vx += accel_filter_x * dt;
+
+  if (accel_filter_x  == 0) //we count the number of acceleration samples that equals zero
+  {
+    countx++;
+  }
+  else
+  {
+    countx = 0;
+  }
+
+  if (countx >= 25) //if this number exceeds 25, we can assume that velocity is zero
+  {
+    vx = 0;
+    countx = 0;
+  }
+
+  last = present;
+  accel_x = last_accel_x;
+
+  //  Serial.println(countx);
+  //  Serial.print(a.acceleration.x);
+  //  Serial.print("   ,   ");
+  //  Serial.print(accel_filter_x);
+  //  Serial.print("   ,   ");
+  //  Serial.print(vx);
+  //  Serial.println();
+  //  delay(20);
 }
 
-////////////////////////////////////////////////////////////     Update RPM
+void comp_filter(float new_accel, float new_gyro)
+{
+  float filterTerm0;
+  float filterTerm1;
+  float filterTerm2;
+  float timeConstant;
+
+  timeConstant = 0.5; // default 1.0
+
+  filterTerm0 = (new_accel - prev_accel) * timeConstant * timeConstant;
+  filterTerm2 += filterTerm0 * dt;
+  filterTerm1 = filterTerm2 + ((new_accel - prev_accel) * 2 * timeConstant) + new_gyro;
+  filter_accel = (filterTerm1 * dt) + prev_accel;
+
+  filter_accel = prev_accel;
+}
+/***************************************************************************************************************************************/
+
+/***********************************************************************    Update RPM    ********************************************/
 void updateRPM()
 {
   for ( int i = 0; i < 3; i++)
@@ -138,13 +290,14 @@ void updateRPM()
 
   }
 }
+/***************************************************************************************************************************************/
 
-/////////////////////////////////////////////////////////////        PID loop
+/*********************************************************   PID for Motor    ****************************************************************/      
 void speed_pid()
 {
   for (int i = 0; i < 3; i++)
   {
-    if (setpoint[i])
+    if (rpm_setpoint[i])
     {
       //updateRPM();
       now[i] = micros();
@@ -154,7 +307,7 @@ void speed_pid()
       {
 
         ///////////////////////////////////////////        Error Variables
-        error[i] = setpoint[i] - rpmValues[i];
+        error[i] = rpm_setpoint[i] - rpmValues[i];
         ITerm[i] += (Ki[i] * error[i]);
 
         if (ITerm[i] > 255)
@@ -196,12 +349,13 @@ void speed_pid()
         delay(2);
       }
     }
-    if (setpoint[i] == 0)
+    if (rpm_setpoint[i] == 0)
     {
       motor(i, 0);
     }
   }
 }
+/***************************************************************************************************************************************/
 
 ////////////////////////////////////////////////////////////            COUNTING ENCODERS
 void encoder0_ISR() // encoder0 interrupt service routine
@@ -389,17 +543,17 @@ void parseCommand()
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
 
-      setpoint[0] = rpm0;
-      setpoint[1] = rpm1;
-      setpoint[2] = rpm2;
+      rpm_setpoint[0] = rpm0;
+      rpm_setpoint[1] = rpm1;
+      rpm_setpoint[2] = rpm2;
       break;
 
     ////////////////////////////////////////////////////////////////////  PID Switch ON/OFF
     case 'p':
     case 'P':
-      setpoint[0] = 0;
-      setpoint[1] = 0;
-      setpoint[2] = 0;
+      rpm_setpoint[0] = 0;
+      rpm_setpoint[1] = 0;
+      rpm_setpoint[2] = 0;
       motor(0, 0);
       motor(1, 0);
       motor(2, 0);
@@ -431,13 +585,37 @@ void parseCommand()
     ///////////////////////////////////////////////////////////////////  STOP
     case 's':
     case 'S':
+      print_setup = 0;
       for (int i = 0; i < 3; i++)
       {
         motor(i, 0);
-        setpoint[i] = 0;
+        rpm_setpoint[i] = 0;
       }
       break;
 
+    //////////////////////////////////////////////////////////////////     PRINT DATA
+    case 'a':
+    case 'A':
+      print_setup = 1;
+      break;
+
+    /////////////////////////////////////////////////////////////////      Move Robot Forward
+    case 'f':
+    case 'F':
+
+      rpm_setpoint[0] = 0;
+      rpm_setpoint[1] = -50;
+      rpm_setpoint[2] = 50;
+      break;
+
+    /////////////////////////////////////////////////////////////////      Move Robot Backward
+    case 'b':
+    case 'B':
+
+      rpm_setpoint[0] = 0;
+      rpm_setpoint[1] = 50;
+      rpm_setpoint[2] = -50;
+      break;
       //    default:
       //      Serial.println("Error: Serial input incorrect");
   }

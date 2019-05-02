@@ -10,7 +10,7 @@ i = 0
 portname = '/dev/ttyACM'
 while True:
     try:
-        ser = serial.Serial(portname + str(i), 9600, timeout=1)
+        ser = serial.Serial(portname + str(i), 115200, timeout=1)
         ser.flushInput()
         ser.flushOutput()
         break
@@ -259,7 +259,8 @@ if mode == 's':
 		command = input("Enter Command: ")
 		command = command+'\r'
 		ser.write(command.encode())
-		print (ser.readline().decode("ascii"))
+		while ser.inWaiting() > 0:
+			print (ser.readline().decode())
 		
 elif mode == 't':
 ################ Simple Input Tester Loop ###############
@@ -340,13 +341,13 @@ elif mode == 'o':
 		
 		#~ initOdemetry()
 				
-		file = open("data_x_"+str(x)+",y_"+str(y)+",theta_"+str(theta)+",time_"+str(timer)+".txt","w+")
+		#~ file = open("data_x_"+str(x)+",y_"+str(y)+",theta_"+str(theta)+",time_"+str(timer)+".txt","w+")
 		
 		while True:
 			pose = odemetryCalc(current_x,current_y,current_t)
 
-			data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-			print(data_write)
+			#~ data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
+			#~ print(data_write)
 			#file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+"\n")
 
 			current_x = pose.item(0)
@@ -355,7 +356,7 @@ elif mode == 'o':
 			
 			if time.time()-float(start) >= float(timer):
 				xyThetaToWheelV(0,0,0)
-				file.close()
+				#~ file.close()
 				break
 			
 elif mode == 'p':

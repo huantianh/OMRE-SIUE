@@ -64,36 +64,154 @@ char pidSwitch = '1';
  **************************************************************/
 
 int IMUsetup = 0;
+
+// Uncomment the following line to use a MinIMU-9 v5 or AltIMU-10 v5. Leave commented for older IMUs (up through v4).
+#define IMU_V5
+
+// Uncomment the below line to use this axis definition:
+// X axis pointing forward
+// Y axis pointing to the right
+// and Z axis pointing down.
+// Positive pitch : nose up
+// Positive roll : right wing down
+// Positive yaw : clockwise
 int SENSOR_SIGN[9] = {1, 1, 1, -1, -1, -1, 1, 1, 1}; //Correct directions x,y,z - gyro, accelerometer, magnetometer
+// Uncomment the below line to use this axis definition:
+// X axis pointing forward
+// Y axis pointing to the left
+// and Z axis pointing up.
+// Positive pitch : nose down
+// Positive roll : right wing down
+// Positive yaw : counterclockwise
+//int SENSOR_SIGN[9] = {1,-1,-1,-1,1,1,1,-1,-1}; //Correct directions x,y,z - gyro, accelerometer, magnetometer
+
+// tested with Arduino Uno with ATmega328 and Arduino Duemilanove with ATMega168
+
 #include <Wire.h>
+
 // accelerometer: 8 g sensitivity
 // 3.9 mg/digit; 1 g = 256
-#define GRAVITY 256  //this equivalent to 1G in the raw data coming from the accelerometer
+
+#define GRAVITY 10//this equivalent to 1G in the raw data coming from the accelerometer
+
 #define ToRad(x) ((x)*0.01745329252)  // *pi/180
 #define ToDeg(x) ((x)*57.2957795131)  // *180/pi
+
 // gyro: 2000 dps full scale
 // 70 mdps/digit; 1 dps = 0.07
+#define Gyro_Gain_X 0.07 //X axis Gyro gain
+#define Gyro_Gain_Y 0.07 //Y axis Gyro gain
+#define Gyro_Gain_Z 0.07 //Z axis Gyro gain
+#define Gyro_Scaled_X(x) ((x)*ToRad(Gyro_Gain_X)) //Return the scaled ADC raw data of the gyro in radians for second
+#define Gyro_Scaled_Y(x) ((x)*ToRad(Gyro_Gain_Y)) //Return the scaled ADC raw data of the gyro in radians for second
+#define Gyro_Scaled_Z(x) ((x)*ToRad(Gyro_Gain_Z)) //Return the scaled ADC raw data of the gyro in radians for second
+
+// LSM303/LIS3MDL magnetometer calibration constants; use the Calibrate example from
+// the Pololu LSM303 or LIS3MDL library to find the right values for your board
+
+#define M_X_MIN -1000
+#define M_Y_MIN -1000
+#define M_Z_MIN -1000
+#define M_X_MAX +1000
+#define M_Y_MAX +1000
+#define M_Z_MAX +1000
+
+#define Kp_ROLLPITCH 0.02
+#define Ki_ROLLPITCH 0.00002
+#define Kp_YAW 1.2
+#define Ki_YAW 0.00002
+
+/*For debugging purposes*/
+//OUTPUTMODE=1 will print the corrected data,
+//OUTPUTMODE=0 will print uncorrected data of the gyros (with drift)
+#define OUTPUTMODE 1
+
+#define PRINT_DCM 1     //Will print the whole direction cosine matrix
+#define PRINT_ANALOGS 0 //Will print the analog raw data
+#define PRINT_EULER 0   //Will print the Euler angles Roll, Pitch and Yaw
+
 #define STATUS_LED 13
+
 float G_Dt = 0.02;  // Integration time (DCM algorithm)  We will run the integration loop at 50Hz if possible
+
 long timer = 0; //general purpuse timer
 long timer_old;
 long timer24 = 0; //Second timer used to print values
 int AN[6]; //array that stores the gyro and accelerometer data
 int AN_OFFSET[6] = {0, 0, 0, 0, 0, 0}; //Array that stores the Offset of the sensors
 
+int gyro_x;
+int gyro_y;
+int gyro_z;
+int accel_x;
+int accel_y;
 int accel_z;
+int magnetom_x;
+int magnetom_y;
+int magnetom_z;
+float c_magnetom_x;
+float c_magnetom_y;
+float c_magnetom_z;
+float MAG_Heading;
+
+float Accel_Vector[3] = {0, 0, 0}; //Store the acceleration in a vector
+float Gyro_Vector[3] = {0, 0, 0}; //Store the gyros turn rate in a vector
+float Omega_Vector[3] = {0, 0, 0}; //Corrected Gyro_Vector data
+float Omega_P[3] = {0, 0, 0}; //Omega Proportional correction
+float Omega_I[3] = {0, 0, 0}; //Omega Integrator
+float Omega[3] = {0, 0, 0};
+
+// Euler angles
+float roll;
+float pitch;
+float yaw;
+
+float errorRollPitch[3] = {0, 0, 0};
+float errorYaw[3] = {0, 0, 0};
 
 unsigned int counter = 0;
+byte gyro_sat = 0;
 
+float DCM_Matrix[3][3] = {
+  {
+    1, 0, 0
+  }
+  , {
+    0, 1, 0
+  }
+  , {
+    0, 0, 1
+  }
+};
+float Update_Matrix[3][3] = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}}; //Gyros here
+
+
+float Temporary_Matrix[3][3] = {
+  {
+    0, 0, 0
+  }
+  , {
+    0, 0, 0
+  }
+  , {
+    0, 0, 0
+  }
+};
+
+unsigned char  Sensor_Data[8];
+unsigned char  Sample_X;
+unsigned char  Sample_Y;
+unsigned char  Sample_Z;
 unsigned char countx, county ;
-signed int  accelerationx[2];
-signed int  accelerationy[2];
-signed int velocityx[2], velocityy[2];
+signed int accelerationx[2] = {0, 0};
+signed int accelerationy[2] = {0, 0};
+signed int velocityx[2] = {0, 0};
+signed int velocityy[2] = {0, 0};
 signed int positionX[2];
 signed int positionY[2];
 signed int positionZ[2];
-signed int distanceX;
-signed int distanceY;
+unsigned char direction1;
+unsigned long sstatex, sstatey;
 
 
 
@@ -103,9 +221,9 @@ void data_reintegration(void);
 void movement_end_check(void);
 void updatePos(void);
 
+double changeTimeSeconds;
+double prevTimes;
 
-int acc_x[2]  = {0, 0};
-int acc_y[2]  = {0, 0};
 int velo_x[2] = {0, 0};
 int velo_y[2] = {0, 0};
 int pos_x[2]  = {0, 0};
@@ -153,23 +271,36 @@ void setup() {
 
   pinMode (STATUS_LED, OUTPUT); // Status LED
   I2C_Init();
+  Serial.println("Pololu MinIMU-9 + Arduino AHRS");
   digitalWrite(STATUS_LED, LOW);
   delay(1500);
+
   Accel_Init();
+  Compass_Init();
+  Gyro_Init();
+
   delay(20);
+
   for (int i = 0; i < 32; i++) // We take some readings...
   {
+    Read_Gyro();
     Read_Accel();
     for (int y = 0; y < 6; y++) // Cumulate values
       AN_OFFSET[y] += AN[y];
     delay(20);
   }
+
   for (int y = 0; y < 6; y++)
     AN_OFFSET[y] = AN_OFFSET[y] / 32;
   AN_OFFSET[5] -= GRAVITY * SENSOR_SIGN[5];
+
+  //Serial.println("Offset:");
   for (int y = 0; y < 6; y++)
-    delay(2000);
+    Serial.println(AN_OFFSET[y]);
+
+  delay(2000);
   digitalWrite(STATUS_LED, HIGH);
+
   timer = millis();
   delay(20);
   counter = 0;
@@ -201,14 +332,144 @@ void loop()
   /**************************************************************************      MINIMU  LOOP
    **************************************************************************/
 
-  Read_Accel();     // Read I2C accelerometer
-  if (IMUsetup == 1)
+  if ((millis() - timer) >= 20) // Main loop runs at 50Hz
   {
-    printdataIMU();
+    counter++;
+    timer_old = timer;
+    timer = millis();
+    if (timer > timer_old)
+    {
+      G_Dt = (timer - timer_old) / 1000.0; // Real time of loop run. We use this on the DCM algorithm (gyro integration time)
+      if (G_Dt > 0.2)
+        G_Dt = 0; // ignore integration times over 200 ms
+    }
+    else
+      G_Dt = 0;
+
+    // *** DCM algorithm
+    // Data adquisition
+    Read_Gyro();   // This read gyro data
+    Read_Accel();     // Read I2C accelerometer
+
+    if (counter > 5)  // Read compass data at 10Hz... (5 loop runs)
+    {
+      counter = 0;
+      Read_Compass();    // Read I2C magnetometer
+      Compass_Heading(); // Calculate magnetic heading
+    }
+
+    // Calculations...
+    Matrix_update();
+    Normalize();
+    Drift_correction();
+    Euler_angles();
+    // ***
+    if (IMUsetup == 1)
+    {
+      printdata();
+    }
   }
   updatePos();
 }
 
+/*****************************************************
+
+                       Function
+
+ ****************************************************/
+
+void Calibrate(void)
+{
+  unsigned int count1;
+  count1 = 0;
+  do {
+    Read_Accel();
+    sstatex = sstatex + Sample_X; // Accumulate Samples
+    sstatey = sstatey + Sample_Y;
+    count1++;
+  } while (count1 != 0x0400); // 1024 times
+  sstatex = sstatex >> 10; // division between 1024
+  sstatey = sstatey >> 10;
+}
+
+void data_transfer(void)
+{
+  signed long positionXbkp;
+  signed long positionYbkp;
+  unsigned int delay;
+  unsigned char posx_seg[4], posy_seg[4];
+  if (positionX[1] >= 0) { //This line compares the sign of the X direction data
+    direction1 = (direction1 | 0x10); //if its positive the most significant byte
+    posx_seg[0] = positionX[1] & 0x000000FF; // is set to 1 else it is set to 8
+    posx_seg[1] = (positionX[1] >> 8) & 0x000000FF; // the data is also managed in the
+    // subsequent lines in order to
+    posx_seg[2] = (positionX[1] >> 16) & 0x000000FF; // be sent. The 32 bit variable must be
+    posx_seg[3] = (positionX[1] >> 24) & 0x000000FF; // split into 4 different 8 bit
+    // variables in order to be sent via
+    // the 8 bit SCI frame
+  }
+
+  else {
+    direction1 = (direction1 | 0x80);
+    positionXbkp = positionX[1] - 1;
+    positionXbkp = positionXbkp ^ 0xFFFFFFFF;
+    posx_seg[0] = positionXbkp & 0x000000FF;
+    posx_seg[1] = (positionXbkp >> 8) & 0x000000FF;
+    posx_seg[2] = (positionXbkp >> 16) & 0x000000FF;
+    posx_seg[3] = (positionXbkp >> 24) & 0x000000FF;
+  }
+
+  if (positionY[1] >= 0) { // Same management than in the previous case
+    direction1 = (direction1 | 0x08); // but with the Y data.
+    posy_seg[0] = positionY[1] & 0x000000FF;
+    posy_seg[1] = (positionY[1] >> 8) & 0x000000FF;
+    posy_seg[2] = (positionY[1] >> 16) & 0x000000FF;
+    posy_seg[3] = (positionY[1] >> 24) & 0x000000FF;
+  }
+
+  else {
+    direction1 = (direction1 | 0x01);
+    positionYbkp = positionY[1] - 1;
+    positionYbkp = positionYbkp ^ 0xFFFFFFFF;
+    posy_seg[0] = positionYbkp & 0x000000FF;
+    posy_seg[1] = (positionYbkp >> 8) & 0x000000FF;
+    posy_seg[2] = (positionYbkp >> 16) & 0x000000FF;
+    posy_seg[3] = (positionYbkp >> 24) & 0x000000FF;
+  }
+
+  delay = 0x0100;
+
+  Sensor_Data[0] = 0x03;
+  Sensor_Data[1] = direction1;
+  Sensor_Data[2] = posx_seg[3];
+  Sensor_Data[3] = posy_seg[3];
+  Sensor_Data[4] = 0x01;
+  Sensor_Data[5] = 0x01;
+
+  while (--delay);
+  //  Serial.print(posx_seg[3]);
+  //  Serial.print("    ,    ");
+  //  Serial.print(posy_seg[3]);
+  //  Serial.print("    ,    ");
+  //  Serial.print(direction1);
+  //  Serial.println();
+}
+
+void data_reintegration(void)
+{
+  if (direction1 >= 10)
+  {
+    positionX[1] = positionX[1] | 0xFFFFC000; // 18 "ones" inserted. Same size as the
+  }
+  //amount of shifts
+
+  direction1 = direction1 & 0x01;
+
+  if (direction1 == 1)
+  {
+    positionY[1] = positionY[1] | 0xFFFFC000;
+  }
+}
 
 void movement_end_check(void)
 {
@@ -245,12 +506,37 @@ void movement_end_check(void)
 ////////////////////////////////////////////////////////////      Position by IMU
 void updatePos(void)
 {
-  Read_Accel ();
+  //Calibrate();
+  //  unsigned char count2 ;
+  //  count2 = 0;
+  //
+  //  do {
+  //    Read_Accel();
+  //    accelerationx[1] = accel_x + Sample_X; //filtering routine for noise attenuation
+  //    accelerationy[1] = accel_y + Sample_Y; //64 samples are averaged. The resulting
+  //    //average represents the acceleration of
+  //    //an instant
+  //    count2++;
+  //
+  //  } while (count2 != 0x40); // 64 sums of the acceleration sample
+
+  accelerationx[1] = accel_x >> 6; // division by 64
+  accelerationy[1] = accel_y >> 6;
+
+  //  accelerationx[1] = accelerationx[1] >> 6; // division by 64
+  //  accelerationy[1] = accelerationy[1] >> 6;
+  //
+  //  accelerationx[1] = accelerationx[1] - (int)sstatex; //eliminating zero reference
+  //  //offset of the acceleration data
+  //  accelerationy[1] = accelerationy[1] - (int)sstatey; // to obtain positive and negative
+  //  //acceleration
+
 
   if ((accelerationx[1] <= 3) && (accelerationx[1] >= -3)) //Discrimination window applied
   {
-    accelerationx[1] = 0;                                  // to the X axis acceleration
-  }                                                       //variable
+    accelerationx[1] = 0; // to the X axis acceleration
+  }
+  //variable
 
   if ((accelerationy[1] <= 3) && (accelerationy[1] >= -3))
   {
@@ -258,38 +544,48 @@ void updatePos(void)
   }
 
   //first X integration:
-  velocityx[1] = velocityx[0] + accelerationx[0] + (accelerationx[1] - accelerationx[0]);
+  velocityx[1] = velocityx[0] + accelerationx[0] + ((accelerationx[1] - accelerationx[0]) >> 1);
   //second X integration:
-  positionX[1] = positionX[0] + velocityx[0] + (velocityx[1] - velocityx[0]);
+  positionX[1] = positionX[0] + velocityx[0] + ((velocityx[1] - velocityx[0]) >> 1);
   //first Y integration:
-  velocityy[1] = velocityy[0] + accelerationy[0] + (accelerationy[1] - accelerationy[0]);
+  velocityy[1] = velocityy[0] + accelerationy[0] + ((accelerationy[1] - accelerationy[0]) >> 1);
   //second Y integration:
-  positionY[1] = positionY[0] + velocityy[0] + (velocityy[1] - velocityy[0]);
+  positionY[1] = positionY[0] + velocityy[0] + ((velocityy[1] - velocityy[0]) >> 1);
 
-  distanceX = positionX[1] + positionX[0];
-  distanceY = positionY[1] + positionY[0];
-
-  accelerationx[0] = accelerationx[1];          //The current acceleration value must be sent
+  accelerationx[0] = accelerationx[1]; //The current acceleration value must be sent
   //to the previous acceleration
-  accelerationy[0] = accelerationy[1];          //variable in order to introduce the new
+  accelerationy[0] = accelerationy[1]; //variable in order to introduce the new
   //acceleration value.
 
-  velocityx[0] = velocityx[1];                  //Same done for the velocity variable
+  velocityx[0] = velocityx[1]; //Same done for the velocity variable
   velocityy[0] = velocityy[1];
+
+//  positionX[1] = positionX[1] << 18; //The idea behind this shifting (multiplication)
+//  //is a sensibility adjustment.
+//  positionY[1] = positionY[1] << 18; //Some applications require adjustments to a
+//  //particular situation
+//  //i.e. mouse application
+  
+  Serial.print(positionX[1]);
+  Serial.print("    ,    ");
+  Serial.print(positionY[1]);
+  Serial.print("    ,    ");
+  Serial.print(direction1);
+  Serial.println();
+
+  data_transfer();
+
+//  positionX[1] = positionX[1] >> 18; //once the variables are sent them must return to
+//  positionY[1] = positionY[1] >> 18; //their original state
+//
+//  //  data_reintegration();
+//  movement_end_check();
 
   positionX[0] = positionX[1]; //actual position data must be sent to the
   positionY[0] = positionY[1]; //previous position
 
-  movement_end_check();
+  direction1 = 0;
 
-  Serial.print(distanceX);
-  Serial.print("   ,   ");
-  Serial.print(distanceY);
-  Serial.print("   ,   ");
-  Serial.print(accelerationx[1]);
-  Serial.print("   ,   ");
-  Serial.print(accelerationy[1]);
-  Serial.println();
 }
 
 

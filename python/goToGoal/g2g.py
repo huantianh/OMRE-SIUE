@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 #sets up serial connection to arduino atMega
-ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
+ser = serial.Serial('/dev/ttyACM0',115200, timeout=.4);
 
 #clear buffers just incase garbage inside
 ser.reset_input_buffer()
@@ -46,8 +46,7 @@ def motorVelocity(m1,m2,m3):
 def encoder(encoderNum):
 	ser.reset_input_buffer()
 	ser.write(("e %d \r" % (encoderNum)).encode())
-	if ser.inWaiting() > 0:
-		encoderValue = (ser.readline().decode("ascii"))
+	encoderValue = (ser.readline().decode("ascii"))
 	return int(encoderValue.rstrip())
 
 #~ def ultrasound(ultraSoundNum):
@@ -98,10 +97,12 @@ def move(xd,yd,thetad):
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 	wheel2RPM = motor_spd_vec[0] # motor 3 speed [rpm]
 	
-	maxAllowedSpeed = 150
+	maxAllowedSpeed = 100
+	
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
 		maxRPM = max(abs(motor_spd_vec))
 		ratio = abs(maxRPM)/maxAllowedSpeed
+		
 		wheel0RPM = wheel0RPM/ratio
 		wheel1RPM = wheel1RPM/ratio
 		wheel2RPM = wheel2RPM/ratio
@@ -358,7 +359,7 @@ while True:
 	
 	if mode == 'g':
 		while True:
-			print(str(ultrasound(1)))
+			#~ print(str(ultrasound(1)))
 			print("######### Enter your goal (x,y) :) ########## ")
 			xd = float(input("enter x desired: "))
 			yd = float(input("enter y desired: "))
