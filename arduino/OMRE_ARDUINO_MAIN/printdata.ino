@@ -32,13 +32,23 @@ void printdata(void)
 #endif
 
 #if PRINT_VELO_IMU == 1
-  Serial.print(a.acceleration.x);
-  Serial.print("   ,   ");
   Serial.print(accel_filter_x);
   Serial.print("   ,   ");
+  Serial.print(accel_filter_y);
+  Serial.print("   ,   ");
+  Serial.print(accel_z);
+  Serial.print("   ,   ");
   Serial.print(vx);
+  Serial.print("   ,   ");
+  Serial.print(vy);
+  Serial.print("   ,   ");
+  Serial.print(vz);
+  Serial.print("   ,   ");
+  Serial.print(v);
+  Serial.print("   ,   ");
+  Serial.print(pos_x);
   Serial.println();
-  delay(20);
+  delay(10);
 #endif
 
 #if PRINT_RPM == 1
