@@ -20,27 +20,38 @@ text = f.read()
 
 #plotting
 x = []
-y = []
+y1 = []
+y2 = []
+y3 = []
 
 with open(root.filename,'r') as csvfile:
 	plots = csv.reader(csvfile, delimiter=',')
 	for row in plots:
 			x.append(float(row[0]))
-			y.append(float(row[1]))
+			y1.append(float(row[1]))
+			y2.append(float(row[2]))
+			y3.append(float(row[3]))
 		
+fig = plt.plot(x,y1, 'b', label='Encoder', linewidth=3)
+fig = plt.plot(y3,y1, 'r', label='IMU', linewidth=3)
+plt.legend()
+plt.autoscale(enable=True, axis='x', tight=True)
+plt.xlabel('X_axis_Moved')
+plt.ylabel('Y_axis_Moved')
+plt.title('Encoder_Pos')
 
-plt.plot(x,y,label='Loaded from file!')
-plt.xlabel('X')
-plt.ylabel('Y')
-plt.title(my_txt1)
-plt.savefig(my_txt1+'.png')
+##Save image into full size 
+fig = plt.gcf()
+fig.set_size_inches((20, 11), forward=False)
+fig.savefig(my_txt1+'.png', dpi=500)
 
 #will not stop the figure if use this
-#plt.show()
-#plt.draw()
+plt.show()
+plt.draw()
 
 #the figure will be closed after 3s
-plt.show(block=False)
-plt.draw()
-time.sleep(3)
+#plt.show(block=False)
+#plt.draw()
+#time.sleep(3)
+
 plt.close()

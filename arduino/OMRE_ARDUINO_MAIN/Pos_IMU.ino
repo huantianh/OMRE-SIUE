@@ -1,40 +1,4 @@
 /******************************************  Update Pos_IMU ************************************************/
-float accel_x;
-float accel_y;
-float accel_z;
-float accel_filter_x;
-float accel_filter_y;
-float accel_filter_z;
-
-float gyro_x;
-float last_accel_x;
-float last_accel_y;
-float last_accel_z;
-
-int countx   = 0;
-int county   = 0;
-int countz   = 0;
-int countv   = 0;
-
-double alpha = 0.1;
-double prev_accel;
-
-float vx;
-float vy;
-float vz;
-float v;
-
-float pos_x;
-float pos_y;
-float pos_z;
-float pos;
-
-unsigned long present       = 0;
-unsigned long last          = 0;
-
-float filter_accel;
-float dt = 0.5;
-
 void updatePos()
 {
   /* Get a new sensor event */

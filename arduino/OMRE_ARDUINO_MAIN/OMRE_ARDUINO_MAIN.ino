@@ -48,7 +48,7 @@ const int infraredSensorPins[]             = {0, 1, 2, 3};
 
 double Kp[] = {0.5, 0.5, 0.5};
 double Ki[] = {0.1, 0.1, 0.1};
-double Kd[] = {0.7, 0.7, 0.7};
+double Kd[] = {0, 0, 0};
 
 double ITerm[3]               = {0, 0, 0};
 double lastInput[3]           = {0, 0, 0};
@@ -70,7 +70,10 @@ unsigned long pastTimes[3]    = {0, 0, 0};// millis() works for up to 50days! we
 char rcv_buffer[64];  // holds commands recieved
 char TXBuffer[64];    // temp storage for large data sent
 
+long duration, cm, start;
+
 void motor(int, int);
+void ultrasound_read(int);
 
 double changeInEncoders[3]    = {0, 0, 0};
 double changeInRevolutions[3] = {0, 0, 0};
@@ -78,11 +81,51 @@ double changeInTimeSeconds[3] = {0, 0, 0};
 
 char pidSwitch = '1';
 
+
+/**********************************************   Pos_IMU Variables ************************************************************/
+float accel_x;
+float accel_y;
+float accel_z;
+float accel_filter_x;
+float accel_filter_y;
+float accel_filter_z;
+
+float gyro_x;
+float last_accel_x;
+float last_accel_y;
+float last_accel_z;
+
+int countx   = 0;
+int county   = 0;
+int countz   = 0;
+int countv   = 0;
+
+double alpha = 0.1;
+double prev_accel;
+
+float vx;
+float vy;
+float vz;
+float v;
+
+float pos_x;
+float pos_y;
+float pos_z;
+float pos;
+
+unsigned long present       = 0;
+unsigned long last          = 0;
+
+float filter_accel;
+float dt = 0.5;
+
+
+
 /********************************         PRINT DATA SETUP        **************************************************************/
-int print_setup = 0;
+char print_setup = '0';
 #define PRINT_IMU        0
-#define PRINT_VELO_IMU   1
-#define PRINT_RPM        0
+#define PRINT_VELO_IMU   0
+#define PRINT_RPM        1
 
 
 /*****************************************************************************************************************************/
@@ -90,17 +133,20 @@ int print_setup = 0;
 /*************************************************************      MAIN  SETUP   *********************************************/
 void setup() {
   Serial.begin(115200);
+
+  // UltraSound
   for (int i = 0; i < 6; i++)
   {
     pinMode(ultrasonicSensorTrigPins[i], OUTPUT);
     pinMode(ultrasonicSensorEchoPins[i], INPUT);
   }
 
-  //INFRARED SENSORS
+  // INFRARED SENSORS
   pinMode(INFRARED_SENSOR_0, INPUT);
   pinMode(INFRARED_SENSOR_1, INPUT);
   pinMode(INFRARED_SENSOR_2, INPUT);
   pinMode(INFRARED_SENSOR_3, INPUT);
+
   // Motor
   for (int i = 0; i < 3; i++)
   {
@@ -125,16 +171,12 @@ void setup() {
   {
     delay(1); // will pause Zero, Leonardo, etc until serial console opens
   }
-  Serial.println("LSM9DS1 data read demo");
-
   // Try to initialise and warn if we couldn't detect the chip
   if (!lsm.begin())
   {
     Serial.println("Oops ... unable to initialize the LSM9DS1. Check your wiring!");
     while (1);
   }
-  Serial.println("Found LSM9DS1 9DOF");
-
   // helper to just set the default scaling we want, see above!
   setupSensor();
 
@@ -152,6 +194,9 @@ void loop()
   {
     speed_pid();
   }
+  //Ultrasound_Read
+  ultrasound_read();
+
 
   /*******************************************        ADA_IMU Loop             ****************************/
   lsm.read(); //read Ada_IMU
@@ -159,11 +204,19 @@ void loop()
   sensors_event_t a, m, g, temp;
   lsm.getEvent(&a, &m, &g, &temp);
 
-  if (print_setup == 1)
+  if (print_setup == '1')
   {
     printdata(); //print data IMU
   }
   updatePos();
+
+  //  Serial.print(micros() * 0.000001);
+  //  Serial.print("  ,  ");
+  //  Serial.print(encoderCounts[0]);
+  //  Serial.print("  ,  ");
+  //  Serial.print(encoderCounts[1]);
+  //  Serial.print("  ,  ");
+  //  Serial.println(encoderCounts[2]);
 }
 /***************************************************************************************************************************************/
 
@@ -215,13 +268,21 @@ void parseCommand()
     case 'e':
       int encoderNum;
       sscanf(&rcv_buffer[1], " %d \r", &encoderNum);
-      long counts;
+      float counts;
       counts = encoderCounts[encoderNum];
-      //itoa(encoderCounts[encoderNum],TXBuffer,10);   // serial.print can not handle printing a 64bit int so we turn it  into a string
+      //itoa(encoderCounts[encoderNum],TXBuffer,10);
+      // serial.print can not handle printing a 64bit int so we turn it  into a string
       Serial.println(counts);
       break;
 
-    ////////////////////////////////////////////////////////////////    MOTOR
+    ///////////////////////////////////////////////////////////////             POSITION IMU
+    case 'x':
+    case 'X':
+      Serial.println(pos_x);
+      break;
+
+
+    ////////////////////////////////////////////////////////////////             MOTOR
     case 'M':
     case 'm':
       int  motorNumber;
@@ -231,39 +292,15 @@ void parseCommand()
       motor(motorNumber, motorPWM);
       break;
 
-    ////////////////////////////////////////////////////////////////    ULTRASOUND
+    ////////////////////////////////////////////////////////////////             ULTRASOUND
     case 'u':
     case 'U':
       int ultrasonicNumber;
-      long duration, cm, start;
-      //duration = -60;
       sscanf(&rcv_buffer[1], " %d \r", &ultrasonicNumber);
-      digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], LOW);
-      //delayMicroseconds(5);
-      digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], HIGH);
-      delayMicroseconds(10);
-      digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], LOW);
-      start = micros();
-      while (digitalRead(ultrasonicSensorEchoPins[ultrasonicNumber]) == LOW);
-      start = micros();
-
-      while (micros() - start <= 6000)
-      {
-        if (digitalRead(ultrasonicSensorEchoPins[ultrasonicNumber]) == LOW)
-        {
-          duration = micros() - start;
-          break;
-        }
-        //duration = micros()-start;
-      }
-      //duration = pulseIn(ultrasonicSensorEchoPins[ultrasonicNumber], HIGH);
-      cm = (duration / 2) / 29.1;
-      //Serial.println(duration);
-      //inches = (duration/2) /
-      Serial.println(cm);
+      //      ultrasound_read(ultrasonicNumber);
       break;
 
-    ////////////////////////////////////  INFARED
+    ////////////////////////////////////                                  INFARED
     case 'i':
     case 'I':
       uint16_t value;
@@ -276,7 +313,7 @@ void parseCommand()
       Serial.println (distance);
       break;
 
-    ////////////////////////////////////  ENTER RPM_GOAL
+    ////////////////////////////////////                                   ENTER RPM_GOAL
     case 'v':
     case 'V':
 
@@ -338,7 +375,7 @@ void parseCommand()
     //////////////////////////////////////////////////////////////////     PRINT DATA
     case 'a':
     case 'A':
-      print_setup = 1;
+      sscanf(&rcv_buffer[1], " %c \r", &print_setup);
       break;
 
     /////////////////////////////////////////////////////////////////      Move Robot Forward

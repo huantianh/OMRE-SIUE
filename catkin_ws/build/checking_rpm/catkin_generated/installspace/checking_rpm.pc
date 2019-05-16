@@ -1,0 +1,8 @@
+prefix=/home/nvidia/catkin_ws/install
+
+Name: checking_rpm
+Description: Description of checking_rpm
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/nvidia/catkin_ws/install/lib 
+Requires: 

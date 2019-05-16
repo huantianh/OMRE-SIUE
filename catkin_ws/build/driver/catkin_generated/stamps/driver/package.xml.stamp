@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>driver</name>
+  <version>0.0.0</version>
+  <description>The arduino_driver package</description>
+
+  <maintainer email="nvidia@todo.todo">nvidia</maintainer>
+  <author email="nvidia@todo.todo">nvidia</author>
+
+  <license>GPLv3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>hardware_interface</build_depend>
+  <build_depend>controller_manager</build_depend>
+  <build_depend>arduino_msgs</build_depend>
+  <build_depend>serial</build_depend>
+
+  <exec_depend>hardware_interface</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>arduino_msgs</exec_depend>
+  <exec_depend>serial</exec_depend>
+
+
+  <exec_depend>robot_state_publisher</exec_depend>
+
+  <export></export>
+</package>
+

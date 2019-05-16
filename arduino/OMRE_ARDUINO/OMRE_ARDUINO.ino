@@ -28,7 +28,7 @@ const int infraredSensorPins[]             = {0, 1, 2, 3};
 
 double Kp[] = {0.5, 0.5, 0.5};
 double Ki[] = {0.1, 0.1, 0.1};
-double Kd[] = {0.7, 0.7, 0.7};
+double Kd[] = {0, 0, 0};
 
 double ITerm[3]       = {0, 0, 0};
 double lastInput[3]   = {0, 0, 0};
@@ -104,14 +104,20 @@ void loop()
   {
     speed_pid();
   }
-
-  //    Serial.print(micros() * 0.000001);
+  /*
+    Serial.print(micros() * 0.000001);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    Serial.println(rpmValues[2]);
+  */
+  //    Serial.print(encoderCounts[0]);
   //    Serial.print("  ,  ");
-  //    Serial.print(rpmValues[0]);
+  //    Serial.print(encoderCounts[1]);
   //    Serial.print("  ,  ");
-  //    Serial.print(rpmValues[1]);
-  //    Serial.print("  ,  ");
-  //    Serial.println(rpmValues[2]);
+  //    Serial.println(encoderCounts[2]);
 }
 
 ////////////////////////////////////////////////////////////     Update RPM
@@ -128,14 +134,22 @@ void updateRPM()
     // update our values to be used next time around
     pastTimes[i] = micros();
     pastEncoderValues[i] = encoderCounts[i];
-    //    Serial.print(micros() * 0.000001);
-    //    Serial.print("  ,  ");
-    //    Serial.print(rpmValues[0]);
-    //    Serial.print("  ,  ");
-    //    Serial.print(rpmValues[1]);
-    //    Serial.print("  ,  ");
-    //    Serial.println(rpmValues[2]);
-
+//    Serial.print(micros() * 0.000001);
+//    Serial.print("  ,  ");
+/*
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[2]);
+    Serial.print(changeInTimeSeconds[0]);
+    Serial.print("  ,  ");
+    Serial.print(changeInRevolutions[0]);
+    Serial.print("  ,  ");
+    Serial.print(changeInRevolutions[1]);
+    Serial.print("  ,  ");
+    Serial.println(changeInRevolutions[2]);
+    */
   }
 }
 
@@ -322,7 +336,7 @@ void parseCommand()
       long counts;
       counts = encoderCounts[encoderNum];
       //itoa(encoderCounts[encoderNum],TXBuffer,10);   // serial.print can not handle printing a 64bit int so we turn it  into a string
-      Serial.println(counts);
+      Serial.println(encoderCounts[encoderNum]);
       break;
 
     ////////////////////////////////////////////////////////////////    MOTOR
