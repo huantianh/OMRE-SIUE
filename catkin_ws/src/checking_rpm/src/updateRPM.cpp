@@ -20,6 +20,8 @@ int main(int argc, char **argv){
 	
 	ros::Subscriber sub = nh.subscribe("/robotState", 1, updateRPM);
 	
+	//ros::Duration(1).sleep();
+	
 	ros::spin();
 	return 0;
 }
@@ -40,7 +42,7 @@ void updateRPM(const arduino_msgs::RobotInfo msg)
     // update our values to be used next time around
     pastTimes = now;
     pastEncoderValues[i] = msg.enconder[i];
-    std::cout << rpmValues[i] << std::endl;
+    std::cout << ros::Time::now() << std::endl;
     //std::cout << "Encoder " << i << " " << msg.enconder[i] << std::endl;
     //std::cout << "ChangeInRevolutions " << i << " " << changeInRevolutions[i] << std::endl;
   }

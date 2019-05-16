@@ -6,5 +6,5 @@ CXX_FLAGS =   -std=c++11
 
 CXX_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"driver\"
 
-CXX_INCLUDES = -I/home/nvidia/catkin_ws/devel/include -I/opt/ros/kinetic/include -I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/home/nvidia/catkin_ws/src/driver/include 
+CXX_INCLUDES = -I/home/nvidia/OMRE-SIUE/catkin_ws/devel/include -I/opt/ros/kinetic/include -I/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/home/nvidia/OMRE-SIUE/catkin_ws/src/driver/include 
 

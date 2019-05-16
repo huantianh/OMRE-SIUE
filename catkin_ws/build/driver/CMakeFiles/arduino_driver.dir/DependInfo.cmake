@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/nvidia/catkin_ws/src/driver/src/ArduinoInterface.cpp" "/home/nvidia/catkin_ws/build/driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o"
-  "/home/nvidia/catkin_ws/src/driver/src/arduino_driver.cpp" "/home/nvidia/catkin_ws/build/driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/ArduinoInterface.cpp" "/home/nvidia/OMRE-SIUE/catkin_ws/build/driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_driver.cpp" "/home/nvidia/OMRE-SIUE/catkin_ws/build/driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -18,10 +18,10 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
-  "/home/nvidia/catkin_ws/devel/include"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/devel/include"
   "/opt/ros/kinetic/include"
   "/opt/ros/kinetic/share/xmlrpcpp/cmake/../../../include/xmlrpcpp"
-  "/home/nvidia/catkin_ws/src/driver/include"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/src/driver/include"
   )
 
 # Targets to which this target links.

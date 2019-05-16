@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/arduino_msgs_generate_messages_cpp"
-  "/home/nvidia/catkin_ws/devel/include/arduino_msgs/RobotInfo.h"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/devel/include/arduino_msgs/RobotInfo.h"
 )
 
 # Per-language clean rules from dependency scanning.

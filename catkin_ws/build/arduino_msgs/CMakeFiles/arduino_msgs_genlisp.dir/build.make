@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/nvidia/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/nvidia/OMRE-SIUE/catkin_ws/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/nvidia/catkin_ws/build
+CMAKE_BINARY_DIR = /home/nvidia/OMRE-SIUE/catkin_ws/build
 
 # Utility rule file for arduino_msgs_genlisp.
 
@@ -63,10 +63,10 @@ arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/build: arduino_msgs_genlisp
 .PHONY : arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/build
 
 arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/clean:
-	cd /home/nvidia/catkin_ws/build/arduino_msgs && $(CMAKE_COMMAND) -P CMakeFiles/arduino_msgs_genlisp.dir/cmake_clean.cmake
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/arduino_msgs && $(CMAKE_COMMAND) -P CMakeFiles/arduino_msgs_genlisp.dir/cmake_clean.cmake
 .PHONY : arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/clean
 
 arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/depend:
-	cd /home/nvidia/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nvidia/catkin_ws/src /home/nvidia/catkin_ws/src/arduino_msgs /home/nvidia/catkin_ws/build /home/nvidia/catkin_ws/build/arduino_msgs /home/nvidia/catkin_ws/build/arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/nvidia/OMRE-SIUE/catkin_ws/src /home/nvidia/OMRE-SIUE/catkin_ws/src/arduino_msgs /home/nvidia/OMRE-SIUE/catkin_ws/build /home/nvidia/OMRE-SIUE/catkin_ws/build/arduino_msgs /home/nvidia/OMRE-SIUE/catkin_ws/build/arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : arduino_msgs/CMakeFiles/arduino_msgs_genlisp.dir/depend
 

@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/nvidia/catkin_ws/devel/include/arduino_msgs/RobotInfo.h
+/home/nvidia/OMRE-SIUE/catkin_ws/devel/include/arduino_msgs/RobotInfo.h
 string
 -
 vector
@@ -22,9 +22,9 @@ ros/builtin_message_traits.h
 ros/message_operations.h
 -
 
-/home/nvidia/catkin_ws/src/checking_rpm/src/updateRPM.cpp
+/home/nvidia/OMRE-SIUE/catkin_ws/src/checking_rpm/src/updateRPM.cpp
 ros/ros.h
-/home/nvidia/catkin_ws/src/checking_rpm/src/ros/ros.h
+/home/nvidia/OMRE-SIUE/catkin_ws/src/checking_rpm/src/ros/ros.h
 arduino_msgs/RobotInfo.h
 -
 iostream

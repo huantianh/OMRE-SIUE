@@ -1,8 +1,8 @@
-# Install script for directory: /home/nvidia/catkin_ws/src/checking_rpm
+# Install script for directory: /home/nvidia/OMRE-SIUE/catkin_ws/src/checking_rpm
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/nvidia/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/nvidia/OMRE-SIUE/catkin_ws/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,18 +33,18 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/nvidia/catkin_ws/build/checking_rpm/catkin_generated/installspace/checking_rpm.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/nvidia/OMRE-SIUE/catkin_ws/build/checking_rpm/catkin_generated/installspace/checking_rpm.pc")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/checking_rpm/cmake" TYPE FILE FILES
-    "/home/nvidia/catkin_ws/build/checking_rpm/catkin_generated/installspace/checking_rpmConfig.cmake"
-    "/home/nvidia/catkin_ws/build/checking_rpm/catkin_generated/installspace/checking_rpmConfig-version.cmake"
+    "/home/nvidia/OMRE-SIUE/catkin_ws/build/checking_rpm/catkin_generated/installspace/checking_rpmConfig.cmake"
+    "/home/nvidia/OMRE-SIUE/catkin_ws/build/checking_rpm/catkin_generated/installspace/checking_rpmConfig-version.cmake"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/checking_rpm" TYPE FILE FILES "/home/nvidia/catkin_ws/src/checking_rpm/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/checking_rpm" TYPE FILE FILES "/home/nvidia/OMRE-SIUE/catkin_ws/src/checking_rpm/package.xml")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
@@ -54,7 +54,7 @@ if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspeci
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/checking_rpm/updateRPM"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/checking_rpm" TYPE EXECUTABLE FILES "/home/nvidia/catkin_ws/devel/lib/checking_rpm/updateRPM")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/checking_rpm" TYPE EXECUTABLE FILES "/home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/checking_rpm/updateRPM")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/checking_rpm/updateRPM" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/checking_rpm/updateRPM")
     file(RPATH_CHANGE

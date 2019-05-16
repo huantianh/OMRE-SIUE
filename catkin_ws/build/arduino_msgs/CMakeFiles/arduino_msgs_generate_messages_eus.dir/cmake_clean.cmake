@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/arduino_msgs_generate_messages_eus"
-  "/home/nvidia/catkin_ws/devel/share/roseus/ros/arduino_msgs/msg/RobotInfo.l"
-  "/home/nvidia/catkin_ws/devel/share/roseus/ros/arduino_msgs/manifest.l"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/devel/share/roseus/ros/arduino_msgs/msg/RobotInfo.l"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/devel/share/roseus/ros/arduino_msgs/manifest.l"
 )
 
 # Per-language clean rules from dependency scanning.

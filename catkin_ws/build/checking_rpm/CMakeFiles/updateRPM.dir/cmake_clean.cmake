@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o"
-  "/home/nvidia/catkin_ws/devel/lib/checking_rpm/updateRPM.pdb"
-  "/home/nvidia/catkin_ws/devel/lib/checking_rpm/updateRPM"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/checking_rpm/updateRPM.pdb"
+  "/home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/checking_rpm/updateRPM"
 )
 
 # Per-language clean rules from dependency scanning.
