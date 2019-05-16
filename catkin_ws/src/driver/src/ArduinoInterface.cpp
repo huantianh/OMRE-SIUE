@@ -50,8 +50,9 @@ arduino_msgs::RobotInfo ArduinoInterface::read() {
 
 		// Read serials from arduino
 		rcss.str(arduino.readline(256, "\r"));
+		
+		// Store encoder values into message
 		rcss >> integerData;
-		//std::cout << integerData << std::endl;
 		robotStatus.enconder.push_back(integerData);
 
 		// Clean streams for safety
@@ -59,58 +60,58 @@ arduino_msgs::RobotInfo ArduinoInterface::read() {
     	rcss.str("");
     }
 
-/*
 
     // Read ultrasonic sensors=================================
-    for(int i = 1; i < 6; i++){
-	// Write commands to arduino
-	cmdss << "U " << i << "\r";
-	arduino.write(cmdss.str());
+    for(int i = 0; i < 6; i++){
+		// Write commands to arduino
+		cmdss << "U " << i << "\r";
+		arduino.write(cmdss.str());
 
-	// Read serials from arduino
-	rcss.str(arduino.readline(256, "\r"));
-	rcss >> floatData;
-	std::cout << floatData << std::endl;
-	//robotStatus.ultraSonic.push_back((float)floatData);
-	
-	// Clean streams for safety
-	cmdss.str("");
+		// Read serials from arduino
+		rcss.str(arduino.readline(256, "\r"));
+		
+		// Store range data into message
+		rcss >> floatData;
+		robotStatus.ultraSonic.push_back((float)floatData);
+		
+		// Clean streams for safety
+		cmdss.str("");
     	rcss.str("");
     }
-*/
-/*
+
    // Read IR sensors=========================================
     for(int i = 0; i < 4; i++){
-	// Write commands to arduino
-	cmdss << "I " << (i+1) << "\r";
-	arduino.write(cmdss.str());
+		// Write commands to arduino
+		cmdss << "I " << i << "\r";
+		arduino.write(cmdss.str());
 
-	// Read serials from arduino
-	rcss.str(arduino.readline(256, "\r"));
-	rcss >> floatData;
-	//robotStatus.ir.push_back((float)floatData);
-	
-	// Clean streams for safety
-	cmdss.str("");
+		// Read serials from arduino
+		rcss.str(arduino.readline(256, "\r"));
+		
+		// Store range data into message
+		rcss >> floatData;
+		robotStatus.ir.push_back((float)floatData);
+		
+		// Clean streams for safety
+		cmdss.str("");
     	rcss.str("");
     }
-*/
+
     return robotStatus;
 }
 
 // Push commands to the robot
 void ArduinoInterface::write() {
     std::stringstream serialString;
-    std::string temp = "v 200 200 200";
+    std::string temp;
 
     //Recieve command from ROS
-    //std::cout << "Enter command: ";
-    //std::getline(std::cin,temp);
+    std::cout << "Enter command: ";
+    std::getline(std::cin,temp);
 
     //Send message to arduino
     serialString << temp << " \r";
     arduino.write(serialString.str());
-    ROS_INFO_STREAM(serialString.str());
     serialString.str("");
 
 }

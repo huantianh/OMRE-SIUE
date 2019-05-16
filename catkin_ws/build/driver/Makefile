@@ -56,18 +56,6 @@ CMAKE_BINARY_DIR = /home/nvidia/OMRE-SIUE/catkin_ws/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -89,6 +77,18 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
 
 # Special rule for the target test
 test:
@@ -211,6 +211,21 @@ controller_manager_msgs_generate_messages_lisp/fast:
 .PHONY : controller_manager_msgs_generate_messages_lisp/fast
 
 # Convenience name for target.
+driver/CMakeFiles/arduino_listener.dir/rule:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 driver/CMakeFiles/arduino_listener.dir/rule
+.PHONY : driver/CMakeFiles/arduino_listener.dir/rule
+
+# Convenience name for target.
+arduino_listener: driver/CMakeFiles/arduino_listener.dir/rule
+
+.PHONY : arduino_listener
+
+# fast build rule for target.
+arduino_listener/fast:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/build
+.PHONY : arduino_listener/fast
+
+# Convenience name for target.
 driver/CMakeFiles/controller_manager_msgs_generate_messages_py.dir/rule:
 	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 driver/CMakeFiles/controller_manager_msgs_generate_messages_py.dir/rule
 .PHONY : driver/CMakeFiles/controller_manager_msgs_generate_messages_py.dir/rule
@@ -241,19 +256,19 @@ controller_manager_msgs_generate_messages_cpp/fast:
 .PHONY : controller_manager_msgs_generate_messages_cpp/fast
 
 # Convenience name for target.
-driver/CMakeFiles/arduino_driver.dir/rule:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 driver/CMakeFiles/arduino_driver.dir/rule
-.PHONY : driver/CMakeFiles/arduino_driver.dir/rule
+driver/CMakeFiles/arduino_commander.dir/rule:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 driver/CMakeFiles/arduino_commander.dir/rule
+.PHONY : driver/CMakeFiles/arduino_commander.dir/rule
 
 # Convenience name for target.
-arduino_driver: driver/CMakeFiles/arduino_driver.dir/rule
+arduino_commander: driver/CMakeFiles/arduino_commander.dir/rule
 
-.PHONY : arduino_driver
+.PHONY : arduino_commander
 
 # fast build rule for target.
-arduino_driver/fast:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/build
-.PHONY : arduino_driver/fast
+arduino_commander/fast:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/build
+.PHONY : arduino_commander/fast
 
 src/ArduinoInterface.o: src/ArduinoInterface.cpp.o
 
@@ -261,7 +276,8 @@ src/ArduinoInterface.o: src/ArduinoInterface.cpp.o
 
 # target to build an object file
 src/ArduinoInterface.cpp.o:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/src/ArduinoInterface.cpp.o
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/src/ArduinoInterface.cpp.o
 .PHONY : src/ArduinoInterface.cpp.o
 
 src/ArduinoInterface.i: src/ArduinoInterface.cpp.i
@@ -270,7 +286,8 @@ src/ArduinoInterface.i: src/ArduinoInterface.cpp.i
 
 # target to preprocess a source file
 src/ArduinoInterface.cpp.i:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.i
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/src/ArduinoInterface.cpp.i
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/src/ArduinoInterface.cpp.i
 .PHONY : src/ArduinoInterface.cpp.i
 
 src/ArduinoInterface.s: src/ArduinoInterface.cpp.s
@@ -279,35 +296,63 @@ src/ArduinoInterface.s: src/ArduinoInterface.cpp.s
 
 # target to generate assembly for a file
 src/ArduinoInterface.cpp.s:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.s
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/src/ArduinoInterface.cpp.s
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/src/ArduinoInterface.cpp.s
 .PHONY : src/ArduinoInterface.cpp.s
 
-src/arduino_driver.o: src/arduino_driver.cpp.o
+src/arduino_commander.o: src/arduino_commander.cpp.o
 
-.PHONY : src/arduino_driver.o
+.PHONY : src/arduino_commander.o
 
 # target to build an object file
-src/arduino_driver.cpp.o:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o
-.PHONY : src/arduino_driver.cpp.o
+src/arduino_commander.cpp.o:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/src/arduino_commander.cpp.o
+.PHONY : src/arduino_commander.cpp.o
 
-src/arduino_driver.i: src/arduino_driver.cpp.i
+src/arduino_commander.i: src/arduino_commander.cpp.i
 
-.PHONY : src/arduino_driver.i
+.PHONY : src/arduino_commander.i
 
 # target to preprocess a source file
-src/arduino_driver.cpp.i:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.i
-.PHONY : src/arduino_driver.cpp.i
+src/arduino_commander.cpp.i:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/src/arduino_commander.cpp.i
+.PHONY : src/arduino_commander.cpp.i
 
-src/arduino_driver.s: src/arduino_driver.cpp.s
+src/arduino_commander.s: src/arduino_commander.cpp.s
 
-.PHONY : src/arduino_driver.s
+.PHONY : src/arduino_commander.s
 
 # target to generate assembly for a file
-src/arduino_driver.cpp.s:
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.s
-.PHONY : src/arduino_driver.cpp.s
+src/arduino_commander.cpp.s:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_commander.dir/build.make driver/CMakeFiles/arduino_commander.dir/src/arduino_commander.cpp.s
+.PHONY : src/arduino_commander.cpp.s
+
+src/arduino_listener.o: src/arduino_listener.cpp.o
+
+.PHONY : src/arduino_listener.o
+
+# target to build an object file
+src/arduino_listener.cpp.o:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/src/arduino_listener.cpp.o
+.PHONY : src/arduino_listener.cpp.o
+
+src/arduino_listener.i: src/arduino_listener.cpp.i
+
+.PHONY : src/arduino_listener.i
+
+# target to preprocess a source file
+src/arduino_listener.cpp.i:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/src/arduino_listener.cpp.i
+.PHONY : src/arduino_listener.cpp.i
+
+src/arduino_listener.s: src/arduino_listener.cpp.s
+
+.PHONY : src/arduino_listener.s
+
+# target to generate assembly for a file
+src/arduino_listener.cpp.s:
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build && $(MAKE) -f driver/CMakeFiles/arduino_listener.dir/build.make driver/CMakeFiles/arduino_listener.dir/src/arduino_listener.cpp.s
+.PHONY : src/arduino_listener.cpp.s
 
 # Help Target
 help:
@@ -315,25 +360,29 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install"
 	@echo "... rebuild_cache"
+	@echo "... edit_cache"
 	@echo "... controller_manager_msgs_generate_messages_eus"
 	@echo "... controller_manager_msgs_generate_messages_nodejs"
-	@echo "... edit_cache"
 	@echo "... controller_manager_msgs_generate_messages_lisp"
+	@echo "... install"
+	@echo "... arduino_listener"
 	@echo "... controller_manager_msgs_generate_messages_py"
 	@echo "... test"
 	@echo "... controller_manager_msgs_generate_messages_cpp"
-	@echo "... arduino_driver"
+	@echo "... arduino_commander"
 	@echo "... list_install_components"
 	@echo "... install/strip"
 	@echo "... install/local"
 	@echo "... src/ArduinoInterface.o"
 	@echo "... src/ArduinoInterface.i"
 	@echo "... src/ArduinoInterface.s"
-	@echo "... src/arduino_driver.o"
-	@echo "... src/arduino_driver.i"
-	@echo "... src/arduino_driver.s"
+	@echo "... src/arduino_commander.o"
+	@echo "... src/arduino_commander.i"
+	@echo "... src/arduino_commander.s"
+	@echo "... src/arduino_listener.o"
+	@echo "... src/arduino_listener.i"
+	@echo "... src/arduino_listener.s"
 .PHONY : help
 
 

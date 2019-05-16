@@ -1,0 +1,17 @@
+<launch>
+	<arg name="port" default="/dev/ttyACM0"/>
+	<arg name="baudrate" default="115200"/>
+	
+	<node name="arduino_listener" pkg="driver" type="arduino_listener">
+		<param name="port" value="$(arg port)"/>
+		<param name="baudrate" value="$(arg baudrate)"/>
+	</node>
+	
+	<node name="arduino_commander" pkg="driver" type="arduino_commander" output="screen">
+		<param name="port" value="$(arg port)"/>
+		<param name="baudrate" value="$(arg baudrate)"/>
+	</node>
+	
+	<!--<node name="updateRPM" pkg="checking_rpm" type="updateRPM"/>-->
+
+</launch>

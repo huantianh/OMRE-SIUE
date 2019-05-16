@@ -57,33 +57,57 @@ include driver/CMakeFiles/arduino_driver.dir/progress.make
 # Include the compile flags for this target's objects.
 include driver/CMakeFiles/arduino_driver.dir/flags.make
 
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o: driver/CMakeFiles/arduino_driver.dir/flags.make
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o: /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_driver.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o"
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o -c /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_driver.cpp
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o: driver/CMakeFiles/arduino_driver.dir/flags.make
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o: /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_listener.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o"
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o -c /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_listener.cpp
 
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.i"
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_driver.cpp > CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.i
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.i"
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_listener.cpp > CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.i
 
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.s"
-	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_driver.cpp -o CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.s
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.s"
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_listener.cpp -o CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.s
 
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.requires:
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.requires:
 
-.PHONY : driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.requires
+.PHONY : driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.requires
 
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.provides: driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.requires
-	$(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.provides.build
-.PHONY : driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.provides
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.provides: driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.requires
+	$(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.provides.build
+.PHONY : driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.provides
 
-driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.provides.build: driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o
+driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.provides.build: driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o
+
+
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o: driver/CMakeFiles/arduino_driver.dir/flags.make
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o: /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_commander.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o"
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o -c /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_commander.cpp
+
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.i"
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_commander.cpp > CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.i
+
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.s"
+	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/arduino_commander.cpp -o CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.s
+
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.requires:
+
+.PHONY : driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.requires
+
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.provides: driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.requires
+	$(MAKE) -f driver/CMakeFiles/arduino_driver.dir/build.make driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.provides.build
+.PHONY : driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.provides
+
+driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.provides.build: driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o
 
 
 driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o: driver/CMakeFiles/arduino_driver.dir/flags.make
 driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o: /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/ArduinoInterface.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o"
 	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && /usr/bin/c++   $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o -c /home/nvidia/OMRE-SIUE/catkin_ws/src/driver/src/ArduinoInterface.cpp
 
 driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.i: cmake_force
@@ -107,13 +131,15 @@ driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o.provides.build: 
 
 # Object files for target arduino_driver
 arduino_driver_OBJECTS = \
-"CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o" \
+"CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o" \
+"CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o" \
 "CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o"
 
 # External object files for target arduino_driver
 arduino_driver_EXTERNAL_OBJECTS =
 
-/home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o
+/home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o
+/home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o
 /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o
 /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: driver/CMakeFiles/arduino_driver.dir/build.make
 /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: /opt/ros/kinetic/lib/libcontroller_manager.so
@@ -147,7 +173,7 @@ arduino_driver_EXTERNAL_OBJECTS =
 /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: /usr/lib/aarch64-linux-gnu/libconsole_bridge.so
 /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: /opt/ros/kinetic/lib/libserial.so
 /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver: driver/CMakeFiles/arduino_driver.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/nvidia/OMRE-SIUE/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX executable /home/nvidia/OMRE-SIUE/catkin_ws/devel/lib/driver/arduino_driver"
 	cd /home/nvidia/OMRE-SIUE/catkin_ws/build/driver && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/arduino_driver.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -155,7 +181,8 @@ driver/CMakeFiles/arduino_driver.dir/build: /home/nvidia/OMRE-SIUE/catkin_ws/dev
 
 .PHONY : driver/CMakeFiles/arduino_driver.dir/build
 
-driver/CMakeFiles/arduino_driver.dir/requires: driver/CMakeFiles/arduino_driver.dir/src/arduino_driver.cpp.o.requires
+driver/CMakeFiles/arduino_driver.dir/requires: driver/CMakeFiles/arduino_driver.dir/src/arduino_listener.cpp.o.requires
+driver/CMakeFiles/arduino_driver.dir/requires: driver/CMakeFiles/arduino_driver.dir/src/arduino_commander.cpp.o.requires
 driver/CMakeFiles/arduino_driver.dir/requires: driver/CMakeFiles/arduino_driver.dir/src/ArduinoInterface.cpp.o.requires
 
 .PHONY : driver/CMakeFiles/arduino_driver.dir/requires

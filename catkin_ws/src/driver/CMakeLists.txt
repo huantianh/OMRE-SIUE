@@ -17,14 +17,22 @@ include_directories(
     include
 )
 
-add_executable(arduino_driver src/arduino_driver.cpp src/ArduinoInterface.cpp)
-add_dependencies(arduino_driver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_executable(arduino_listener src/arduino_listener.cpp src/ArduinoInterface.cpp)
+add_dependencies(arduino_listener ${${PROJECT_NAME}_EXPORTED_TARGETS}${catkin_EXPORTED_TARGETS})
+target_link_libraries(arduino_listener ${catkin_LIBRARIES})
 
-target_link_libraries(arduino_driver 
-    ${catkin_LIBRARIES}
+add_executable(arduino_commander src/arduino_commander.cpp src/ArduinoInterface.cpp)
+add_dependencies(arduino_commander ${${PROJECT_NAME}_EXPORTED_TARGETS}${catkin_EXPORTED_TARGETS})
+target_link_libraries(arduino_commander ${catkin_LIBRARIES})
+
+
+install(TARGETS arduino_listener
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(TARGETS arduino_driver
+install(TARGETS arduino_commander
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

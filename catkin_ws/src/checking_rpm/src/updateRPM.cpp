@@ -4,46 +4,48 @@
 
 void updateRPM(const arduino_msgs::RobotInfo msg);
 
-float pastEncoderValues[3]    = {0, 0, 0};
-unsigned long pastTimes       =  0;
+double pastEncoderValues[3]    = {0, 0, 0};
 double changeInEncoders[3]    = {0, 0, 0};
 double changeInRevolutions[3] = {0, 0, 0};
 double changeInTimeSeconds[3] = {0, 0, 0};
 int rpmValues[3];
-unsigned long now=0;
-
+ros::Time now;
+ros::Time pastTimes;
 
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "rpmChecker");
 	ros::NodeHandle nh;
 	
-	ros::Subscriber sub = nh.subscribe("/robotState", 1, updateRPM);
+	// Initialize pastTime at start up once
+	pastTimes = ros::Time::now();
 	
-	//ros::Duration(1).sleep();
-	
-	ros::spin();
+	// This is in its own scope because pastTimes value is meant
+	// to only be intialized once before going into the loop
+	{
+		ros::Subscriber sub = nh.subscribe("/robotState", 1, updateRPM);
+		ros::spin();
+	}
 	return 0;
 }
 
 
-
+// This function is called every time new message is update to /robotState topic
 void updateRPM(const arduino_msgs::RobotInfo msg)
 {
+  now = ros::Time::now();
   for ( int i = 0; i < 3; i++)
   {
-	now = ros::Time::now().toSec();
     changeInEncoders[i] = msg.enconder[i] - pastEncoderValues[i];
-    changeInTimeSeconds[i] = (now - pastTimes); // *.001 to convert to seconds
+    changeInTimeSeconds[i] = now.toSec() - pastTimes.toSec();
     changeInRevolutions[i] = changeInEncoders[i] / 2248.6;
 
     rpmValues[i] = (changeInRevolutions[i] / (changeInTimeSeconds[i])) * 60; // *60 to get Revolutions per MINUTE
 
     // update our values to be used next time around
-    pastTimes = now;
     pastEncoderValues[i] = msg.enconder[i];
-    std::cout << ros::Time::now() << std::endl;
-    //std::cout << "Encoder " << i << " " << msg.enconder[i] << std::endl;
-    //std::cout << "ChangeInRevolutions " << i << " " << changeInRevolutions[i] << std::endl;
+
+    std::cout << rpmValues[i] << std::endl;
   }
+  pastTimes = ros::Time::now();
 }
