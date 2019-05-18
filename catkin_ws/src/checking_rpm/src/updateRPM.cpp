@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include "std_msgs/Int32MultiArray.h"
 #include <arduino_msgs/RobotInfo.h>
 #include <iostream>
 
@@ -9,13 +10,18 @@ double changeInEncoders[3]    = {0, 0, 0};
 double changeInRevolutions[3] = {0, 0, 0};
 double changeInTimeSeconds[3] = {0, 0, 0};
 int rpmValues[3];
+
 ros::Time now;
 ros::Time pastTimes;
+
+ros::Publisher rpm_pub;
 
 
 int main(int argc, char **argv){
 	ros::init(argc, argv, "rpmChecker");
 	ros::NodeHandle nh;
+	
+	rpm_pub = nh.advertise<std_msgs::Int32MultiArray>("/RPM",1);
 	
 	// Initialize pastTime at start up once
 	pastTimes = ros::Time::now();
@@ -34,6 +40,7 @@ int main(int argc, char **argv){
 void updateRPM(const arduino_msgs::RobotInfo msg)
 {
   now = ros::Time::now();
+  std_msgs::Int32MultiArray rpm;
   for ( int i = 0; i < 3; i++)
   {
     changeInEncoders[i] = msg.enconder[i] - pastEncoderValues[i];
@@ -41,11 +48,11 @@ void updateRPM(const arduino_msgs::RobotInfo msg)
     changeInRevolutions[i] = changeInEncoders[i] / 2248.6;
 
     rpmValues[i] = (changeInRevolutions[i] / (changeInTimeSeconds[i])) * 60; // *60 to get Revolutions per MINUTE
-
+	rpm.data.push_back(rpmValues[i]);
     // update our values to be used next time around
     pastEncoderValues[i] = msg.enconder[i];
 
-    std::cout << rpmValues[i] << std::endl;
   }
   pastTimes = ros::Time::now();
+  rpm_pub.publish(rpm);
 }

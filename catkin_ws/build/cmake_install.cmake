@@ -118,6 +118,7 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/nvidia/OMRE-SIUE/catkin_ws/build/gtest/cmake_install.cmake")
   include("/home/nvidia/OMRE-SIUE/catkin_ws/build/arduino_msgs/cmake_install.cmake")
+  include("/home/nvidia/OMRE-SIUE/catkin_ws/build/msg_to_cvs/cmake_install.cmake")
   include("/home/nvidia/OMRE-SIUE/catkin_ws/build/checking_rpm/cmake_install.cmake")
   include("/home/nvidia/OMRE-SIUE/catkin_ws/build/driver/cmake_install.cmake")
 

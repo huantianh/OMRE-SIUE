@@ -194,8 +194,6 @@ void loop()
   {
     speed_pid();
   }
-  //Ultrasound_Read
-  ultrasound_read();
 
 
   /*******************************************        ADA_IMU Loop             ****************************/
@@ -272,7 +270,7 @@ void parseCommand()
       counts = encoderCounts[encoderNum];
       //itoa(encoderCounts[encoderNum],TXBuffer,10);
       // serial.print can not handle printing a 64bit int so we turn it  into a string
-      Serial.println(counts);
+      Serial.println(encoderCounts[encoderNum]);
       break;
 
     ///////////////////////////////////////////////////////////////             POSITION IMU
@@ -297,7 +295,33 @@ void parseCommand()
     case 'U':
       int ultrasonicNumber;
       sscanf(&rcv_buffer[1], " %d \r", &ultrasonicNumber);
-      //      ultrasound_read(ultrasonicNumber);
+
+      digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], LOW);
+      delayMicroseconds(2);
+      digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], HIGH);
+      delayMicroseconds(10);
+      digitalWrite(ultrasonicSensorTrigPins[ultrasonicNumber], LOW);
+
+      //      start = micros();
+      //      while (digitalRead(ultrasonicSensorEchoPins[ultrasonicNumber]) == LOW);
+      //      start = micros();
+      //
+      //      while (micros() - start <= 6000)
+      //      {
+      //        if (digitalRead(ultrasonicSensorEchoPins[ultrasonicNumber]) == LOW)
+      //        {
+      //          duration = micros() - start;
+      //          break;
+      //        }
+      //duration = micros()-start;
+
+      duration = pulseIn(ultrasonicSensorEchoPins[ultrasonicNumber], HIGH);
+      cm = (duration*0.034) / 2;
+  
+      //Serial.println(duration);
+      //inches = (duration/2) /
+      Serial.println(cm);
+
       break;
 
     ////////////////////////////////////                                  INFARED

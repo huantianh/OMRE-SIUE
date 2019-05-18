@@ -59,6 +59,9 @@ checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/incl
 checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/ros/wall_timer.h
 checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/ros/wall_timer_options.h
 checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/rosconsole/macros_generated.h
+checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/std_msgs/Int32MultiArray.h
+checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/std_msgs/MultiArrayDimension.h
+checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/std_msgs/MultiArrayLayout.h
 checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/xmlrpcpp/XmlRpcDecl.h
 checking_rpm/CMakeFiles/updateRPM.dir/src/updateRPM.cpp.o: /opt/ros/kinetic/include/xmlrpcpp/XmlRpcValue.h
 

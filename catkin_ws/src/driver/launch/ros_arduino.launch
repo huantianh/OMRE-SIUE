@@ -12,6 +12,6 @@
 		<param name="baudrate" value="$(arg baudrate)"/>
 	</node>
 	
-	<!--<node name="updateRPM" pkg="checking_rpm" type="updateRPM"/>-->
+	<node name="updateRPM" pkg="checking_rpm" type="updateRPM"/>
 
 </launch>

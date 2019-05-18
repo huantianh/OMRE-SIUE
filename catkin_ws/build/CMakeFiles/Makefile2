@@ -979,6 +979,24 @@ clean: arduino_msgs/CMakeFiles/arduino_msgs_genpy.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Directory level rules for directory msg_to_cvs
+
+# Convenience name for "all" pass in the directory.
+msg_to_cvs/all:
+
+.PHONY : msg_to_cvs/all
+
+# Convenience name for "clean" pass in the directory.
+msg_to_cvs/clean:
+
+.PHONY : msg_to_cvs/clean
+
+# Convenience name for "preinstall" pass in the directory.
+msg_to_cvs/preinstall:
+
+.PHONY : msg_to_cvs/preinstall
+
+#=============================================================================
 # Directory level rules for directory checking_rpm
 
 # Convenience name for "all" pass in the directory.

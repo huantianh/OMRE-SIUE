@@ -18,7 +18,8 @@ const int encoder_interrupt_pin_2          = 3;         //can change to 20
 const int motorPWMPins[3]                  = {8, 9, 10};
 const int motorDirPins[3]                  = {29, 28, 27};
 
-const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
+const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40}; //30, 32, 34, 36, 38, 40
+//const int ultrasonicSensorTrigPins       = 42;
 const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
 const int infraredSensorPins[]             = {0, 1, 2, 3};
 
@@ -58,6 +59,8 @@ double changeInTimeSeconds[3] = {0, 0, 0};
 
 char pidSwitch = '1';
 
+long duration[6] = {0, 0, 0, 0, 0, 0};
+long cm[6]       = {0, 0, 0, 0, 0, 0};
 
 ////////////////////////////////////////////////////////////////           SET UP
 void setup() {
@@ -96,6 +99,7 @@ void setup() {
 //////////////////////////////////////////////////////////////////    LOOP
 void loop()
 {
+  long beginTime = micros();
   updateRPM();
   // determines if we have any serial commands and interpruts them
   receiveBytes();
@@ -104,20 +108,38 @@ void loop()
   {
     speed_pid();
   }
-  /*
-    Serial.print(micros() * 0.000001);
+
+  for (int i = 0; i < 6; i++)
+  {
+    digitalWrite(ultrasonicSensorTrigPins[i], LOW);
+    delayMicroseconds(2);
+    digitalWrite(ultrasonicSensorTrigPins[i], HIGH);
+    delayMicroseconds(10);
+    digitalWrite(ultrasonicSensorTrigPins[i], LOW);
+
+    duration[i] = pulseIn(ultrasonicSensorEchoPins[i], HIGH, 6500); //6500 micro seconds gives about 100 cm max
+    cm[i] = (duration[i] * 0.034) / 2;
+
+//    if (cm[i] > 3000)
+//    {
+//      cm[i] = 0;
+//      }
+/*
+    Serial.print(cm[0]);
     Serial.print("  ,  ");
-    Serial.print(rpmValues[0]);
+    Serial.print(cm[1]);
     Serial.print("  ,  ");
-    Serial.print(rpmValues[1]);
+    Serial.print(cm[2]);
     Serial.print("  ,  ");
-    Serial.println(rpmValues[2]);
-  */
-  //    Serial.print(encoderCounts[0]);
-  //    Serial.print("  ,  ");
-  //    Serial.print(encoderCounts[1]);
-  //    Serial.print("  ,  ");
-  //    Serial.println(encoderCounts[2]);
+    Serial.print(cm[3]);
+    Serial.print("  ,  ");
+    Serial.print(cm[4]);
+    Serial.print("  ,  ");
+    Serial.println(cm[5]);
+*/   
+  }
+  long endTime = micros();
+  //Serial.println(1000000/(endTime-beginTime));
 }
 
 ////////////////////////////////////////////////////////////     Update RPM
@@ -134,22 +156,25 @@ void updateRPM()
     // update our values to be used next time around
     pastTimes[i] = micros();
     pastEncoderValues[i] = encoderCounts[i];
-//    Serial.print(micros() * 0.000001);
-//    Serial.print("  ,  ");
-/*
-    Serial.print(rpmValues[0]);
-    Serial.print("  ,  ");
-    Serial.print(rpmValues[1]);
-    Serial.print("  ,  ");
-    Serial.print(rpmValues[2]);
-    Serial.print(changeInTimeSeconds[0]);
-    Serial.print("  ,  ");
-    Serial.print(changeInRevolutions[0]);
-    Serial.print("  ,  ");
-    Serial.print(changeInRevolutions[1]);
-    Serial.print("  ,  ");
-    Serial.println(changeInRevolutions[2]);
+    //    Serial.print(micros() * 0.000001);
+    //    Serial.print("  ,  ");
+    /*
+      Serial.print(rpmValues[0]);
+      Serial.print("  ,  ");
+      Serial.print(rpmValues[1]);
+      Serial.print("  ,  ");
+      Serial.print(rpmValues[2]);
+      Serial.print(changeInTimeSeconds[0]);
+      Serial.print("  ,  ");
+      Serial.print(changeInRevolutions[0]);
+      Serial.print("  ,  ");
+      Serial.print(changeInRevolutions[1]);
+      Serial.print("  ,  ");
+      Serial.println(changeInRevolutions[2]);
     */
+
+
+
   }
 }
 
@@ -258,22 +283,12 @@ void motor(int motorNumber, int pwm)
 
   if (pwm > 0)
   {
-    //    if (mark_start >= 0) {
-    //      digitalWrite(motorDirPins[motorNumber], FORWARD);
-    //      analogWrite(motorPWMPins[motorNumber], pwm + 150);
-    //      mark_start -= 1;
-    //    }
     digitalWrite(motorDirPins[motorNumber], FORWARD);
     analogWrite(motorPWMPins[motorNumber], pwm);
   }
 
   if (pwm < 0)
   {
-    //    if (mark_start >= 0) {
-    //      digitalWrite(motorDirPins[motorNumber], BACKWARD);
-    //      analogWrite(motorPWMPins[motorNumber], -pwm - 150);
-    //      mark_start -= 1;
-    //    }
     digitalWrite(motorDirPins[motorNumber], BACKWARD);
     analogWrite(motorPWMPins[motorNumber], -pwm);
   }

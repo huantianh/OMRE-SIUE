@@ -1,2 +1,2 @@
-arduino_msgs:checking_rpm:driver
+arduino_msgs:checking_rpm:driver:msg_to_cvs
 -DCATKIN_DEVEL_PREFIX=/home/nvidia/OMRE-SIUE/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/nvidia/OMRE-SIUE/catkin_ws/install -G Unix Makefiles

@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS
     hardware_interface
     controller_manager
     arduino_msgs
+    std_msgs
     serial
 )
 
