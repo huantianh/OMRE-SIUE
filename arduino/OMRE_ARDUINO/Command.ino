@@ -12,8 +12,6 @@ void parseCommand()
       sscanf(&rcv_buffer[1], " %d \r", &encoderNum);
       float counts;
       counts = encoderCounts[encoderNum];
-      //itoa(encoderCounts[encoderNum],TXBuffer,10);
-      // serial.print can not handle printing a 64bit int so we turn it  into a string
       Serial.println(encoderCounts[encoderNum]);
       break;
 
