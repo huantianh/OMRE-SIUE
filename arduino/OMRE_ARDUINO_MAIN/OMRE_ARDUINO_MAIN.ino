@@ -123,9 +123,9 @@ float dt = 0.5;
 
 /********************************         PRINT DATA SETUP        **************************************************************/
 char print_setup = '0';
-#define PRINT_IMU        0
+#define PRINT_IMU        1
 #define PRINT_VELO_IMU   0
-#define PRINT_RPM        1
+#define PRINT_RPM        0
 
 
 /*****************************************************************************************************************************/
@@ -165,9 +165,7 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_0), encoder0_ISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_1), encoder1_ISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(encoder_interrupt_pin_2), encoder2_ISR, CHANGE);
-
   /******************************************** ADA_IMU Setup ***************************************************/
-  while (!Serial)
   {
     delay(1); // will pause Zero, Leonardo, etc until serial console opens
   }
