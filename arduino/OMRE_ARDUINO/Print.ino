@@ -1,17 +1,17 @@
 void printdata(void)
 {
 #if PRINT_ULTRASOUND == 1
-  Serial.print(cm[0]);
+  Serial.print(cm_US[0]);
   Serial.print("  ,  ");
-  Serial.print(cm[1]);
+  Serial.print(cm_US[1]);
   Serial.print("  ,  ");
-  Serial.print(cm[2]);
+  Serial.print(cm_US[2]);
   Serial.print("  ,  ");
-  Serial.print(cm[3]);
+  Serial.print(cm_US[3]);
   Serial.print("  ,  ");
-  Serial.print(cm[4]);
+  Serial.print(cm_US[4]);
   Serial.print("  ,  ");
-  Serial.println(cm[5]);
+  Serial.println(cm_US[5]);
 #endif
 
 #if PRINT_IR == 1

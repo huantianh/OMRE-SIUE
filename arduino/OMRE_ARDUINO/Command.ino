@@ -1,5 +1,4 @@
-/*****************************************************************************************************************************/
-/***************************              GIVING COMMAND                *******************************************/
+/*******************************              GIVING COMMAND                *******************************************/
 void parseCommand()
 {
   char command = rcv_buffer[0]; // our first byte tells us the command char is equivalent to byte
@@ -30,14 +29,14 @@ void parseCommand()
     case 'U':
       int ultrasonicNumber;
       sscanf(&rcv_buffer[1], " %d \r", &ultrasonicNumber);
-      ultrasonicSwitch = '1';     
+      ultrasonicSwitch = '1';
       Serial.println(cm_US[ultrasonicNumber]);
       break;
 
     ////////////////////////////////////////////////////////////////              INFARED
     case 'i':
     case 'I':
-    
+
       int infraredNumber;
       sscanf(&rcv_buffer[1], " %d \r", &infraredNumber);
       IRSwitch = '1';
@@ -57,7 +56,7 @@ void parseCommand()
       rpm_setpoint[1] = rpm1;
       rpm_setpoint[2] = rpm2;
       break;
-      
+
     ////////////////////////////////////////////////////////////////              PID Switch ON/OFF
     case 'p':
     case 'P':
@@ -78,19 +77,19 @@ void parseCommand()
       printDouble(rpmValues[rpmNum], 1000000000);
       break;
 
-    ///////////////////////////////////////////////////////////////               ENTER GAINS K
-    case 'k':
-    case 'K':
-      char  pValue[20];
-      char  iValue[20];
-      sscanf(&rcv_buffer[1], " %s %s \r", &pValue, &iValue);
-      char *ptr;
-      for (int i = 0; i < 3; i++)
-      {
-        Kp[i] = strtod(pValue, &ptr);
-        Ki[i] = strtod(iValue, &ptr);
-      }
-      break;
+    //    ///////////////////////////////////////////////////////////////               ENTER GAINS K
+    //    case 'k':
+    //    case 'K':
+    //      char  pValue[20];
+    //      char  iValue[20];
+    //      sscanf(&rcv_buffer[1], " %s %s \r", &pValue, &iValue);
+    //      char *ptr;
+    //      for (int i = 0; i < 3; i++)
+    //      {
+    //        Kp[i] = strtod(pValue, &ptr);
+    //        Ki[i] = strtod(iValue, &ptr);
+    //      }
+    //      break;
 
     ////////////////////////////////////////////////////////////////              STOP
     case 's':
