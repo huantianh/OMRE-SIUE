@@ -8,8 +8,8 @@ SharpIR IR_Sensor1(SharpIR::GP2Y0A21YK0F, A1);
 SharpIR IR_Sensor2(SharpIR::GP2Y0A21YK0F, A2);
 SharpIR IR_Sensor3(SharpIR::GP2Y0A21YK0F, A3);
 
-#define FORWARD  LOW
-#define BACKWARD HIGH
+#define FORWARD  HIGH
+#define BACKWARD LOW
 
 volatile long encoderCounts[]              = {0, 0, 0}; // variables accesed inside of an interrupt need to be volatile
 const int encoder_interrupt_pin_0          = 18;      
@@ -26,10 +26,10 @@ const int infraredSensorPins[]             = {0, 1, 2, 3};
 double rpm_setpoint[3]                     = {0, 0, 0};
 int rpmValues[3]                           = {0, 0, 0};
 
-long duration_US[6]                        = {0, 0, 0, 0, 0, 0};
-long cm_US[6]                              = {0, 0, 0, 0, 0, 0};
+double duration_US[6]                       = {0, 0, 0, 0, 0, 0};
+double m_US[6]                              = {0, 0, 0, 0, 0, 0};
 
-int  cm_IR[4]                              = {0, 0, 0, 0};
+double m_IR[4]                              = {0, 0, 0, 0};
 
 char rcv_buffer[64];  // holds commands recieved
 //char TXBuffer[64];    // temp storage for large data sent

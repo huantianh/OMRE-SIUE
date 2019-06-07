@@ -88,7 +88,7 @@ def move(xd,yd,thetad):
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	
-	maxAllowedSpeed = 100
+	maxAllowedSpeed = 50
 	
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
 		maxRPM = max(abs(motor_spd_vec))
@@ -103,41 +103,3 @@ def move(xd,yd,thetad):
 	#~ print("Wheel2 RPM: " +str(wheel2RPM))
 
 	motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
-
-#~ def odemetryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
-	#~ global oldEncoder0
-	#~ global oldEncoder1
-	#~ global oldEncoder2
-	
-	#~ newEncoder0 = encoder(0)
-	#~ newEncoder1 = encoder(1)
-	#~ newEncoder2 = encoder(2)
-	
-	#~ deltaEncoder0 = newEncoder0 - oldEncoder0
-	#~ deltaEncoder1 = newEncoder1 - oldEncoder1
-	#~ deltaEncoder2 = newEncoder2 - oldEncoder2
-	
-	#~ D0=(deltaEncoder0/N)*((2*np.pi*r))
-	#~ D1=(deltaEncoder1/N)*((2*np.pi*r))
-	#~ D2=(deltaEncoder2/N)*((2*np.pi*r))
-
-	#~ kinematic_mat = np.array([1/np.sqrt(3),0,-1/np.sqrt(3),-1/3,2/3,-1/3,-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3)
-		
-	#~ rotation_mat= np.array([np.cos(thetak),-np.sin(thetak),0,np.sin(thetak),np.cos(thetak),0,0,0,1]).reshape(3,3)
-	
-	#~ # diffrence in ticks (rpm)
-	#~ distance_mat = np.array([D1,D0,D2])[:,None]
-	
-	#~ oldPos_mat = np.array([xk,yk,thetak])[:,None]
-	
-	#~ # np.dot explanation https://stackoverflow.com/questions/21562986/numpy-matrix-vector-multiplication
-	#~ kinxrot = np.dot(rotation_mat,kinematic_mat)
-	#~ newPos_mat = oldPos_mat + np.dot(kinxrot,distance_mat)
-
-	#~ oldEncoder0 = newEncoder0
-	#~ oldEncoder1 = newEncoder1
-	#~ oldEncoder2 = newEncoder2
-
-	#~ return  newPos_mat
-
-

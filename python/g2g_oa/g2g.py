@@ -4,7 +4,7 @@ import time
 import numpy as np
 
 #sets up serial connection to arduino atMega
-ser = serial.Serial('/dev/ttyACM0',9600, timeout=.4);
+ser = serial.Serial('/dev/ttyACM0',115200, timeout=.4);
 
 #clear buffers just incase garbage inside
 ser.reset_input_buffer()
@@ -25,6 +25,11 @@ current_x = 0
 current_y = 0
 current_theta = 0
 
+#PID goToGoal
+kp = 1.2
+ki = 0
+kd = 0
+
 # This functions sends  pwm signals to the motor and reverses the direction if given negative
 # Example motor(255,0,0) would turn motor 0 on all the away and 1,2 off
 # motor(125,-200,-100) motor 0 would have a half duty cycle, motor 1 would move backwards at a pwm of 200 etc...
@@ -34,8 +39,7 @@ def motors(m1,m2,m3):
 		ser.write(("m %d %d %d\r" % (x, abs(motorValues[x]), int(motorValues[x]>=0))).encode())
 
 def motorVelocity(m1,m2,m3):
-	motorV= [m1*10,m2*10,m3*10]
-	ser.write(("v %d %d %d \r" %(motorV[0],motorV[1],motorV[2])).encode())
+	ser.write(("v %d %d %d \r" %(m1,m2,m3)).encode())
 
 #read encoder value from motor number given
 def encoder(encoderNum):
@@ -93,18 +97,22 @@ def move(xd,yd,thetad):
 	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	
 	maxAllowedSpeed = 150
+	
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
 		maxRPM = max(abs(motor_spd_vec))
 		ratio = abs(maxRPM)/maxAllowedSpeed
+		
 		wheel0RPM = wheel0RPM/ratio
 		wheel1RPM = wheel1RPM/ratio
 		wheel2RPM = wheel2RPM/ratio
-
-	print("Wheel0 RPM: " +str(wheel0RPM))
-	print("Wheel1 RPM: " +str(wheel1RPM))
-	print("Wheel2 RPM: " +str(wheel2RPM))
+	
+	#~ print("Wheel0 RPM: " +str(wheel0RPM))
+	#~ print("Wheel1 RPM: " +str(wheel1RPM))
+	#~ print("Wheel2 RPM: " +str(wheel2RPM))
 
 	motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
+
+
 
 def odemetryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 	global oldEncoder0
@@ -127,7 +135,7 @@ def odemetryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 		
 	rotation_mat= np.array([np.cos(thetak),-np.sin(thetak),0,np.sin(thetak),np.cos(thetak),0,0,0,1]).reshape(3,3)
 	
-	#   diffrence in ticks (rpm1)
+	# diffrence in ticks (rpm)
 	distance_mat = np.array([D1,D0,D2])[:,None]
 	
 	oldPos_mat = np.array([xk,yk,thetak])[:,None]
@@ -151,8 +159,110 @@ def initOdometry():
 	oldEncoder0 = encoder(0)
 	oldEncoder1 = encoder(1)
 	oldEncoder2 = encoder(2)
+	
+
+def goToGoal(dx,dy,dtheta):
+	global current_x
+	global current_y
+	global current_theta
+	
+	while True:
+
+		print("current x = "+str(current_x))
+		print("current y = "+str(current_y))
+		print("current theta = "+str(current_theta))
+
+		xc = current_x
+		yc = current_y
+		thetac = current_theta
+
+
+		inv_rotation_mat= np.array([np.cos(thetac), np.sin(thetac), 0, -np.sin(thetac), np.cos(thetac), 0, 0, 0, 1]).reshape(3,3)
+		d = np.sqrt(((xd-xc)**2)+((yd-yc)**2))
+
+		phi = math.atan2((yd-yc),(xd-xc))
+
+		vel_global = np.array([ d*np.cos(phi), d*np.sin(phi), -1*(current_theta-dtheta)])[:,None]
+			
+		vel_local = np.dot(inv_rotation_mat, vel_global)
+		
+		#v = velocity  l = local		
+		vl_x = vel_local[0]
+		vl_y = vel_local[1]
+		vl_theta = vel_local[2]
+		
+		print(vl_x)
+		print(vl_y)
+		print(vl_theta)
+		
+		move(vl_x, vl_y, vl_theta)
+		pose = odemetryCalc(xc,yc,thetac)
+		
+		current_x = pose.item(0)
+		current_y = pose.item(1)
+		current_theta = pose.item(2)
+		
+		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2)) #< 0.1	
+		#data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
+		#print(data_write)
+			#print(delta)
+			
+		if delta < 0.05:	
+			move(0,0,0)
+			break
+
+def goToGoalTimed(dx,dy,dtheta,duration):
+	global current_x
+	global current_y
+	global current_theta
+	dt = 0.1
+	start = time.time()
+	
+	while time.time()-float(start) <= float(duration):
+		
+		xc = current_x
+		yc = current_y
+		thetac = current_theta
+
+
+		inv_rotation_mat= np.array([np.cos(thetac), np.sin(thetac), 0, -np.sin(thetac), np.cos(thetac), 0, 0, 0, 1]).reshape(3,3)
+		d = np.sqrt(((xd-xc)**2)+((yd-yc)**2))
+
+		phi = math.atan2((yd-yc),(xd-xc))
+
+		vel_global = np.array([ d*np.cos(phi), d*np.sin(phi), -1*(current_theta-dtheta)])[:,None]
+			
+		vel_local = np.dot(inv_rotation_mat, vel_global)
+		
+		time_left = duration - (time.time() - start) #duration - time elapsed = time left
+		vl_x = vel_local[0] / time_left
+		vl_y = vel_local[1] / time_left 
+		vl_theta = vel_local[2] / time_left
+		
+		
+		move(vl_x,vl_y,vl_theta)
+		pose = odemetryCalc(current_x,current_y,current_theta)
+		current_x = pose.item(0)
+		current_y = pose.item(1)
+		current_theta = pose.item(2)		
+		time.sleep(dt)
+		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
+		print(data_write)
+
+	move(0,0,0)
+
+def goToGoalFile(fileName):
+	file = open(fileName,"r")
+	for line in file:
+		values = line.strip().split(',')
+		dx = values[0]
+		dy = values[1]
+		dtheta = values[2]
+		goToGoal(dx,dy,dtheta)
+	file.close()
 
 def goToGoalPID(xd,yd,thetad):
+
 	global current_x
 	global current_y
 	global current_theta
@@ -222,16 +332,61 @@ def goToGoalPID(xd,yd,thetad):
 		print(data_write)
 
 	move(0,0,0)
-
-
+	
+def moveXTimer(distance,vl_x,vl_y,timer):
+	linearVelocity =  np.sqrt(vl_x**2+vl_y**2)
+	velocity = distance/timer
+	# time = 1  linvel = .5  d = 1 
+	ratio = velocity/linearVelocity 
+	print("velocity calculated: " +str(velocity))
+	move(vl_x*ratio,vl_y*ratio,0)
+	
+def moveX(distance,velocity,timer):
+	if velocity == 0:
+		velocity = distance/timer
+		print("velocity calculated: " +str(velocity))
+		move(velocity,0,0)
+		return;
+	else:
+		timer = abs(distance/velocity)
+		print("time calculated: " +str(timer))
+		move(velocity,0,0)
+		return timer
+		
+#initOdometry()	
 while True: 
-	print("######### Enter your goal (x,y) :) ########## ")
-	xd = float(input("enter x desired: "))
-	yd = float(input("enter y desired: "))
-	thetad = float(input("enter theta desired: "))	
-	#~ duration = float(input("enter duration desired: "))	
-	goToGoalPID(xd,yd,thetad)
+	
+	mode = str(input("Enter mode: g for regular g2g, t for timed g2g, p for PID "))
+	
+	if mode == 'g':
+		while True:
+			#~ print(str(ultrasound(1)))
+			print("######### Enter your goal (x,y) :) ########## ")
+			xd = float(input("enter x desired: "))
+			yd = float(input("enter y desired: "))
+			thetad = float(input("enter theta desired: "))	
+			#~ print(str(ultrasound(1)))
+			goToGoal(xd,yd,thetad)
+	if mode == 't':
+		while True:
+			print("######### Enter your goal (x,y) :) ########## ")
+			xd = float(input("enter x desired: "))
+			yd = float(input("enter y desired: "))
+			thetad = float(input("enter theta desired: "))	
+			duration = float(input("enter duration desired: "))	
+			goToGoalTimed(xd,yd,thetad,duration)
+	if mode == 'p':
+		while True:
+			print("######### Enter your goal (x,y) :) ########## ")
+			xd = float(input("enter x desired: "))
+			yd = float(input("enter y desired: "))
+			thetad = float(input("enter theta desired: "))	
+			goToGoalPID(xd,yd,thetad)
+	else:
+		print("############# Enter File Name #############")
+		filename = input("Enter File Name: ")
+		goToGoalFile(filename)
+		
 
 
-	
-	
+

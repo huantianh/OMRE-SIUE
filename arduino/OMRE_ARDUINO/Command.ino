@@ -30,7 +30,7 @@ void parseCommand()
       int ultrasonicNumber;
       sscanf(&rcv_buffer[1], " %d \r", &ultrasonicNumber);
       ultrasonicSwitch = '1';
-      Serial.println(cm_US[ultrasonicNumber]);
+      Serial.println(m_US[ultrasonicNumber]);
       break;
 
     ////////////////////////////////////////////////////////////////              INFARED
@@ -40,7 +40,7 @@ void parseCommand()
       int infraredNumber;
       sscanf(&rcv_buffer[1], " %d \r", &infraredNumber);
       IRSwitch = '1';
-      Serial.println (cm_IR[infraredNumber]);
+      Serial.println (m_IR[infraredNumber]);
       break;
 
     ////////////////////////////////////////////////////////////////              ENTER RPM_GOAL
@@ -113,8 +113,8 @@ void parseCommand()
     case 'F':
 
       rpm_setpoint[0] = 0;
-      rpm_setpoint[1] = -50;
-      rpm_setpoint[2] = 50;
+      rpm_setpoint[1] = 50;
+      rpm_setpoint[2] = -50;
       break;
 
     /////////////////////////////////////////////////////////////////            Move Robot Backward
@@ -122,8 +122,8 @@ void parseCommand()
     case 'B':
 
       rpm_setpoint[0] = 0;
-      rpm_setpoint[1] = 50;
-      rpm_setpoint[2] = -50;
+      rpm_setpoint[1] = -50;
+      rpm_setpoint[2] = 50;
       break;
       //    default:
       //      Serial.println("Error: Serial input incorrect");

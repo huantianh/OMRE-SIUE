@@ -44,12 +44,12 @@ def readEncoder(encoderNum):
 	data_encoder = float(encoderValue.strip())
 	return data_encoder
 
-def read_IMU_pos_x():
-	ser.reset_input_buffer()
-	ser.write(("x \r").encode())
-	pos_x = (ser.readline().decode("ascii"))
-	data_imu = float(pos_x.strip())
-	return data_imu
+#~ def read_IMU_pos_x():
+	#~ ser.reset_input_buffer()
+	#~ ser.write(("x \r").encode())
+	#~ pos_x = (ser.readline().decode("ascii"))
+	#~ data_imu = float(pos_x.strip())
+	#~ return data_imu
 
 def enablePrint(printEnable):
 	print_setup = printEnable
@@ -107,9 +107,9 @@ def xyThetaToWheelV(xd,yd,thetad):
  
 	motor_spd_vec = np.dot(IK_M,vel_des)
 	
-	wheel1RPM = motor_spd_vec[2] # motor 2 speed [rpm]
+	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-	wheel2RPM = motor_spd_vec[0] # motor 3 speed [rpm]
+	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	 
 	if (abs(wheel1RPM) > 200 or abs(wheel0RPM) > 200 or abs(wheel2RPM) > 200):
 		if  (abs(wheel0RPM) > abs(wheel1RPM) and abs(wheel0RPM) > abs(wheel2RPM)):
@@ -227,12 +227,13 @@ elif mode == 'o':
 		
 			pose = odemetryCalc(old_x,old_y,old_t,D0,D1,D2)
 			
-			imu_pos_x = read_IMU_pos_x()
+			#~ imu_pos_x = read_IMU_pos_x()
 
 			#write data
 			data_write = "x: " + str(pose[0][0]) + "  y: " + str(pose[1][0]) + "  theta: " + str(pose[2][0])+ "  posX: " + str(imu_pos_x);	
 			print(data_write)
-			file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(imu_pos_x)+"\n")
+			#~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(imu_pos_x)+"\n")
+			file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0]))
 			
 			old_x=pose.item(0)
 			old_y=pose.item(1)

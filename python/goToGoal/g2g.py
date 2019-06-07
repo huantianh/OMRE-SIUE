@@ -39,8 +39,7 @@ def motors(m1,m2,m3):
 		ser.write(("m %d %d %d\r" % (x, abs(motorValues[x]), int(motorValues[x]>=0))).encode())
 
 def motorVelocity(m1,m2,m3):
-	motorV= [m1*10,m2*10,m3*10]
-	ser.write(("v %d %d %d \r" %(motorV[0],motorV[1],motorV[2])).encode())
+	ser.write(("v %d %d %d \r" %(m1,m2,m3)).encode())
 
 #read encoder value from motor number given
 def encoder(encoderNum):
@@ -49,11 +48,11 @@ def encoder(encoderNum):
 	encoderValue = (ser.readline().decode("ascii"))
 	return int(encoderValue.rstrip())
 
-#~ def ultrasound(ultraSoundNum):
-	#~ ser.reset_input_buffer()
-	#~ ser.write(("u %d \r" % (ultraSoundNum)).encode())
-	#~ ultraSoundValue = (ser.readline().decode("ascii"))
-	#~ return int(ultraSoundValue.rstrip())
+def ultrasound(ultraSoundNum):
+	ser.reset_input_buffer()
+	ser.write(("u %d \r" % (ultraSoundNum)).encode())
+	ultraSoundValue = (ser.readline().decode("ascii"))
+	return int(ultraSoundValue.rstrip())
 
 def infrared(infraredNum):
 	ser.reset_input_buffer()
@@ -93,11 +92,11 @@ def move(xd,yd,thetad):
  
 	motor_spd_vec = np.dot(IK_M,vel_des, out=None)
  
-	wheel1RPM = motor_spd_vec[2] # motor 2 speed [rpm]
+	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-	wheel2RPM = motor_spd_vec[0] # motor 3 speed [rpm]
+	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	
-	maxAllowedSpeed = 100
+	maxAllowedSpeed = 150
 	
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
 		maxRPM = max(abs(motor_spd_vec))
@@ -106,7 +105,7 @@ def move(xd,yd,thetad):
 		wheel0RPM = wheel0RPM/ratio
 		wheel1RPM = wheel1RPM/ratio
 		wheel2RPM = wheel2RPM/ratio
-
+	
 	print("Wheel0 RPM: " +str(wheel0RPM))
 	print("Wheel1 RPM: " +str(wheel1RPM))
 	print("Wheel2 RPM: " +str(wheel2RPM))
@@ -136,7 +135,7 @@ def odemetryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 		
 	rotation_mat= np.array([np.cos(thetak),-np.sin(thetak),0,np.sin(thetak),np.cos(thetak),0,0,0,1]).reshape(3,3)
 	
-	#   diffrence in ticks (rpm1)
+	# diffrence in ticks (rpm)
 	distance_mat = np.array([D1,D0,D2])[:,None]
 	
 	oldPos_mat = np.array([xk,yk,thetak])[:,None]
@@ -191,12 +190,14 @@ def goToGoal(dx,dy,dtheta):
 		vl_x = vel_local[0]
 		vl_y = vel_local[1]
 		vl_theta = vel_local[2]
+		
 		print(vl_x)
 		print(vl_y)
 		print(vl_theta)
 		
 		move(vl_x, vl_y, vl_theta)
 		pose = odemetryCalc(xc,yc,thetac)
+		
 		current_x = pose.item(0)
 		current_y = pose.item(1)
 		current_theta = pose.item(2)

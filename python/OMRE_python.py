@@ -100,9 +100,9 @@ def xyThetaToWheelV(xd,yd,thetad):
  
 	motor_spd_vec = np.dot(IK_M,vel_des)
 	
-	wheel1RPM = motor_spd_vec[2] # motor 2 speed [rpm]
+	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-	wheel2RPM = motor_spd_vec[0] # motor 3 speed [rpm]
+	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	
 	if (abs(wheel1RPM) > 200 or abs(wheel0RPM) > 200 or abs(wheel2RPM) > 200):
 		if  (abs(wheel0RPM) > abs(wheel1RPM) and abs(wheel0RPM) > abs(wheel2RPM)):
