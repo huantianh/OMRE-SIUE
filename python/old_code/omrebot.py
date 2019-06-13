@@ -1,6 +1,5 @@
 import serial
 import math
-import xbox
 import time
 import numpy as np
 
@@ -15,14 +14,13 @@ class OmreBot:
 	def printPort(self):
 		print(self.port)
 
-
 	def motors(m1,m2,m3):
 		motorValues = [m1,m2,m3]
 		for x in range(3):
 			ser.write(("m %d %d %d\r" % (x, abs(motorValues[x]), int(motorValues[x]>=0))).encode())
 
 	def motorVelocity(m1,m2,m3):
-		motorV= [m1*10,m2*10,m3*10]
+		motorV= [m1,m2,m3]
 		ser.write(("v %d %d %d \r" %(motorV[0],motorV[1],motorV[2])).encode())
 
 	#read encoder value from motor number given

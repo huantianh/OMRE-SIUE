@@ -16,64 +16,80 @@ oldEncoder2 = 0
 newEncoder0 = 0
 newEncoder1 = 0
 newEncoder2 = 0
+
+####################################################		Reset encoder
+def initOdometry():
+	global oldEncoder0 
+	global oldEncoder1 
+	global oldEncoder2 
+	oldEncoder0 = robot.encoder(0)
+	oldEncoder1 = robot.encoder(1)
+	oldEncoder2 = robot.encoder(2)
+	
 #odemetry position
 current_x = 0
 current_y = 0
 current_theta = 0
 
+vl_s = [0,0,0,1]
+flag = [0,0,0,0,0,0]
+
+#~ v_x_obs = 0
+#~ v_y_obs = 0
+
 #####################################################		Obstacle Position
-def us0(d0,xc,yc,thetac):
-	T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
+def us0(d0):
+	#~ T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
 	T_mat_sen0_robot = np.array([-1,0,0,-0.33,0,-1,0,0,0,0,1,0,0,0,0,1]).reshape(4,4)
 	P_obs0_sen0		 = np.array([d0,0,0,1]).reshape(4,1)	
 	P_obs0_robot 	 = np.dot(T_mat_sen0_robot,P_obs0_sen0)
-	P_obs0_world	 = np.dot(T_mat_robot_world,P_obs0_robot)	
-	P_obs0			 = np.concatenate([P_obs0_robot,P_obs0_world])
+	#~ P_obs0_world	 = np.dot(T_mat_robot_world,P_obs0_robot)	
+	#~ P_obs0			 = np.concatenate([P_obs0_robot,P_obs0_world])
 	return 	P_obs0_robot
 	
-def us1(d1,xc,yc,thetac):
-	T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
+def us1(d1):
+	#~ T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
 	T_mat_sen1_robot = np.array([0,-1,0,0,1,0,0,0.33,0,0,1,0,0,0,0,1]).reshape(4,4)
 	P_obs1_sen1		 = np.array([d1,0,0,1]).reshape(4,1)	
 	P_obs1_robot 	 = np.dot(T_mat_sen1_robot,P_obs1_sen1)
-	P_obs1_world	 = np.dot(T_mat_robot_world,P_obs1_robot)	
-	P_obs1			 = np.concatenate([P_obs1_robot,P_obs1_world])
+	#~ P_obs1_world	 = np.dot(T_mat_robot_world,P_obs1_robot)	
+	#~ P_obs1			 = np.concatenate([P_obs1_robot,P_obs1_world])
 	return 	P_obs1_robot 
 	
-def us2(d2,xc,yc,thetac):
-	T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
+def us2(d2):
+	#~ T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
 	T_mat_sen2_robot = np.array([np.sqrt(3)/2,-1/2,0,0.3556*(np.sqrt(3)/2),1/2,np.sqrt(3)/2,0,0.3556/2,0,0,1,0,0,0,0,1]).reshape(4,4)
 	P_obs2_sen2		 = np.array([d2,0,0,1]).reshape(4,1)	
 	P_obs2_robot 	 = np.dot(T_mat_sen2_robot,P_obs2_sen2)
-	P_obs2_world	 = np.dot(T_mat_robot_world,P_obs2_robot)
-	P_obs2			 = np.concatenate([P_obs2_robot,P_obs2_world])
+	#~ P_obs2_world	 = np.dot(T_mat_robot_world,P_obs2_robot)
+	#~ P_obs2			 = np.concatenate([P_obs2_robot,P_obs2_world])
 	return 	P_obs2_robot 
 
-def us3(d3,xc,yc,thetac):
-	T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
+def us3(d3):
+	#~ T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
 	T_mat_sen3_robot = np.array([1,0,0,0.33,0,1,0,0,0,0,1,0,0,0,0,1]).reshape(4,4)
 	P_obs3_sen3		 = np.array([d3,0,0,1]).reshape(4,1)	
 	P_obs3_robot 	 = np.dot(T_mat_sen3_robot,P_obs3_sen3)
-	P_obs3_world	 = np.dot(T_mat_robot_world,P_obs3_robot)	
-	P_obs3			 = np.concatenate([P_obs3_robot,P_obs3_world])
+	#~ P_obs3_world	 = np.dot(T_mat_robot_world,P_obs3_robot)	
+	#~ P_obs3			 = np.concatenate([P_obs3_robot,P_obs3_world])
 	return 	P_obs3_robot 
 
-def us4(d4,xc,yc,thetac):
-	T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
+def us4(d4):
+	#~ T_mat_robot_world= np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
 	T_mat_sen4_robot = np.array([np.sqrt(3)/2,1/2,0,0.3556*(np.sqrt(3)/2),-1/2,np.sqrt(3)/2,0,-0.3556/2,0,0,1,0,0,0,0,1]).reshape(4,4)
 	P_obs4_sen4		 = np.array([d4,0,0,1]).reshape(4,1)	
 	P_obs4_robot 	 = np.dot(T_mat_sen4_robot,P_obs4_sen4)
-	P_obs4_world	 = np.dot(T_mat_robot_world,P_obs4_robot)	
-	P_obs4			 = np.concatenate([P_obs4_robot,P_obs4_world])
+	#~ P_obs4_world	 = np.dot(T_mat_robot_world,P_obs4_robot)	
+	#~ P_obs4			 = np.concatenate([P_obs4_robot,P_obs4_world])
 	return 	P_obs4_robot 
 
-def us5(d5,xc,yc,thetac):
-	T_mat_robot_world=  np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
+def us5(d5):
+	#~ T_mat_robot_world=  np.array([np.cos(thetac),-np.sin(thetac),0,xc,np.sin(thetac),np.cos(thetac),0,yc,0,0,1,0,0,0,0,1]).reshape(4,4)
 	T_mat_sen5_robot = np.array([0,1,0,0,-1,0,0,-0.33,0,0,1,0,0,0,0,1]).reshape(4,4)
 	P_obs5_sen5		 = np.array([d5,0,0,1]).reshape(4,1)	
 	P_obs5_robot 	 = np.dot(T_mat_sen5_robot,P_obs5_sen5)
-	P_obs5_world	 = np.dot(T_mat_robot_world,P_obs5_robot)
-	P_obs5			 = np.concatenate([P_obs5_robot,P_obs5_world])
+	#~ P_obs5_world	 = np.dot(T_mat_robot_world,P_obs5_robot)
+	#~ P_obs5			 = np.concatenate([P_obs5_robot,P_obs5_world])
 	return 	P_obs5_robot 
 
 ######################################################		Odemetry	
@@ -188,6 +204,8 @@ def g2g_pid(xd,yd,thetad):
 
 #########################################################################		G2G_OA_Blend
 def g2g_oa(xd,yd,thetad):
+
+#########################################			G2G					####################################################################	
 	global current_x
 	global current_y
 	global current_theta
@@ -230,316 +248,68 @@ def g2g_oa(xd,yd,thetad):
 		#~ vel_global = np.array([ d*np.cos(phi), d*np.sin(phi), 0])[:,None]
 		vel_local = np.dot(inv_rotation_mat, vel_global)		
 		
-		#~ time_left = duration - (time.time() - start) #duration - time elapsed = time left
-		time_left = 1 #duration - time elapsed = time left
-		vl_x = vel_local[0] / time_left
-		vl_y = vel_local[1] / time_left 
-		vl_theta = vel_local[2] / time_left
+		v_x_g2g = vel_local[0]
+		v_y_g2g = vel_local[1] 
+		v_theta_g2g = vel_local[2] 
 		
+		
+###########################################################################################################################################
+#########################################		Obstacle Avoidance	
+		for x in range(6):
+			us[x] = robot.ultrasonic(x)
+			#~ print(str(us[0])+", "+str(us[1])+", "+str(us[2])+", "+str(us[3])+", "+str(us[4])+", "+str(us[5]))
+			d = [us[0],us[1],us[2],us[3],us[4],us[5]]
+
+			if d[x] != 0:
+				flag[x] = 1
+			else:
+				flag[x] = 0	
+			#~ print(flag)
+		
+			if d != 0:
+				d0 = d[0]
+				d1 = d[1]
+				d2 = d[2]
+				d3 = d[3]
+				d4 = d[4]
+				d5 = d[5]
+							
+				vs0 = us0(d0)
+				vs1 = us1(d1)
+				vs2 = us2(d2)
+				vs3 = us3(d3)
+				vs4 = us4(d4)
+				vs5 = us5(d5)	
+							
+				vl_s = flag[0]*vs0 + flag[1]*vs1 + flag[2]*vs2 + flag[3]*vs3 + flag[4]*vs4 + flag[5]*vs5			
+					
+###############################################			Combine G2G and OA  		###########################################################
+		v_x_obs = -vl_s.item(0)
+		v_y_obs = -vl_s.item(1)	
+
+		v_x = 0.2*v_x_g2g + 0.8*v_x_obs
+		v_y = 0.2*v_y_g2g + 0.8*v_y_obs
+		v_theta = v_theta_g2g
+
 		#Move the robot
-		robot.move(vl_x,vl_y,vl_theta)
-		
+		robot.move(v_x,v_y,v_theta)		
+		#~ robot.move(v_x_g2g,v_y_g2g,v_theta_g2g)		
+
 		#Odemetry
 		current_x = pose.item(0)
 		current_y = pose.item(1)
 		current_theta = pose.item(2)
-		
+
 		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 				
 		time.sleep(dt)
 		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 		print(data_write)
-		
-############################################################################################################################################
-		#########################################		Obstacle Avoidance	
-		for x in range(6):
-			us[x] = robot.ultrasonic(x)
-			
-		#########################################		sensor 0
-		if (us[0] > 0) and (us[0]<= 0.2):
-			d0 = us[0]
-			obs0pos = us0(d0,xc,yc,thetac)	
+
 					
-			xd0 = -obs0pos.item(0)
-			yd0 = -obs0pos.item(1) 	
-			robot.move(xd0,yd0,0)
-		
-		##########################################		sensor 1 (left)
-		elif(us[1] > 0) and (us[1]<= 0.2):
-			d1 = us[1]
-			obs1pos = us1(d1,xc,yc,thetac)		
-			
-			
-			xd1 = -obs1pos.item(0)
-			yd1 = -obs1pos.item(1) 
-			robot.move(xd1,yd1,0)
-
-		##########################################		sensor 2		
-		elif(us[2] > 0) and (us[2]<= 0.2):
-			d2 = us[2]
-			obs2pos = us2(d2,xc,yc,thetac)		
-			
-			xd2 = -obs2pos.item(0)
-			yd2 = -obs2pos.item(1)  				
-			robot.move(xd2,yd2,0)
-		
-			if (us[1] != 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] == 0) and (us[5] == 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] != 0) and (us[5] != 0):
-				if (us[1] > us[5]):
-					robot.move(0,0,1.57)
-				else:
-					robot.move(0,0,-1.57)
-				
-			if (us[5] != 0):
-				robot.move(0,0,1.57)
-				time.sleep(.14)
-			elif (us[1] == 0) and (us[5] == 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] != 0) and (us[5] != 0):
-				if (us[1] > us[5]):
-					robot.move(0,0,1.57)
-				else:
-					robot.move(0,0,-1.57)
-		##########################################		sensor 3 (front)
-		elif(us[3] != 0):
-			d3 = us[3]
-			obs3pos = us3(d3,xc,yc,thetac)		
-			
-			xd3 = -obs3pos.item(0)
-			yd3 = -obs3pos.item(1)  				
-			robot.move(xd3,yd3,0)
-		
-			if (us[1] != 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] == 0) and (us[5] == 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] != 0) and (us[5] != 0):
-				if (us[1] > us[5]):
-					robot.move(0,0,1.57)
-				else:
-					robot.move(0,0,-1.57)
-				
-			if (us[5] != 0):
-				robot.move(0,0,1.57)
-				time.sleep(.14)
-			elif (us[1] == 0) and (us[5] == 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] != 0) and (us[5] != 0):
-				if (us[1] > us[5]):
-					robot.move(0,0,1.57)
-				else:
-					robot.move(0,0,-1.57)
-			
-		##########################################		sensor 4
-		elif(us[4] > 0) and (us[4]<= 0.2):
-			d4 = us[4]
-			obs4pos = us4(d4,xc,yc,thetac)		
-			
-			xd4 = -obs4pos.item(0)
-			yd4 = -obs4pos.item(1)
-			robot.move(xd4,yd4,0)
-			
-			if (us[1] != 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] == 0) and (us[5] == 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] != 0) and (us[5] != 0):
-				if (us[1] > us[5]):
-					robot.move(0,0,1.57)
-				else:
-					robot.move(0,0,-1.57)
-				
-			if (us[5] != 0):
-				robot.move(0,0,1.57)
-				time.sleep(.14)
-			elif (us[1] == 0) and (us[5] == 0):
-				robot.move(0,0,-1.57)
-				time.sleep(.14)
-			elif (us[1] != 0) and (us[5] != 0):
-				if (us[1] > us[5]):
-					robot.move(0,0,1.57)
-				else:
-					robot.move(0,0,-1.57)
-			
-		##########################################		sensor 5 (right)		
-		elif(us[5] > 0) and (us[5]<= 0.2):
-			d5 = us[5]
-			obs5pos = us5(d5,xc,yc,thetac)		
-						
-			xd5 = -obs5pos.item(0)
-			yd5 = -obs5pos.item(1)
-			robot.move(xd5,yd5,0)
-
-		##########################################		No Obsatcle			
-		else:
-			robot.move(vl_x,vl_y,vl_theta)
-			#~ robot.motorVelocity(0,50,-50)
-			
 	robot.move(0,0,0)
 
-def obstacleAvoidance():
-	global current_x
-	global current_y
-	global current_theta
-	
-	xc = current_x
-	yc = current_y
-	thetac = current_theta
-	
-	pose = odemetryCalc(xc,yc,thetac)
-	
-	#########################################		Obstacle Avoidance	
-	for x in range(6):
-		us[x] = robot.ultrasonic(x)
-		#~ print(str(us[0])+", "+str(us[1])+", "+str(us[2])+", "+str(us[3])+", "+str(us[4])+", "+str(us[5]))		
-	#########################################		sensor 0
-	if (us[0] > 0) and (us[0]<= 0.2):
-		d0 = us[0]
-		obs0pos = us0(d0,xc,yc,thetac)	
-		#~ print(obs0pos)	
-		
-		xd0 = -obs0pos.item(0)
-		yd0 = -obs0pos.item(1) 	
-		robot.move(xd0,yd0,0)
-		
-	##########################################		sensor 1 (left)
-	elif(us[1] > 0) and (us[1]<= 0.2):
-		d1 = us[1]
-		obs1pos = us1(d1,xc,yc,thetac)		
-		#~ print(obs1pos)
-		
-		xd1 = -obs1pos.item(0)
-		yd1 = -obs1pos.item(1) 
-		robot.move(xd1,yd1,0)
 
-	##########################################		sensor 2		
-	elif(us[2] > 0) and (us[2]<= 0.2):
-		d2 = us[2]
-		obs2pos = us2(d2,xc,yc,thetac)		
-		#~ print(obs2pos)
-		#~ xd2 = -obs2pos.item(0)
-		#~ yd2 = -obs2pos.item(1)  				
-		#~ robot.move(xd2,yd2,0)
-		
-		if (us[1] != 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] == 0) and (us[5] == 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] != 0) and (us[5] != 0):
-			if (us[1] > us[5]):
-				robot.move(0,0,1.57)
-			else:
-				robot.move(0,0,-1.57)
-			
-		if (us[5] != 0):
-			robot.move(0,0,1.57)
-			time.sleep(.14)
-		elif (us[1] == 0) and (us[5] == 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] != 0) and (us[5] != 0):
-			if (us[1] > us[5]):
-				robot.move(0,0,1.57)
-			else:
-				robot.move(0,0,-1.57)
-	##########################################		sensor 3 (front)
-	elif(us[3] != 0):
-		d3 = us[3]
-		obs3pos = us3(d3,xc,yc,thetac)		
-		#~ print(obs3pos)
-		#~ xd3 = -obs3pos.item(0)
-		#~ yd3 = -obs3pos.item(1)  				
-		#~ robot.move(xd3,yd3,0)
-		
-		if (us[1] != 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] == 0) and (us[5] == 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] != 0) and (us[5] != 0):
-			if (us[1] > us[5]):
-				robot.move(0,0,1.57)
-			else:
-				robot.move(0,0,-1.57)
-			
-		if (us[5] != 0):
-			robot.move(0,0,1.57)
-			time.sleep(.14)
-		elif (us[1] == 0) and (us[5] == 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] != 0) and (us[5] != 0):
-			if (us[1] > us[5]):
-				robot.move(0,0,1.57)
-			else:
-				robot.move(0,0,-1.57)
-			
-	##########################################		sensor 4
-	elif(us[4] > 0) and (us[4]<= 0.2):
-		d4 = us[4]
-		obs4pos = us4(d4,xc,yc,thetac)		
-		#~ print(obs4pos)
-		#~ xd4 = -obs4pos.item(0)
-		#~ yd4 = -obs4pos.item(1)
-		#~ robot.move(xd4,yd4,0)
-		
-		if (us[1] != 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] == 0) and (us[5] == 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] != 0) and (us[5] != 0):
-			if (us[1] > us[5]):
-				robot.move(0,0,1.57)
-			else:
-				robot.move(0,0,-1.57)
-			
-		if (us[5] != 0):
-			robot.move(0,0,1.57)
-			time.sleep(.14)
-		elif (us[1] == 0) and (us[5] == 0):
-			robot.move(0,0,-1.57)
-			time.sleep(.14)
-		elif (us[1] != 0) and (us[5] != 0):
-			if (us[1] > us[5]):
-				robot.move(0,0,1.57)
-			else:
-				robot.move(0,0,-1.57)
-			
-	##########################################		sensor 5 (right)		
-	elif(us[5] > 0) and (us[5]<= 0.2):
-		d5 = us[5]
-		obs5pos = us5(d5,xc,yc,thetac)		
-		#~ print(obs5pos)
-		
-		xd5 = -obs5pos.item(0)
-		yd5 = -obs5pos.item(1)
-		robot.move(xd5,yd5,0)
-
-	##########################################		No Obsatcle			
-	else:
-		robot.motorVelocity(0,50,-50)
-
-	current_x = pose.item(0)
-	current_y = pose.item(1)
-	current_theta = pose.item(2)	
-	
-	return current_x, current_y,current_theta
 try: 
 	while True:
 		
@@ -547,17 +317,8 @@ try:
 		xd = float(input("enter x desired: "))
 		yd = float(input("enter y desired: "))
 		thetad = float(input("enter theta desired: "))	
-										
-		for x in range(6):
-			us[x] = robot.ultrasonic(x)
-			print(str(us[0])+", "+str(us[1])+", "+str(us[2])+", "+str(us[3])+", "+str(us[4])+", "+str(us[5]))											
-			
-			if us[x] == 0:
-				g2g_oa(xd,yd,thetad)
-				if us[x] != 0:
-					obstacleAvoidance()		
-					if us[x] == 0:
-						g2g_pid(xd - current_x,yd - current_y,thetad - current_theta)		
+		initOdometry()							
+		g2g_oa(xd,yd,thetad)
 				
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:

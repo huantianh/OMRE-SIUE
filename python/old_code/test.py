@@ -13,8 +13,8 @@ if(mode == 's'):
 
 ############## Simple Serial Communicator to Arduino ##############
 	while True:
-		command = input("Enter Command")
-		command = command+'\r'
-		robot.ser.write(command.encode())
-		print (robot.ser.readline().decode("ascii"))
-
+		#~ command = input("Enter Command")
+		#~ command = command+'\r'
+		#~ robot.ser.write(command.encode())
+		#~ print (robot.ser.readline().decode("ascii"))
+		robot.motorVelocity(0,50,-50)

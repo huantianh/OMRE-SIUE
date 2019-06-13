@@ -22,9 +22,6 @@ newEncoder2 = 0
 current_x = 0
 current_y = 0
 current_theta = 0
-#vector
-v = [0,0,0,1]
-flag =[0,0,0,0,0,0]
 
 #####################################################		Obstacle Position
 def us0(d0,xc,yc,thetac):
@@ -132,45 +129,189 @@ try:
 		
 		for x in range(6):
 			us[x] = robot.ultrasonic(x)
-			#~ print(str(us[0])+", "+str(us[1])+", "+str(us[2])+", "+str(us[3])+", "+str(us[4])+", "+str(us[5]))
-			d = [us[0],us[1],us[2],us[3],us[4],us[5]]
-
-			if d[x] != 0:
-				flag[x] = 1
-			else:
-				flag[x] = 0	
+			print(str(us[0])+", "+str(us[1])+", "+str(us[2])+", "+str(us[3])+", "+str(us[4])+", "+str(us[5]))
 			
-			#~ for item in d:
-				#~ if not item:
-					#~ continue
-				#~ else:	
-			if d != 0:	
-				d0 = d[0]
-				d1 = d[1]
-				d2 = d[2]
-				d3 = d[3]
-				d4 = d[4]
-				d5 = d[5]
+#########################################		sensor 0
+		#~ if (us[0] > 0) and (us[0]<= 0.2):
+			#~ d0 = us[0]
+			#~ obs0pos = us0(d0,xc,yc,thetac)		
+			
+			#~ xd0 = -obs0pos.item(0)
+			#~ yd0 = -obs0pos.item(1) 	
+			#~ robot.move(xd0,yd0,0)
+			
+##########################################		sensor 1 (left)
+		if(us[1] > 0) and (us[1]<= 0.2):
+			d1 = us[1]
+			obs1pos = us1(d1,xc,yc,thetac)		
+			#~ print(obs1pos)
+			
+			xd1 = -obs1pos.item(0)
+			yd1 = -obs1pos.item(1) 
+			robot.move(xd1,yd1,0)
+
+##########################################		sensor 2		
+		elif(us[2] != 0):
+			d2 = us[2]
+			obs2pos = us2(d2,xc,yc,thetac)		
+			xd2 = -obs2pos.item(0)
+			yd2 = -obs2pos.item(1)  				
+			robot.move(xd2,yd2,0)
+			
+			if (us[1] != 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] == 0) and (us[5] == 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] != 0) and (us[5] != 0):
+				if (us[1] > us[5]):
+					robot.move(0,0,1.57)
+				else:
+					robot.move(0,0,-1.57)
 				
-				vs0 = us0(d0,xc,yc,thetac)
-				vs1 = us1(d1,xc,yc,thetac)
-				vs2 = us2(d2,xc,yc,thetac)
-				vs3 = us3(d3,xc,yc,thetac)
-				vs4 = us4(d4,xc,yc,thetac)
-				vs5 = us5(d5,xc,yc,thetac)	
+			if (us[5] != 0):
+				robot.move(0,0,1.57)
+				time.sleep(.14)
+			elif (us[1] == 0) and (us[5] == 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] != 0) and (us[5] != 0):
+				if (us[1] > us[5]):
+					robot.move(0,0,1.57)
+				else:
+					robot.move(0,0,-1.57)
+##########################################		sensor 3 (front)
+		elif(us[3] != 0):
+			d3 = us[3]
+			obs3pos = us3(d3,xc,yc,thetac)		
+			xd3 = -obs3pos.item(0)
+			yd3 = -obs3pos.item(1)  				
+			robot.move(xd3,yd3,0)
+			
+			if (us[1] != 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] == 0) and (us[5] == 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] != 0) and (us[5] != 0):
+				if (us[1] > us[5]):
+					robot.move(0,0,1.57)
+				else:
+					robot.move(0,0,-1.57)
 				
-				v = flag[0]*vs0 + flag[1]*vs1 + flag[2]*vs2 + flag[3]*vs3 + flag[4]*vs4 + flag[5]*vs5
+			if (us[5] != 0):
+				robot.move(0,0,1.57)
+				time.sleep(.14)
+			elif (us[1] == 0) and (us[5] == 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] != 0) and (us[5] != 0):
+				if (us[1] > us[5]):
+					robot.move(0,0,1.57)
+				else:
+					robot.move(0,0,-1.57)
 				
-				xd = -v.item(0)
-				yd = -v.item(1)
+##########################################		sensor 4
+		elif(us[4] != 0):
+			d4 = us[4]
+			obs4pos = us4(d4,xc,yc,thetac)		
+			xd4 = -obs4pos.item(0)
+			yd4 = -obs4pos.item(1)
+			robot.move(xd4,yd4,0)
+			
+			if (us[1] != 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] == 0) and (us[5] == 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] != 0) and (us[5] != 0):
+				if (us[1] > us[5]):
+					robot.move(0,0,1.57)
+				else:
+					robot.move(0,0,-1.57)
 				
-				robot.move(xd,yd,0)	
-			else:
-				robot.motorVelocity(0,50,-50)	
-		
+			if (us[5] != 0):
+				robot.move(0,0,1.57)
+				time.sleep(.14)
+			elif (us[1] == 0) and (us[5] == 0):
+				robot.move(0,0,-1.57)
+				time.sleep(.14)
+			elif (us[1] != 0) and (us[5] != 0):
+				if (us[1] > us[5]):
+					robot.move(0,0,1.57)
+				else:
+					robot.move(0,0,-1.57)
+				
+##########################################		sensor 5 (right)		
+		elif(us[5] > 0) and (us[5]<= 0.2):
+			d5 = us[5]
+			obs5pos = us5(d5,xc,yc,thetac)		
+			
+			xd5 = -obs5pos.item(0)
+			yd5 = -obs5pos.item(1)
+			robot.move(xd5,yd5,0)
+
+##########################################		No Obsatcle			
+		else:
+			robot.motorVelocity(0,50,-50)
+			
+		current_x = pose.item(0)
+		current_y = pose.item(1)
+		current_theta = pose.item(2)	
 			
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:
         # Close serial connection
 	robot.stop()     
-	print('\n		Stop!!! See you again!')
+	print('		Stop!!! See you again!')
+	
+	
+		#~ d0 = us[0]
+			#~ d1 = us[1]
+			#~ d2 = us[2]
+			#~ d3 = us[3]
+			#~ d4 = us[4]
+			#~ d5 = us[5]
+	
+			#~ obs0pos = us0(d0,xc,yc,thetac)
+			#~ obs1pos = us1(d1,xc,yc,thetac)
+			#~ obs2pos = us2(d2,xc,yc,thetac)
+			#~ obs3pos = us3(d3,xc,yc,thetac)
+			#~ obs4pos = us4(d4,xc,yc,thetac)
+			#~ obs5pos = us5(d5,xc,yc,thetac)
+			
+			#~ print(str(obs0pos[0])+"  ,  "+str(obs1pos[0])+"  ,  "+str(obs2pos[0])+"  ,  "+str(obs3pos[0])+"  ,  "+str(obs4pos[0])+"  ,  "+str(obs5pos[0]))
+	
+			#~ run_vector = np.sum([obs1pos,obs2pos,obs3pos,obs4pos,obs5pos],axis=0)
+			#~ print(str(run_vector[0])+" ,  "+str(run_vector[1])) 
+			
+			#~ xd = run_vector[0]
+			#~ yd = run_vector[1]
+			
+			#~ if (us[3] > 0) and (us[3]<= 0.2):
+				#~ xd3 = obs3pos.item(0)
+				#~ yd3 = obs3pos.item(1) 
+				#~ robot.move(-xd3,-yd3,0)
+				#~ time.sleep(.14)
+				
+				#~ if (us[1] != 0):
+					#~ robot.move(0,0,-1.57)
+					#~ time.sleep(.14)
+				#~ elif (us[5] != 0):
+					#~ robot.move(0,0,1.57)
+					#~ time.sleep(0.6)
+				#~ elif (us[1] != 0) and (us[5] != 0):
+					#~ robot.move(0,0,3.14)
+					#~ time.sleep(0.6)
+				#~ elif (us[1] == 0):
+					#~ robot.move(0,0,1.57)
+					#~ time.sleep(.14)
+			#~ elif ((us[2] > 0) and (us[2]<= 0.2)) or ((us[4] > 0) and (us[4]<= 0.2)):
+				#~ robot.move(-xd,-yd,0)
+			#~ elif ((us[1] > 0) and (us[1]<= 0.2)) or ((us[5] > 0) and (us[5]<= 0.2)):
+				#~ robot.move(0,-yd,0)
+			#~ else:
+				#~ robot.motorVelocity(0,50,-50)	
