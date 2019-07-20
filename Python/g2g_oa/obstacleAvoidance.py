@@ -4,8 +4,6 @@ import serial
 import math
 import numpy as np
 
-robot.enablePID(1)
-
 count = 0
 
 #ultrasonic setup
@@ -143,7 +141,8 @@ try:
 			#~ for item in d:
 				#~ if not item:
 					#~ continue
-				#~ else:	
+				#~ else
+				
 			if d != 0:	
 				d0 = d[0]
 				d1 = d[1]
@@ -163,6 +162,8 @@ try:
 				
 				xd = -v.item(0)
 				yd = -v.item(1)
+				
+				print(str(xd)+"  ,  "+str(yd))
 				
 				robot.move(xd,yd,0)	
 			else:

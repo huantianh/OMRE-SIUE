@@ -4,7 +4,6 @@ import serial
 import math
 import numpy as np
 
-robot.enablePID(1)
 
 #ultrasonic setup
 us = [0,0,0,0,0,0]
@@ -34,8 +33,6 @@ current_theta = 0
 vl_s = [0,0,0,1]
 flag = [0,0,0,0,0,0]
 
-#~ v_x_obs = 0
-#~ v_y_obs = 0
 
 #####################################################		Obstacle Position
 def us0(d0):
@@ -129,78 +126,6 @@ def odemetryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 
 	return  newPos_mat
 
-#########################################################################		Go_To_Goal	
-def g2g_pid(xd,yd,thetad):
-
-	global current_x
-	global current_y
-	global current_theta
-	dt = 0.1
-	
-	#PID goToGoal
-	Kp = 2
-	Ki = 0.05
-	Kd = 0
-	integral = np.array([0,0,0])[:,None]
-	
-	preError = np.array([0,0,0])[:,None]
-	min_distance = 0.02
-	
-	delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
-	
-	#~ start = time.time()
-	
-	#~ while time.time()-float(start) <= float(duration):
-	while delta > min_distance:
-		
-		xc = current_x
-		yc = current_y
-		thetac = current_theta
-		
-		#PID Controller		
-		setPoint = np.array([xd,yd,thetad])[:,None]
-		currentPoint = np.array([xc,yc,thetac])[:,None]
-		error = setPoint - currentPoint
-		preError = error
-		integral = integral + error
-	
-		#~ if error == 0:
-			#~ integral = 0
-		#~ if error >= 30:
-			#~ integral = 0
-	
-		derivative = error - preError
-		output = Kp*error + Ki*integral + Kd*derivative	
-		vel_global = output
-		#Inverse Kinematic 
-		inv_rotation_mat= np.array([np.cos(thetac), np.sin(thetac), 0, -np.sin(thetac), np.cos(thetac), 0, 0, 0, 1]).reshape(3,3)
-		#~ d = np.sqrt(((xd-xc)**2)+((yd-yc)**2))
-		#~ phi = math.atan2((yd-yc),(xd-xc))
-		
-		#~ vel_global = np.array([ d*np.cos(phi), d*np.sin(phi), 0])[:,None]
-		vel_local = np.dot(inv_rotation_mat, vel_global)		
-		
-		#~ time_left = duration - (time.time() - start) #duration - time elapsed = time left
-		time_left = 1 #duration - time elapsed = time left
-		vl_x = vel_local[0] / time_left
-		vl_y = vel_local[1] / time_left 
-		vl_theta = vel_local[2] / time_left
-		
-		#Move the robot
-		robot.move(vl_x,vl_y,vl_theta)
-		#Odemetry
-		pose = odemetryCalc(current_x,current_y,current_theta)
-		current_x = pose.item(0)
-		current_y = pose.item(1)
-		current_theta = pose.item(2)
-		
-		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
-				
-		time.sleep(dt)
-		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-		print(data_write)
-
-	robot.move(0,0,0)	
 
 #########################################################################		G2G_OA_Blend
 def g2g_oa(xd,yd,thetad):
@@ -266,7 +191,7 @@ def g2g_oa(xd,yd,thetad):
 				flag[x] = 0	
 			#~ print(flag)
 		
-			if d != 0:
+			if d[x] != 0:
 				d0 = d[0]
 				d1 = d[1]
 				d2 = d[2]
@@ -280,12 +205,14 @@ def g2g_oa(xd,yd,thetad):
 				vs3 = us3(d3)
 				vs4 = us4(d4)
 				vs5 = us5(d5)	
+				
+				global vl_s
 							
 				vl_s = flag[0]*vs0 + flag[1]*vs1 + flag[2]*vs2 + flag[3]*vs3 + flag[4]*vs4 + flag[5]*vs5			
-					
+			
 ###############################################			Combine G2G and OA  		###########################################################
-		v_x_obs = -vl_s.item(0)
-		v_y_obs = -vl_s.item(1)	
+		v_x_obs = -vl_s[0]
+		v_y_obs = -vl_s[1]	
 
 		v_x = 0.2*v_x_g2g + 0.8*v_x_obs
 		v_y = 0.2*v_y_g2g + 0.8*v_y_obs
@@ -324,4 +251,4 @@ try:
 except KeyboardInterrupt:
         # Close serial connection
 	robot.stop()     
-	print('\n		Stop!!! See you again!')
+	print('\n\n		Stop!!! See you again!')

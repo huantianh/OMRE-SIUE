@@ -21,7 +21,6 @@ time.sleep(1)
 ser.reset_input_buffer()
 ser.reset_output_buffer()
 
-pid = 0;
 
 # This functions sends  pwm signals to the motor and reverses the direction if given negative
 # Example motor(255,0,0) would turn motor 0 on all the away and 1,2 off
@@ -60,10 +59,6 @@ def rpm(rpmNum):
 	rpmValue = (ser.readline().decode("ascii"))
 	return rpmValue.rstrip()
 
-def enablePID(pidValue):
-	pid = pidValue
-	ser.write(("p %d \r" % (pid)).encode())
-	
 def stop():
 	ser.write(("s \r").encode())	
 
@@ -88,7 +83,7 @@ def move(xd,yd,thetad):
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	
-	maxAllowedSpeed = 50
+	maxAllowedSpeed = 150
 	
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
 		maxRPM = max(abs(motor_spd_vec))
