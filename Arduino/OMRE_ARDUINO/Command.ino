@@ -21,6 +21,7 @@ void parseCommand()
       int  motorPWM;
       int  motorDirection;
       sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
+      pidSwitch = '0';
       motor(motorNumber, motorPWM);
       break;
 
@@ -57,17 +58,17 @@ void parseCommand()
       rpm_setpoint[2] = rpm2;
       break;
 
-    ////////////////////////////////////////////////////////////////              PID Switch ON/OFF
-    case 'p':
-    case 'P':
-      rpm_setpoint[0] = 0;
-      rpm_setpoint[1] = 0;
-      rpm_setpoint[2] = 0;
-      motor(0, 0);
-      motor(1, 0);
-      motor(2, 0);
-      sscanf(&rcv_buffer[1], " %c \r", &pidSwitch);
-      break;
+    //    ////////////////////////////////////////////////////////////////              PID Switch ON/OFF
+    //    case 'p':
+    //    case 'P':
+    //      rpm_setpoint[0] = 0;
+    //      rpm_setpoint[1] = 0;
+    //      rpm_setpoint[2] = 0;
+    //      motor(0, 0);
+    //      motor(1, 0);
+    //      motor(2, 0);
+    //      sscanf(&rcv_buffer[1], " %c \r", &pidSwitch);
+    //      break;
 
     ////////////////////////////////////////////////////////////////              Check  RPM
     case 'r':
@@ -103,9 +104,9 @@ void parseCommand()
       break;
 
     ////////////////////////////////////////////////////////////////             PRINT DATA
-    case 'a':
-    case 'A':
-      sscanf(&rcv_buffer[1], " %c \r", &printSwitch);
+    case 'p':
+    case 'P':
+      printSwitch = '1';
       break;
 
     ////////////////////////////////////////////////////////////////             Move Robot Forward
