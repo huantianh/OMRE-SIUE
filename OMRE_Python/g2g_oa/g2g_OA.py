@@ -16,6 +16,7 @@ newEncoder0 = 0
 newEncoder1 = 0
 newEncoder2 = 0
 
+
 ####################################################		Reset encoder
 def initOdometry():
 	global oldEncoder0 
@@ -127,10 +128,10 @@ def odemetryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 	return  newPos_mat
 
 
-#########################################################################		G2G_OA_Blend
+#######################################################		G2G_OA_Blend
 def g2g_oa(xd,yd,thetad):
 
-#########################################			G2G					####################################################################	
+#########################################			G2G					#####################################
 	global current_x
 	global current_y
 	global current_theta
@@ -178,11 +179,13 @@ def g2g_oa(xd,yd,thetad):
 		v_theta_g2g = vel_local[2] 
 		
 		
-###########################################################################################################################################
-#########################################		Obstacle Avoidance	
+################################################################################################################
+#########################################		Obstacle Avoidance					############################
 		for x in range(6):
 			us[x] = robot.ultrasonic(x)
 			#~ print(str(us[0])+", "+str(us[1])+", "+str(us[2])+", "+str(us[3])+", "+str(us[4])+", "+str(us[5]))
+			
+			global d
 			d = [us[0],us[1],us[2],us[3],us[4],us[5]]
 
 			if d[x] != 0:
@@ -210,18 +213,33 @@ def g2g_oa(xd,yd,thetad):
 							
 				vl_s = flag[0]*vs0 + flag[1]*vs1 + flag[2]*vs2 + flag[3]*vs3 + flag[4]*vs4 + flag[5]*vs5			
 			
-###############################################			Combine G2G and OA  		###########################################################
+###############################################			Combine G2G and OA  		#####################################
+		
 		v_x_obs = -vl_s[0]
 		v_y_obs = -vl_s[1]	
+	
+		if d == [0,0,0,0,0,0]:	
+			
+			v_x = 0.8*v_x_g2g + 0.2*v_x_obs
+			v_y = 0.8*v_y_g2g + 0.2*v_y_obs
+			v_theta = v_theta_g2g
+			time.sleep(0.2)
 
-		v_x = 0.2*v_x_g2g + 0.8*v_x_obs
-		v_y = 0.2*v_y_g2g + 0.8*v_y_obs
-		v_theta = v_theta_g2g
-
-		#Move the robot
-		robot.move(v_x,v_y,v_theta)		
-		#~ robot.move(v_x_g2g,v_y_g2g,v_theta_g2g)		
-
+		elif (d > [0,0,0,0,0,0]) and (d <= [0.2,0.2,0.2,0.2,0.2,0.2]):
+			
+			v_x = 0.1*v_x_g2g + 0.9*v_x_obs
+			v_y = 0.1*v_y_g2g + 0.9*v_y_obs
+			v_theta = v_theta_g2g
+			time.sleep(0.2)	
+			
+		elif (d > [0,0,0,0,0,0]) and (d<= [0.4,0.4,0.4,0.4,0.4,0.4]):
+	
+			v_x = 0.2*v_x_g2g + 0.8*v_x_obs
+			v_y = 0.2*v_y_g2g + 0.8*v_y_obs
+			v_theta = v_theta_g2g
+			time.sleep(0.2)
+					
+		robot.move(v_x,v_y,v_theta)	
 		#Odemetry
 		current_x = pose.item(0)
 		current_y = pose.item(1)

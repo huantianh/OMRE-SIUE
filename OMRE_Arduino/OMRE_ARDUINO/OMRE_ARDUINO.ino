@@ -43,7 +43,6 @@ char printSwitch                           = '0';
 #define PRINT_ULTRASOUND       1
 #define PRINT_IR               0
 #define PRINT_RPM              0
-
 /*****************************************         MAIN  SETUP             *********************************************/
 void setup()
 {
