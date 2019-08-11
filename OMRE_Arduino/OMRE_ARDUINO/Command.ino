@@ -52,7 +52,7 @@ void parseCommand()
       int rpm1;
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
-      pidSwitch = '1';      
+      pidSwitch = '1';
       rpm_setpoint[0] = rpm0;
       rpm_setpoint[1] = rpm1;
       rpm_setpoint[2] = rpm2;

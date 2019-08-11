@@ -33,7 +33,9 @@ current_theta = 0
 
 vl_s = [0,0,0,1]
 flag = [0,0,0,0,0,0]
-
+v_x = 0
+v_y = 0
+v_theta = 0
 
 #####################################################		Obstacle Position
 def us0(d0):
@@ -145,7 +147,7 @@ def g2g_oa(xd,yd,thetad):
 	
 	integral = np.array([0,0,0])[:,None]
 	preError = np.array([0,0,0])[:,None]
-	min_distance = 0.1
+	min_distance = 0.15
 	
 	delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 	
@@ -195,6 +197,7 @@ def g2g_oa(xd,yd,thetad):
 			#~ print(flag)
 		
 			if d[x] != 0:
+				
 				d0 = d[0]
 				d1 = d[1]
 				d2 = d[2]
@@ -214,31 +217,50 @@ def g2g_oa(xd,yd,thetad):
 				vl_s = flag[0]*vs0 + flag[1]*vs1 + flag[2]*vs2 + flag[3]*vs3 + flag[4]*vs4 + flag[5]*vs5			
 			
 ###############################################			Combine G2G and OA  		#####################################
-		
+	
 		v_x_obs = -vl_s[0]
 		v_y_obs = -vl_s[1]	
+		
+		#~ print(str(v_x_obs)+' , '+str(v_y_obs))
+		#~ print(d)
+		for x in d:
+			global v_x
+			global v_y
+			global v_theta	
+			if d == [0,0,0,0,0,0]:	
 	
-		if d == [0,0,0,0,0,0]:	
+				v_x = 0.3*v_x_g2g 
+				v_y = 0.3*v_y_g2g 
+				v_theta = v_theta_g2g
 			
-			v_x = 0.8*v_x_g2g + 0.2*v_x_obs
-			v_y = 0.8*v_y_g2g + 0.2*v_y_obs
-			v_theta = v_theta_g2g
-			time.sleep(0.2)
-
-		elif (d > [0,0,0,0,0,0]) and (d <= [0.2,0.2,0.2,0.2,0.2,0.2]):
+			elif x > 0.3 and x <= 0.4:
+				
+				v_x = 0.3*v_x_g2g + 0.7*v_x_obs
+				v_y = 0.3*v_y_g2g + 0.7*v_y_obs
+				v_theta = v_theta_g2g
+				#~ print('30 cm')	
 			
-			v_x = 0.1*v_x_g2g + 0.9*v_x_obs
-			v_y = 0.1*v_y_g2g + 0.9*v_y_obs
-			v_theta = v_theta_g2g
-			time.sleep(0.2)	
+			elif x > 0.2 and x <= 0.3:
+				
+				v_x = 0.2*v_x_g2g + 0.8*v_x_obs
+				v_y = 0.2*v_y_g2g + 0.8*v_y_obs
+				v_theta = v_theta_g2g
+				#~ print('20 cm')		
 			
-		elif (d > [0,0,0,0,0,0]) and (d<= [0.4,0.4,0.4,0.4,0.4,0.4]):
-	
-			v_x = 0.2*v_x_g2g + 0.8*v_x_obs
-			v_y = 0.2*v_y_g2g + 0.8*v_y_obs
-			v_theta = v_theta_g2g
-			time.sleep(0.2)
-					
+			elif x > 0.1 and x <= 0.2:
+				
+				v_x = 0.1*v_x_g2g + 0.9*v_x_obs
+				v_y = 0.1*v_y_g2g + 0.9*v_y_obs
+				v_theta = v_theta_g2g
+				#~ print('10 cm')		
+			
+			elif x > 0 and x <= 0.1:
+				
+				v_x = v_x_obs
+				v_y = v_y_obs
+				v_theta = v_theta_g2g
+				#~ print('0 cm')	
+		
 		robot.move(v_x,v_y,v_theta)	
 		#Odemetry
 		current_x = pose.item(0)

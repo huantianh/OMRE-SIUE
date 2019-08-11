@@ -26,10 +26,10 @@ const int infraredSensorPins[]             = {0, 1, 2, 3};
 double rpm_setpoint[3]                     = {0, 0, 0};
 int rpmValues[3]                           = {0, 0, 0};
 
-double duration_US[6]                       = {0, 0, 0, 0, 0, 0};
-double m_US[6]                              = {0, 0, 0, 0, 0, 0};
+double duration_US[6]                      = {0, 0, 0, 0, 0, 0};
+double m_US[6]                             = {0, 0, 0, 0, 0, 0};
 
-double m_IR[4]                              = {0, 0, 0, 0};
+double m_IR[4]                             = {0, 0, 0, 0};
 
 char rcv_buffer[64];  // holds commands recieved
 //char TXBuffer[64];    // temp storage for large data sent

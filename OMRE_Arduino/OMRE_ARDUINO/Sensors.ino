@@ -38,7 +38,7 @@ void UsSensor()
     delayMicroseconds(10);
     digitalWrite(ultrasonicSensorTrigPins[i], LOW);
 
-    duration_US[i] = pulseIn(ultrasonicSensorEchoPins[i], HIGH, 2500); //2500 = 30cm //6500 micro seconds gives about 100 cm max
+    duration_US[i] = pulseIn(ultrasonicSensorEchoPins[i], HIGH, 3000); //2500 = 30cm //6500 micro seconds gives about 100 cm max
     m_US[i] = ((duration_US[i] * 0.034) / 2)*0.01;
   }
 }
