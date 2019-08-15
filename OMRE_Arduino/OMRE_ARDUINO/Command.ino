@@ -58,18 +58,6 @@ void parseCommand()
       rpm_setpoint[2] = rpm2;
       break;
 
-    //    ////////////////////////////////////////////////////////////////              PID Switch ON/OFF
-    //    case 'p':
-    //    case 'P':
-    //      rpm_setpoint[0] = 0;
-    //      rpm_setpoint[1] = 0;
-    //      rpm_setpoint[2] = 0;
-    //      motor(0, 0);
-    //      motor(1, 0);
-    //      motor(2, 0);
-    //      sscanf(&rcv_buffer[1], " %c \r", &pidSwitch);
-    //      break;
-
     ////////////////////////////////////////////////////////////////              Check  RPM
     case 'r':
     case 'R':

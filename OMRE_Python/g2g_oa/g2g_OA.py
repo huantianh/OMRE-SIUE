@@ -1,9 +1,13 @@
 import libomni as robot  #Library tha handles all the serial commands to arduino AtMega
-import time
+import time,os
 import serial
 import math
 import numpy as np
 
+#folder where saving all the data
+save_folder = "Data_Testing/"
+current_directory = os.getcwd()
+save_directory = os.path.join(current_directory, save_folder)
 
 #ultrasonic setup
 us = [0,0,0,0,0,0]
@@ -151,8 +155,10 @@ def g2g_oa(xd,yd,thetad):
 	
 	delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 	
+
 	while delta > min_distance:
 		
+		file = open(save_folder + "x_"+str(xd)+",y_"+str(yd)+",theta_"+str(thetad)+".txt","a+")
 		xc = current_x
 		yc = current_y
 		thetac = current_theta
@@ -232,13 +238,15 @@ def g2g_oa(xd,yd,thetad):
 				v_x = 0.3*v_x_g2g 
 				v_y = 0.3*v_y_g2g 
 				v_theta = v_theta_g2g
-			
+				#~ speed = 120
+				
 			elif x > 0.3 and x <= 0.4:
 				
 				v_x = 0.3*v_x_g2g + 0.7*v_x_obs
 				v_y = 0.3*v_y_g2g + 0.7*v_y_obs
 				v_theta = v_theta_g2g
 				#~ print('30 cm')	
+				#~ speed = 100
 			
 			elif x > 0.2 and x <= 0.3:
 				
@@ -246,22 +254,28 @@ def g2g_oa(xd,yd,thetad):
 				v_y = 0.2*v_y_g2g + 0.8*v_y_obs
 				v_theta = v_theta_g2g
 				#~ print('20 cm')		
-			
+				#~ speed = 80
+				
 			elif x > 0.1 and x <= 0.2:
 				
 				v_x = 0.1*v_x_g2g + 0.9*v_x_obs
 				v_y = 0.1*v_y_g2g + 0.9*v_y_obs
 				v_theta = v_theta_g2g
 				#~ print('10 cm')		
-			
+				#~ speed = 70
+				
 			elif x > 0 and x <= 0.1:
 				
 				v_x = v_x_obs
 				v_y = v_y_obs
 				v_theta = v_theta_g2g
-				#~ print('0 cm')	
-		
+				#~ print('0 cm')		
+				#~ speed = 200
+			elif d[0] != 0:
+				v_theta = 3.14
+			
 		robot.move(v_x,v_y,v_theta)	
+		
 		#Odemetry
 		current_x = pose.item(0)
 		current_y = pose.item(1)
@@ -269,12 +283,14 @@ def g2g_oa(xd,yd,thetad):
 
 		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 				
-		time.sleep(dt)
+		#~ time.sleep(dt)
 		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 		print(data_write)
-
-					
-	robot.move(0,0,0)
+		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+"\n")
+		#~ file.writelines(data_write)
+		file.close()
+				
+	robot.stop()
 
 
 try: 
@@ -286,9 +302,12 @@ try:
 		thetad = float(input("enter theta desired: "))	
 		initOdometry()							
 		g2g_oa(xd,yd,thetad)
+		
+		
 				
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:
         # Close serial connection
-	robot.stop()     
+	robot.stop()    
+	#~ file.close() 
 	print('\n\n		Stop!!! See you again!')
