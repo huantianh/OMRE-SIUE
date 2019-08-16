@@ -95,7 +95,9 @@ def g2g_pid(xd,yd,thetad):
 
 	while delta > min_distance:
 		
-		file = open(save_folder1 + "x_"+str(xd)+",y_"+str(yd)+",theta_"+str(thetad)+".txt","a+")
+		#~ file = open(save_folder1 + "x_"+str(xd)+",y_"+str(yd)+",theta_"+str(thetad)+".txt","a+")
+		#~ file = open(save_folder1 + "Triangle_Closed" +".txt","a")
+		file = open(save_folder1 + "Square_Closed" +".txt","a")
 		xc = current_x
 		yc = current_y
 		thetac = current_theta
@@ -144,7 +146,9 @@ def g2g(xd,yd,thetad):
 	global current_y
 	global current_theta
 	
-	file = open(save_folder2 + "x_"+str(xd)+",y_"+str(yd)+",theta_"+str(thetad)+".txt","a+")
+	#~ file = open(save_folder2 + "x_"+str(xd)+",y_"+str(yd)+",theta_"+str(thetad)+".txt","a+")
+	#~ file = open(save_folder2 + "Triangle_Open" +".txt","a")
+	file = open(save_folder2 + "Square_Open" +".txt","a")
 	
 	while True:
 
@@ -161,15 +165,11 @@ def g2g(xd,yd,thetad):
 		vel_global = np.array([ d*np.cos(phi), d*np.sin(phi), -1*(current_theta-thetad)])[:,None]
 			
 		vel_local = np.dot(inv_rotation_mat, vel_global)
-		
-		#v = velocity  l = local		
+				
 		v_x = vel_local[0]
 		v_y = vel_local[1]
 		v_theta = vel_local[2]
 		
-		#~ print(v_x)
-		#~ print(v_y)
-		#~ print(v_theta)
 		
 		robot.move(v_x, v_y, v_theta)
 		
@@ -197,20 +197,65 @@ try:
 		mode = str(input("Enter mode: g for regular g2g, p for PID "))
 			
 		if mode == 'g':	
-			print("######### Enter your goal (x,y) :) ########## ")
-			xd = float(input("enter x desired: "))
-			yd = float(input("enter y desired: "))
-			thetad = float(input("enter theta desired: "))	
-			initOdometry()							
-			g2g(xd,yd,thetad)
+			#~ f = open("triangle_values.txt",'r')
+			f = open("square_values.txt",'r')
+			lines = f.readlines()
+			xd = []
+			yd = []
+			thetad = []
+			timer = []
+			
+			for line in lines:
+				x = line.split(',')[0]
+				y = line.split(',')[1]
+				theta = line.split(',')[2]
+				time = line.split(',')[3]
+				
+				xd = x	
+				yd = y
+				thetad = theta
+				timer = time
+				#~ print(xd)
+				#~ print(yd)
+				initOdometry()							
+				g2g(int(xd),int(yd),int(thetad))
+			
+			
+			#~ print("######### Enter your goal (x,y) :) ########## ")
+			#~ xd = float(input("enter x desired: "))
+			#~ yd = float(input("enter y desired: "))
+			#~ thetad = float(input("enter theta desired: "))	
+			#~ initOdometry()							
+			#~ g2g(xd,yd,thetad)
 		
 		if mode == 'p':	
-			print("######### Enter your goal (x,y) :) ########## ")
-			xd = float(input("enter x desired: "))
-			yd = float(input("enter y desired: "))
-			thetad = float(input("enter theta desired: "))	
-			initOdometry()							
-			g2g_pid(xd,yd,thetad)
+			#~ f = open("triangle_values.txt",'r')
+			f = open("square_values.txt",'r')
+			lines = f.readlines()
+			xd = []
+			yd = []
+			thetad = []
+			timer = []
+			
+			for line in lines:
+				x = line.split(',')[0]
+				y = line.split(',')[1]
+				theta = line.split(',')[2]
+				time = line.split(',')[3]
+				
+				xd = x	
+				yd = y
+				thetad = theta
+				timer = time
+				initOdometry()							
+				g2g_pid(int(xd),int(yd),int(thetad))
+			
+			#~ print("######### Enter your goal (x,y) :) ########## ")
+			#~ xd = float(input("enter x desired: "))
+			#~ yd = float(input("enter y desired: "))
+			#~ thetad = float(input("enter theta desired: "))	
+			#~ initOdometry()							
+			#~ g2g_pid(xd,yd,thetad)
 		
 				
 ## Ctrl + c to stop robot

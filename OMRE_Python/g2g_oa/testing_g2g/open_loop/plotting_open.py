@@ -33,12 +33,12 @@ with open(root.filename,'r') as csvfile:
 
 fig = plt.plot(x,y, 'b', label='Open_Loop', linewidth=3)
 plt.legend()
-plt.plot(x,0*np.ones(len(x)),'r',linewidth=3)
-plt.axis([-0.2,2.2,-1,0.007])
+#~ plt.plot(x,0*np.ones(len(x)),'r',linewidth=3)
+plt.axis([-0.2,2.2,-0.2,1.2])
 
 
-#~ plt.autoscale(enable=True, axis='x', tight=False)
-plt.autoscale(enable=True, axis='y', tight=True)
+#~ plt.autoscale(enable=True, axis='x', tight=True)
+#~ plt.autoscale(enable=True, axis='y', tight=True)
 plt.xlabel('X_open')
 plt.ylabel('Y_open')
 plt.title(my_txt1)
