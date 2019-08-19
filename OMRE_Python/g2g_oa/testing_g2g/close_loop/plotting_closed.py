@@ -31,11 +31,21 @@ with open(root.filename,'r') as csvfile:
 		y.append(float(row[1]))
 		y3.append(float(row[2]))
 
-fig = plt.plot(x,y, 'b', label='Closed_Loop', linewidth=3)
+fig, ax = plt.subplots()
+ax.plot(x,y, 'b', label='Closed_Loop', linewidth=3)
 plt.legend()
-#~ plt.plot(x,0*np.ones(len(x)),'r',linewidth=3)
-plt.axis([-0.2,2.2,-0.2,1.2])
 
+#square
+#~ ax.vlines(x=0, ymin=0, ymax=1,color='r',linewidth=1.5)
+#~ ax.vlines(x=1, ymin=0, ymax=1,color='r',linewidth=1.5)
+#~ ax.hlines(y=0, xmin=0, xmax=1,color='r',linewidth=1.5)
+#~ ax.hlines(y=1, xmin=0, xmax=1,color='r',linewidth=1.5)
+#~ plt.axis([-0.2,1.2,-0.2,1.2])
+
+#triangle
+plt.plot([0,1,2],[0,1,0],'r',linewidth=1.5)
+ax.hlines(y=0, xmin=0, xmax=2,color='r',linewidth=1.5)
+plt.axis([-0.2,2.2,-0.2,1.2])
 
 #~ plt.autoscale(enable=True, axis='x', tight=False)
 #~ plt.autoscale(enable=True, axis='y', tight=False)
