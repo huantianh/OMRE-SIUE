@@ -93,7 +93,7 @@ void parseCommand()
     case 'R':
       int rpmNum;
       sscanf(&rcv_buffer[1], " %d \r", &rpmNum);
-      printDouble(rpmValues[rpmNum], 1000000000);
+      Serial.println(rpmValues[rpmNum]);
       break;
 
     //    ///////////////////////////////////////////////////////////////               ENTER GAINS K
