@@ -34,15 +34,15 @@ double m_IR[4]                             = {0, 0, 0, 0};
 char rcv_buffer[64];  // holds commands recieved
 //char TXBuffer[64];    // temp storage for large data sent
 
-char pidSwitch                             = '1';
+char pidSwitch                             = '0';
 char ultrasonicSwitch                      = '0';
 char IRSwitch                              = '0';
 char printSwitch                           = '0';
 
 /*****************************************        PRINT DATA SETUP        **************************************************************/
-#define PRINT_ULTRASOUND       1
+#define PRINT_ULTRASOUND       0
 #define PRINT_IR               0
-#define PRINT_RPM              0
+#define PRINT_RPM              1
 
 /*****************************************         MAIN  SETUP             *********************************************/
 void setup()

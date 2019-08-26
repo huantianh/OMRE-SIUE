@@ -1,4 +1,5 @@
-import matplotlib.pyplot as plt
+#~ import matplotlib.pyplot as plt
+import matplotlib
 import csv
 import numpy as np 
 import os, time

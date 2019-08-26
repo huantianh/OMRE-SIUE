@@ -43,12 +43,12 @@ plt.legend()
 #~ plt.axis([-0.2,1.2,-0.2,1.2])
 
 #triangle
-plt.plot([0,1,2],[0,1,0],'r',linewidth=1.5)
-ax.hlines(y=0, xmin=0, xmax=2,color='r',linewidth=1.5)
-plt.axis([-0.2,2.2,-0.2,1.2])
+#~ plt.plot([0,1,2],[0,1,0],'r',linewidth=1.5)
+#~ ax.hlines(y=0, xmin=0, xmax=2,color='r',linewidth=1.5)
+plt.axis([-0.2,5.2,-0.2,5.2])
 
 #~ plt.autoscale(enable=True, axis='x', tight=True)
-#~ plt.autoscale(enable=True, axis='y', tight=True)
+#~ plt.autoscale(enable=True, axis='y', tight=False)
 plt.xlabel('X_open')
 plt.ylabel('Y_open')
 plt.title(my_txt1)
