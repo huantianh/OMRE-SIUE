@@ -1,6 +1,9 @@
 # OMRE-SIUE
 6 Autonomous Mobile Robots at SIUE
 
+Intall Jetpack: (fixed error)
+sudo dpkg -i /home/nvidia/cuda-l4t/cuda-repo-l4t-9-0-local_9.0.252-1_arm64.deb
+
 Install Arduino:
 https://www.instructables.com/id/Install-Arduino-IDE-182-on-Linux/
 
