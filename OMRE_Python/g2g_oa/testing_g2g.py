@@ -254,8 +254,6 @@ try:
 			initOdometry()							
 			g2g_pid(xd,yd,thetad)
 
-		
-				
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:
         # Close serial connection
