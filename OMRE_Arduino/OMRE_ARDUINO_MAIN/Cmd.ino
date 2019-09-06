@@ -4,7 +4,7 @@ void parseCommand()
   char command = rcv_buffer[0]; // our first byte tells us the command char is equivalent to byte
   switch (command)
   {
-    ///////////////////////////////////////////////////////////////             ENCODER
+    ////////////////////////////////////////////////////////////////             ENCODER
     case 'E':
     case 'e':
       int encoderNum;
@@ -96,7 +96,7 @@ void parseCommand()
       Serial.println(rpmValues[rpmNum]);
       break;
 
-    //    ///////////////////////////////////////////////////////////////               ENTER GAINS K
+    //    ///////////////////////////////////////////////////////////////             ENTER GAINS K
     //    case 'k':
     //    case 'K':
     //      char  pValue[20];
@@ -110,7 +110,7 @@ void parseCommand()
     //      }
     //      break;
 
-    ////////////////////////////////////////////////////////////////              STOP
+    ////////////////////////////////////////////////////////////////            STOP
     case 's':
     case 'S':
 
