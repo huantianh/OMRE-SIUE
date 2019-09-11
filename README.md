@@ -14,3 +14,6 @@ https://github.com/geany/geany-themes
 
 Install OpenCV:
 https://shiroku.net/robotics/install-opencv-on-jetson-tx2/
+
+Install Intel_RealSense
+https://www.jetsonhacks.com/2017/03/26/intel-realsense-camera-installation-nvidia-jetson-tx2/
