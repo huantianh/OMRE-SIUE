@@ -10,8 +10,8 @@ double pwm_pid[3]             = {0, 0, 0};
 int    rpms[3]                = {0, 0, 0};
 int SampleTime                = 1000;
 
-double Kp[] = {0.5, 0.5, 0.5};
-double Ki[] = {0.1, 0.1, 0.1};
+double Kp[] = {0.3, 0.3, 0.3};
+double Ki[] = {0.05, 0.05, 0.05};
 double Kd[] = {0, 0, 0};
 
 void speed_pid()
