@@ -11,7 +11,7 @@ int    rpms[3]                = {0, 0, 0};
 int SampleTime                = 1000;
 
 double Kp[] = {0.3, 0.3, 0.3};
-double Ki[] = {0.05, 0.05, 0.05};
+double Ki[] = {0.02, 0.02, 0.02};
 double Kd[] = {0, 0, 0};
 
 void speed_pid()

@@ -69,115 +69,117 @@ def odometryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 	return  newPos_mat
 
 
-def g2g(xd,yd,thetad):
+def path_f(xd,yd,thetad):
 	global current_x
 	global current_y
 	global current_theta
 
 	file = open(save_folder2 + "Circle_Open" +".txt","a")
 	
-	# ~ while True:
+	while True:
 
-	xc = current_x
-	yc = current_y
-	thetac = current_theta
-	
-	vr = 0.5
-	
-	if (2-xd == 0):
-		x_dot_d = vr
-		y_dot_d = 0
-		theta_dot_d = thetad
-	
-	if (yd-2 == 0):
-		x_dot_d = 0
-		y_dot_d = vr	
-		theta_dot_d = thetad
+		xc = current_x
+		yc = current_y
+		thetac = current_theta
 		
-	else:
-		dydx = (2-xd) / (yd -2)
-		x_dot_d = vr / np.sqrt(1+dydx*dydx)
-		y_dot_d = dydx*x_dot_d
-		theta_dot_d = thetad
-	
-	q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
-	
-	j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
-	j_inv = np.linalg.inv(j).reshape(3,3)
-	
-	# ~ print(j_inv)
-	
-	K = 1
-			
-	e = np.array([(xc - xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 		
-	
-	s = -K*e + q_dot_d
-			
-	vm = np.dot( j_inv, s, out=None)
-	
-	motor_spd_vec = vm
-	
-	# ~ print(motor_spd_vec)
-	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
-	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
-	
-	
-	maxAllowedSpeed = 210
-	
-	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
-		maxRPM = max(abs(motor_spd_vec))
-		ratio = abs(maxRPM)/maxAllowedSpeed
+		vr = 0.01
 		
-		wheel0RPM = wheel0RPM/ratio
-		wheel1RPM = wheel1RPM/ratio
-		wheel2RPM = wheel2RPM/ratio
-	
-	print("Wheel0 RPM: " +str(wheel0RPM))
-	print("Wheel1 RPM: " +str(wheel1RPM))
-	print("Wheel2 RPM: " +str(wheel2RPM))
+		if (0.5-xd == 0):
+			x_dot_d = vr
+			y_dot_d = 0
+			theta_dot_d = 0.01
+		
+		if (yd-0.5 == 0):
+			x_dot_d = 0
+			y_dot_d = vr	
+			theta_dot_d = 0.01
+			
+		else:
+			dydx = (0.5-xd) / (yd-0.5)
+			x_dot_d = vr / np.sqrt(1+dydx*dydx)
+			y_dot_d = dydx*x_dot_d
+			theta_dot_d = 0.01
+		
+		q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
+		
+		j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
+		j_inv = np.linalg.inv(j).reshape(3,3)
+		
+		K = 5
+				
+		e = np.array([(xc - xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 			
+		
+		s = -K*e + q_dot_d
+				
+		vm = np.dot( j_inv, s, out=None)
+		
+		motor_spd_vec = vm
+		
+		wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
+		wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
+		wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
+		
 
-	robot.motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
-	
-	pose = odometryCalc(xc,yc,thetac)	
-	
-	current_x = pose.item(0)
-	current_y = pose.item(1)
-	current_theta = pose.item(2)
-	
-	# ~ delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
-	
-	data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-	# ~ print(data_write)
-	file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+"\n")
-	
-	# ~ if delta < 0.01:	
-		# ~ file.close()
-		# ~ robot.stop()	
-		# ~ break
+		robot.motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
+		
+		pose = odometryCalc(xc,yc,thetac)	
+		
+		current_x = pose.item(0)
+		current_y = pose.item(1)
+		current_theta = pose.item(2)
+		
+		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
+		# ~ print(delta)
+		
+		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
+		print(data_write)
+		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+"\n")
+		
+		if delta < 0.05:	
+			file.close()
+			robot.stop()	
+			break
 
 try: 
 	while True:
 		mode = str(input("Enter mode: s for start "))
 			
-		if mode == 'g':	
-			f = open("circle_values.txt",'r')
-			lines = f.readlines()
-			xd = []
-			yd = []
-			thetad = []
-						
-			for line in lines:
-				x = line.split(',')[0]
-				y = line.split(',')[1]
-				theta = line.split(',')[2]
-								
+		if mode == 's':	
+				
+			for x in np.arange(0,1,0.008):
+	
+				b = 0.5
+				a = 0.5
+				R = 0.5
+				
+				w = R*R - (x-a)*(x-a)
+				
+				y = b + np.sqrt(w)
+		
 				xd = x	
 				yd = y
-				thetad = theta
-												
+				thetad = 0
+											
 				initOdometry()							
-				g2g(float(xd),float(yd),float(thetad))
+				path_f(float(xd),float(yd),float(thetad))
+				
+			for x1 in np.arange(1,0,-0.008):
+	
+				b = 0.5
+				a = 0.5
+				R = 0.5
+				
+				w = R*R - (x1-a)*(x1-a)
+				
+				y1 = b - np.sqrt(w)					
+				
+				xd1 = x1	
+				yd1 = y1
+				thetad = 0
+				
+				# ~ print(xd)								
+				initOdometry()							
+				path_f(float(xd1),float(yd1),float(thetad))
 	
 
 ## Ctrl + c to stop robot
