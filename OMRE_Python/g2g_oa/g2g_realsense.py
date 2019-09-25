@@ -235,8 +235,8 @@ def g2g(xd,yd,thetad):
 		pose = odemetryCalc(xc,yc,thetac)
 		pos  = odemetry_RealSense()
 		
-		current_x = pos_x
-		current_y = pos_y
+		current_x = pose.item(0)
+		current_y = pose.item(1)
 		current_theta = pose.item(2)
 		# ~ print (current_x)
 		# ~ print (current_y)

@@ -3,6 +3,7 @@ import time,os
 import serial
 import math
 import numpy as np
+import xbox
 
 #folder where saving all the data
 save_folder = "Data_Testing/"
@@ -296,12 +297,33 @@ def g2g_oa(xd,yd,thetad):
 try: 
 	while True:
 		
-		print("######### Enter your goal (x,y) :) ########## ")
-		xd = float(input("enter x desired: "))
-		yd = float(input("enter y desired: "))
-		thetad = float(input("enter theta desired: "))	
-		initOdometry()							
-		g2g_oa(xd,yd,thetad)
+		# ~ print("######### Enter your goal (x,y) :) ########## ")
+		# ~ xd = float(input("enter x desired: "))
+		# ~ yd = float(input("enter y desired: "))
+		# ~ thetad = float(input("enter theta desired: "))	
+		# ~ initOdometry()							
+		# ~ g2g_oa(xd,yd,thetad)
+		
+		############### Contoller demo for testing  ################
+		
+		mode = str(input("Enter mode: c for controller "))
+		
+		if mode == 'c':
+			joy = xbox.Joystick()
+			theta = 0
+			while True:
+				theta = 0
+				time.sleep(0)
+				if(joy.B()):
+					joy.close()
+					motors(0,0,0)
+					quit()
+				(x,y) = joy.leftStick()
+				(x1,y1) = joy.rightStick()
+				print("x: "+str(y))
+				print("y: "+str(x1))
+			
+				robot.move(y/1.5,-x/1.5,x1*np.pi)
 		
 		
 				

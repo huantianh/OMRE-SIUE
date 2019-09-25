@@ -28,13 +28,6 @@ acc_x = 0
 acc_y = 0
 acc_z = 0
 
-# Declare RealSense pipeline, encapsulating the actual device and sensors
-pipe = rs.pipeline()
-# Build config object and request pose data
-cfg = rs.config()
-cfg.enable_stream(rs.stream.pose)
-# Start streaming with requested config
-pipe.start(cfg)
 
 ####################################################		Reset encoder
 def initOdometry():
@@ -200,7 +193,7 @@ def g2g(xd,yd,thetad):
 		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2)) #< 0.1	
 		
 		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-		# ~ print(data_write)
+		print(data_write)
 		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+"\n")
 		
 	
@@ -217,29 +210,30 @@ try:
 		if mode == 'g':	
 			# ~ f = open("triangle_values.txt",'r')
 			# ~ f = open("square_values.txt",'r')
-			f = open("circle_values.txt",'r')
-			lines = f.readlines()
-			xd = []
-			yd = []
-			thetad = []
+			# ~ f = open("circle_values.txt",'r')
+			# ~ lines = f.readlines()
+			# ~ xd = []
+			# ~ yd = []
+			# ~ thetad = []
 						
-			for line in lines:
-				x = line.split(',')[0]
-				y = line.split(',')[1]
-				theta = line.split(',')[2]
+			# ~ for line in lines:
+				# ~ x = line.split(',')[0]
+				# ~ y = line.split(',')[1]
+				# ~ theta = line.split(',')[2]
 								
-				xd = x	
-				yd = y
-				thetad = theta
-				initOdometry()							
-				g2g(float(xd),float(yd),float(thetad))
+				# ~ xd = x	
+				# ~ yd = y
+				# ~ thetad = theta
+				# ~ print(str(xd) +' , '+str(yd))
+				# ~ initOdometry()							
+				# ~ g2g(float(xd),float(yd),float(thetad))
 		
-			# ~ print("######### Enter your goal (x,y) :) ########## ")
-			# ~ xd = float(input("enter x desired: "))
-			# ~ yd = float(input("enter y desired: "))
-			# ~ thetad = float(input("enter theta desired: "))	
-			# ~ initOdometry()							
-			# ~ g2g(xd,yd,thetad)	
+			print("######### Enter your goal (x,y) :) ########## ")
+			xd = float(input("enter x desired: "))
+			yd = float(input("enter y desired: "))
+			thetad = float(input("enter theta desired: "))	
+			initOdometry()							
+			g2g(xd,yd,thetad)	
 		
 		if mode == 'p':	
 			# ~ f = open("triangle_values.txt",'r')

@@ -3,8 +3,8 @@ import numpy as np
 import time,os,serial,math
 
 #folder where saving all the data
-save_folder1 = "testing_g2g_data/close_loop/"
-save_folder2 = "testing_g2g_data/open_loop/"
+save_folder1 = "path_data/close_loop/"
+save_folder2 = "path_data/open_loop/"
 current_directory = os.getcwd()
 save_directory1 = os.path.join(current_directory, save_folder1)
 save_directory2 = os.path.join(current_directory, save_folder2)
@@ -69,12 +69,20 @@ def odometryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 	return  newPos_mat
 
 
-def path_f(xd,yd,thetad):
+def path_f(xd,yd,thetad,b,a,R,step):
 	global current_x
 	global current_y
 	global current_theta
+	
+	delta_min = 0.1
+	vr = 0.01
+	h = 3
+	Kx = h	
+	Ky = h
+	Kz = h
 
-	file = open(save_folder2 + "Circle_Open" +".txt","a")
+	file = open(save_folder2 + "Circle"+"_vr_"+str(vr)+"_K_"+str(h)+"_delta_"+str(delta_min)+'_R_'+str(R)+'_step_'+str(step)+".txt","a")
+	# ~ file = open(save_folder2 + "Circle"+"_vr_"+str(vr)+"_K_"+str(Kx)+"_"+str(Ky)+"_"+str(Kz)+"_delta_"+str(delta_min)+".txt","a")
 	
 	while True:
 
@@ -82,44 +90,42 @@ def path_f(xd,yd,thetad):
 		yc = current_y
 		thetac = current_theta
 		
-		vr = 0.01
-		
-		if (0.5-xd == 0):
+		if (a-xd == 0):
 			x_dot_d = vr
 			y_dot_d = 0
-			theta_dot_d = 0.01
-		
-		if (yd-0.5 == 0):
-			x_dot_d = 0
-			y_dot_d = vr	
-			theta_dot_d = 0.01
+			theta_dot_d = 0.1
 			
+		if (yd-b == 0):
+			x_dot_d = 0
+			y_dot_d = vr
+			theta_dot_d = 0.1
+						
 		else:
-			dydx = (0.5-xd) / (yd-0.5)
+			dydx = (a-xd)/(yd-b)
 			x_dot_d = vr / np.sqrt(1+dydx*dydx)
 			y_dot_d = dydx*x_dot_d
-			theta_dot_d = 0.01
+			theta_dot_d = 0.1
 		
 		q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
 		
 		j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
 		j_inv = np.linalg.inv(j).reshape(3,3)
-		
-		K = 5
+			
+		K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
 				
-		e = np.array([(xc - xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 			
+		e = np.array([(xc - xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
 		
-		s = -K*e + q_dot_d
+		s = np.dot(-K,e,out=None) + q_dot_d
 				
 		vm = np.dot( j_inv, s, out=None)
 		
 		motor_spd_vec = vm
+		# ~ print(vm)
 		
 		wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
 		wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 		wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
-		
-
+			
 		robot.motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 		
 		pose = odometryCalc(xc,yc,thetac)	
@@ -131,57 +137,57 @@ def path_f(xd,yd,thetad):
 		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 		# ~ print(delta)
 		
-		data_write = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-		print(data_write)
-		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+"\n")
+		m1_rpm = robot.rpm(0)
+		m2_rpm = robot.rpm(1)
+		m3_rpm = robot.rpm(2)
+		data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
+		print(data_rpm) 	
 		
-		if delta < 0.05:	
+		time_running = time.time()
+		# ~ print(time_running)
+		
+		data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
+		# ~ print(data_pose)
+		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
+		
+		if delta < delta_min:	
 			file.close()
 			robot.stop()	
 			break
 
 try: 
 	while True:
-		mode = str(input("Enter mode: s for start "))
-			
-		if mode == 's':	
-				
-			for x in np.arange(0,1,0.008):
-	
-				b = 0.5
-				a = 0.5
-				R = 0.5
-				
-				w = R*R - (x-a)*(x-a)
-				
-				y = b + np.sqrt(w)
+		mode = str(input("Enter s to start "))
 		
-				xd = x	
-				yd = y
-				thetad = 0
-											
-				initOdometry()							
-				path_f(float(xd),float(yd),float(thetad))
-				
-			for x1 in np.arange(1,0,-0.008):
-	
-				b = 0.5
-				a = 0.5
-				R = 0.5
-				
-				w = R*R - (x1-a)*(x1-a)
-				
-				y1 = b - np.sqrt(w)					
-				
-				xd1 = x1	
-				yd1 = y1
-				thetad = 0
-				
-				# ~ print(xd)								
-				initOdometry()							
-				path_f(float(xd1),float(yd1),float(thetad))
-	
+		if mode == 's':
+			# ~ a = float(input("enter a: "))
+			# ~ b = float(input("enter b: "))
+			# ~ R = float(input("enter R: "))		
 
+			b = 0.15	
+			a = 0
+			R = b
+			step = 0.01
+			
+			y1 = np.arange(0,b*2,step)
+			w1 = R*R - (y1-b)*(y1-b)
+			x1 = a + np.sqrt(w1)
+
+			y2 = np.arange(b*2,0,-step)
+			y3 = np.append(y2,0)
+			w2 = R*R - (y3-b)*(y3-b)
+			x2 = a - np.sqrt(w2)
+
+			x = np.concatenate((x1,x2))
+			y = np.concatenate((y1,y3))
+					
+			initOdometry()
+			for i,j in zip(x,y):
+				xd = i
+				yd = j
+				thetad = 0
+				path_f(float(xd),float(yd),float(thetad),float(b),float(a),float(R),float(step))
+	
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:
         # Close serial connection
