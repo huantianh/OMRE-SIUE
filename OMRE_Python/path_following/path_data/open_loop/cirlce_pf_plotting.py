@@ -22,6 +22,8 @@ text = f.read()
 x = []
 y = []
 z = []
+rs1 = []
+rs2 = []
 rpm1 =[]
 rpm2 =[]
 rpm3 =[]
@@ -35,10 +37,14 @@ with open(root.filename,'r') as csvfile:
 		x.append(float(row[0]))
 		y.append(float(row[1]))
 		z.append(float(row[2]))
-		rpm1.append(float(row[3]))
-		rpm2.append(float(row[4]))
-		rpm3.append(float(row[5]))
-		t.append(float(row[6])-t0)
+		
+		rs1.append(float(row[3]))
+		rs2.append(float(row[4]))
+		
+		rpm1.append(float(row[5]))
+		rpm2.append(float(row[6]))
+		rpm3.append(float(row[7]))
+		t.append(float(row[8])-t0)
 
 #circle path
 theta = np.linspace(0, 2*np.pi, 100)
@@ -56,7 +62,8 @@ ax4 = fig.add_subplot(224)
 
 #Circle
 ax1 = plt.subplot(221)
-ax1.plot(x,y, 'b', label='OMRE', linewidth=3)
+ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
+ax1.plot(rs1,rs2,'g',label='RealSense', linewidth=3)
 ax1.plot(x1,x2, 'r--', label='Circle', linewidth=1.5)
 ax1.set_xlabel('X')
 ax1.set_ylabel('Y')
