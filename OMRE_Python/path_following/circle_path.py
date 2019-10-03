@@ -113,9 +113,9 @@ def odometry_RealSense():
 	vel1 = str(velocity)	
 	vel2 = vel1.replace(', ',' ').split(' ')
 	# ~ print(vel2[1] + " , " + vel2[3] + " , " + vel2[5])
-	vel_x = float(vel2[1]) 
-	vel_y = float(vel2[3]) 
-	vel_z = float(vel2[5]) 
+	vel_x = -float(vel2[5]) 
+	vel_y = -float(vel2[1]) 
+	vel_z = float(vel2[3]) 
 	
 	#get Postion data
 	pos1 = str(position)	
@@ -129,9 +129,9 @@ def odometry_RealSense():
 	acc1 = str(acceleration)	
 	acc2 = acc1.replace(', ',' ').split(' ')
 	# ~ print(acc2[1] + " , " + acc2[3] + " , " + acc2[5])
-	acc_x = float(acc2[1]) 
-	acc_y = float(acc2[3]) 
-	acc_z = float(acc2[5]) 
+	acc_x = -float(acc2[5]) 
+	acc_y = -float(acc2[1]) 
+	acc_z = float(acc2[3]) 
 
 ######################################################################			Path_Following
 def path_f(xd,yd,thetad,b,a,R,step):
@@ -204,6 +204,10 @@ def path_f(xd,yd,thetad,b,a,R,step):
 		# ~ current_y = pos_y
 		# ~ current_theta = pose.item(2)
 		
+		vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
+		# ~ vel = str(vel_x)+" , "+str(vel_y)
+		print(vel)
+		
 		delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 		# ~ print(delta)
 		
@@ -211,14 +215,15 @@ def path_f(xd,yd,thetad,b,a,R,step):
 		m2_rpm = robot.rpm(1)
 		m3_rpm = robot.rpm(2)
 		data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
-		print(data_rpm) 	
+		# ~ print(data_rpm) 	
 		
 		time_running = time.time()
 		# ~ print(time_running)
 		
 		data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 		# ~ print(data_pose)
-		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
+		# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
+		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 		
 		if delta < delta_min:	
 			file.close()
@@ -227,19 +232,22 @@ def path_f(xd,yd,thetad,b,a,R,step):
 
 try: 
 	while True:
-		mode = str(input("Enter s to start "))
+		# ~ mode = str(input("Enter s to start "))
 		
-		if mode == 's':
+		# ~ if mode == 's':
 			# ~ a = float(input("enter a: "))
 			# ~ b = float(input("enter b: "))
-			R = float(input("enter R: "))		
-			
+		R = float(input("Enter R: "))		
+		
+		initOdometry()
+		odometry_RealSense()
+		while True:	
 			b = R
 			# ~ b = 0.15	
 			a = 0
-			
-			step = 0.02
-			
+				
+			step = 0.01
+				
 			y1 = np.arange(0,b*2,step)
 			w1 = R*R - (y1-b)*(y1-b)
 			x1 = a + np.sqrt(w1)
@@ -251,9 +259,7 @@ try:
 
 			x = np.concatenate((x1,x2))
 			y = np.concatenate((y1,y3))
-					
-			initOdometry()
-			odometry_RealSense()
+						
 			for i,j in zip(x,y):
 				xd = i
 				yd = j

@@ -27,6 +27,9 @@ rs2 = []
 rpm1 =[]
 rpm2 =[]
 rpm3 =[]
+vx= []
+vy= []
+v = []
 t = []
 
 with open(root.filename,'r') as csvfile:
@@ -44,7 +47,12 @@ with open(root.filename,'r') as csvfile:
 		rpm1.append(float(row[5]))
 		rpm2.append(float(row[6]))
 		rpm3.append(float(row[7]))
-		t.append(float(row[8])-t0)
+		
+		vx.append(float(row[8]))
+		vy.append(float(row[9]))
+		v.append(float(row[10]))
+		
+		t.append(float(row[11])-t0)
 
 #circle path
 theta = np.linspace(0, 2*np.pi, 100)
@@ -73,28 +81,28 @@ plt.legend()
 
 #motor1
 ax2 = plt.subplot(222)
-ax2.plot(t,rpm1, 'm', label='RPM1', linewidth=3)
+ax2.plot(t,vx, 'm', label='RPM1', linewidth=3)
 ax2.set_xlabel('Time')
-ax2.set_ylabel('RPM')
-ax2.set_title('m1_rpm', fontsize=12)
+ax2.set_ylabel('m/s')
+ax2.set_title('Vx', fontsize=12)
 plt.grid(True)
 plt.legend()
 
 #motor2
 ax3 = plt.subplot(223)
-ax3.plot(t,rpm2, 'g', label='RPM2', linewidth=3)
+ax3.plot(t,vy, 'g', label='RPM2', linewidth=3)
 ax3.set_xlabel('Time')
-ax3.set_ylabel('RPM')
-ax3.set_title('m2_rpm', fontsize=12)
+ax3.set_ylabel('m/s')
+ax3.set_title('Vy', fontsize=12)
 plt.grid(True)
 plt.legend()
 
 #motor3
 ax4 = plt.subplot(224)
-ax4.plot(t,rpm3, 'c', label='RPM3', linewidth=3)
+ax4.plot(t,v, 'c', label='RPM3', linewidth=3)
 ax4.set_xlabel('Time')
-ax4.set_ylabel('RPM')
-ax4.set_title('m3_rpm', fontsize=12)
+ax4.set_ylabel('m/s')
+ax4.set_title('V', fontsize=12)
 plt.grid(True)
 plt.legend()
 
