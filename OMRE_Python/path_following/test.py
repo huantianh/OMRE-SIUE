@@ -2,36 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-b = 0.5
-a = 0
-R = 0.5
-
-y1 = np.arange(0,b*2,0.01)
-w1 = R*R - (y1-b)*(y1-b)
-x1 = a + np.sqrt(w1)
-
-y2 = np.arange(b*2,0,-0.01)
-y3 = np.append(y2,0)
-w2 = R*R - (y3-b)*(y3-b)
-x2 = a - np.sqrt(w2)
-
-x = np.concatenate((x1,x2))
-y = np.concatenate((y1,y3))
-
-for i,j in zip(x,y):
-		xd = i
-		yd = j
-		thetad = 0
-		print(str(i) +' , '+str(j))
-
-
-# ~ Kx = 2
-# ~ Ky = 2
-# ~ Kz = 2
-
-# ~ K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
-
-
+t = np.arange(0,2.1,0.1)
+						
+for i in t:
+	xd = np.sin(0.1*i)
+	yd = np.cos(0.1*i)
+	thetad = 0
+	print(str(i)+' , '+str(xd)+' , '+str(yd))
 
 
 
