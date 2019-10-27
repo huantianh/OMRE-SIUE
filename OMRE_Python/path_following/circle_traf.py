@@ -37,7 +37,9 @@ cfg.enable_stream(rs.stream.pose)
 # Start streaming with requested config
 pipe.start(cfg)
 
-
+#pid controller
+integral = np.array([0,0,0])[:,None]
+preError = np.array([0,0,0])[:,None]
 
 #####################################################		Reset encoder
 def initOdometry():
@@ -134,16 +136,18 @@ def odometry_RealSense():
 	acc_z = float(acc2[3]) 
 
 ######################################################################			Path_Following
-def path_f(xd,yd,thetad,t,del_t,step_t,k):
+def path_f(xd,yd,thetad,t,del_t,step_t,kp,ki,kd):
 	global current_x
 	global current_y
 	global current_theta
 	
-	Kx = k	
-	Ky = k
-	Kz = k
+	global integral
+	global preError
+	# ~ Kx = k	
+	# ~ Ky = k
+	# ~ Kz = k
 	
-	file = open(save_folder2 + "Circle_TraF"+"_K_"+str(k)+"_wait_"+str(del_t)+"_stept_"+str(step_t)+".txt","a")
+	file = open(save_folder2 + "Circle_TraF"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_wait_"+str(del_t)+"_stept_"+str(step_t)+".txt","a")
 	# ~ file = open(save_folder2 + "Circle"+"_vr_"+str(vr)+"_K_"+str(Kx)+"_"+str(Ky)+"_"+str(Kz)+"_delta_"+str(delta_min)+".txt","a")
 	
 	# ~ while True:
@@ -152,35 +156,65 @@ def path_f(xd,yd,thetad,t,del_t,step_t,k):
 	yc = current_y
 	thetac = current_theta
 	
+	#q_dot_d
 	x_dot_d =  0.1*np.cos(0.1*t)
-	
 	y_dot_d = -0.1*np.sin(0.1*t)
-	
 	theta_dot_d = 0
 	
 	q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
 	
+	#J_inverse
 	j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
 	j_inv = np.linalg.inv(j).reshape(3,3)
-		
-	K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
-			
-	e = np.array([(xc - xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
 	
-	s = np.dot(-K,e,out=None) + q_dot_d
-	# ~ print(s)
-			
-	vm = np.dot( j_inv, s, out=None)
+	#PI Controller Trajectory	
+	Kp = kp
+	Ki = ki
+	Kd = kd
 	
+	setPoint     = np.array([xd,yd,thetad])[:,None]
+	currentPoint = np.array([xc,yc,thetac])[:,None]
+	error        = currentPoint - setPoint
+	preError     = error
+	integral     = integral + error
+	derivative   = error - preError
+	
+	# ~ print(str(integral) +" , "+str(error))
+	
+	output = Kp*error + Ki*integral + Kd*derivative	
+	e = (-output).reshape(3,1)
+	s = e + q_dot_d
+	
+	#P Controller
+	# ~ K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
+	# ~ e = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
+	# ~ s = np.dot(-K,e,out=None) + q_dot_d
+	
+	#Motor Vector		
+	vm = np.dot( j_inv, s, out=None)	
 	motor_spd_vec = vm
 	# ~ print(vm)
 	
+	#commanded RPM
 	wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
-		
+	
+	c_rpm1 = float(wheel0RPM)
+	c_rpm2 = float(wheel1RPM)
+	c_rpm3 = float(wheel2RPM)
+	print(str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)) 
+	
 	robot.motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 	
+	#reading actual RPM
+	m1_rpm = robot.rpm(0)
+	m2_rpm = robot.rpm(1)
+	m3_rpm = robot.rpm(2)
+	data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
+	# ~ print(data_rpm)
+	
+	#odometry using encoder
 	pose = odometryCalc(xc,yc,thetac)	
 	pos  = odometry_RealSense()
 	
@@ -188,11 +222,12 @@ def path_f(xd,yd,thetad,t,del_t,step_t,k):
 	current_y = pose.item(1)
 	current_theta = pose.item(2)
 	
-	#use RealSense as feedback
+	#odometry using RealSense
 	# ~ current_x = pos_x
 	# ~ current_y = pos_y
 	# ~ current_theta = pose.item(2)
 	
+	#RealSense velocities
 	vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
 	# ~ vel = str(vel_x)+" , "+str(vel_y)
 	# ~ print(vel)
@@ -200,20 +235,12 @@ def path_f(xd,yd,thetad,t,del_t,step_t,k):
 	delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
 	# ~ print(delta)
 	
-	m1_rpm = robot.rpm(0)
-	m2_rpm = robot.rpm(1)
-	m3_rpm = robot.rpm(2)
-	data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
-	print(data_rpm) 	
-	
-	# ~ start = time.time()
 	time_running = time.time()
-	# ~ print(time_running)
 	
 	data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 	# ~ print(data_pose)
 	# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
-	file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+	file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 		
 
 try: 
@@ -227,16 +254,24 @@ try:
 
 			t = 0
 			
-			del_t = 0.1
-			step_t = 0.5
-			k = 1.2
+			del_t  = 0.1
+			step_t = 0.1
+			
+			kp = 4
+			ki = 0.3
+			kd = 0
 			
 			while True:
+				start = time.time()
 						
 				xd = np.sin(0.1*t)
 				yd = np.cos(0.1*t)
 				thetad = 0
-				path_f(float(xd),float(yd),float(thetad),float(t),float(del_t),float(step_t),float(k))
+				path_f(float(xd),float(yd),float(thetad),float(t),float(del_t),float(step_t),float(kp),float(ki),float(kd))
+				
+				elapsed_time = (time.time() - start)
+				# ~ print(elapsed_time)
+				
 				time.sleep(del_t)
 				t = t + step_t
 				
