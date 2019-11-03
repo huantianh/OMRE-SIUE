@@ -1,14 +1,38 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import sympy as sym
+
+thetad = sym.Symbol('thetad')
+
+# ~ thetad = 0
+
+j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
+j_inv = np.linalg.inv(j).reshape(3,3)
+
+j_inv_dot = sym.diff(j)
+print(j)
 
 
-t = np.arange(0,2.1,0.1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ~ t = np.arange(0,2.1,0.1)
 						
-for i in t:
-	xd = np.sin(0.1*i)
-	yd = np.cos(0.1*i)
-	thetad = 0
-	print(str(i)+' , '+str(xd)+' , '+str(yd))
+# ~ for i in t:
+	# ~ xd = np.sin(0.1*i)
+	# ~ yd = np.cos(0.1*i)
+	# ~ thetad = 0
+	# ~ print(str(i)+' , '+str(xd)+' , '+str(yd))
 
 
 
