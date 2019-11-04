@@ -4,11 +4,9 @@ import numpy as np
 import time,os,serial,math
 
 #folder where saving all the data
-save_folder1 = "path_data/close_loop/"
-save_folder2 = "path_data/open_loop/"
+save_folder = "traf_data/"
 current_directory = os.getcwd()
-save_directory1 = os.path.join(current_directory, save_folder1)
-save_directory2 = os.path.join(current_directory, save_folder2)
+save_directory = os.path.join(current_directory, save_folder)
 
 #odometry setups
 oldEncoder0 = 0
@@ -164,7 +162,9 @@ try:
 				yd = np.cos(0.1*t)
 				thetad = 0
 				
-				file = open(save_folder2 + "Circle_TraF"+".txt","a")
+				a1 = 12.17; b1 = 224.46; a2 = 4.74; b2 = 10.08; c2 = 0.58;
+				
+				file = open(save_folder + "Circle_TraF"+"_c2_"+str(c2)+".txt","a")
 				
 				k  = 1
 				Kx = k
@@ -190,22 +190,18 @@ try:
 				######Calculate W				
 				K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
 				e1 = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
-				w = np.dot(-K,e1,out=None) + q_dot_d
+				w1 = np.dot(-K,e1,out=None) + q_dot_d
 				
 				#Motor Vector		
-				wd = np.dot( j_inv, w, out=None)	
-				motor_spd_vec = wd
-				wd_dot = (last_wd - wd)/dt
+				wd = np.dot( j_inv, w1, out=None)	
+				wd_dot = (last_wd - wd)/del_t
 				# ~ print(str(wd) +" , "+str(wd_dot))
+				# ~ print(wd_dot)
 				
 				#commanded RPM
-				wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
-				wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-				wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
-				
-				c_rpm1 = float(wheel0RPM)
-				c_rpm2 = float(wheel1RPM)
-				c_rpm3 = float(wheel2RPM)
+				c_rpm2 = float(wd[0])
+				c_rpm1 = float(wd[1])
+				c_rpm3 = float(wd[2])
 				# ~ print(str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)) 
 				
 				#reading actual RPM
@@ -215,26 +211,29 @@ try:
 				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
 				# ~ print(data_rpm)
 				
-				
 				######Calculate V
 				e2 = np.array([(m1_rpm-c_rpm1),(m2_rpm-c_rpm2),(m3_rpm-c_rpm3)]).reshape(3,1) 
 				z1 = np.dot(j,e2,out=None)
-				a1 = 12.17; b1 = 224.46; a2 = 4.74; b2 = 10.08; c2 = 0.32;
 				j1 = np.dot(j_inv,j_dot,out=None)
 				j2 = np.dot(j_inv,e1,out=None)
 				
 				vd = 1/b1*a1*wd + 1/b1*wd_dot - 1/b1*np.dot(j1,e2,out=None) - 1/b1*j2
-				vd_dot = (last_vd-vd)/dt
+				vd_dot = (last_vd-vd)/del_t
+				# ~ print(vd_dot)
+				# ~ print(vd)
 				
 				#Input U
 				j3 = np.dot(j_trans,z1,out=None)
 				u1 = 1/b2*vd_dot + a2*vd + b1*j3
-				u  = np.power(u1,1/c2)
-				print(u)
+				c3 = 1/c2
+				u  = np.sign(u1) * (np.abs(u1)) ** (c3)
+				# ~ print(str(u) +' , '+ str(u1))
+				# ~ print(u)
 				
-				m2_rpm_control = motor_spd_vec1[0] # motor 2 speed [rpm]
-				m1_rpm_control = motor_spd_vec1[1] # motor 1 speed [rpm]
-				m3_rpm_control = motor_spd_vec1[2] # motor 3 speed [rpm]
+				m2_rpm_control = u[0] # motor 2 speed [rpm]
+				m1_rpm_control = u[1] # motor 1 speed [rpm]
+				m3_rpm_control = u[2] # motor 3 speed [rpm]
+				
 				robot.motorVelocity(int(m1_rpm_control),int(m2_rpm_control),int(m3_rpm_control))
 				
 				#odometry using encoder
@@ -245,21 +244,25 @@ try:
 				current_y = pose.item(1)
 				current_theta = pose.item(2)
 				
+				#odometry using RealSense
+				# ~ current_x = pos_x
+				# ~ current_y = pos_y
+				# ~ current_theta = pose.item(2)
+
 				#RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
 				# ~ vel = str(vel_x)+" , "+str(vel_y)
 				# ~ print(vel)
 			
-				
 				time_running = time.time()
 				
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-				# ~ print(data_pose)
+				print(data_pose)
 				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
 				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 							
-				
 				dt = (time.time() - start)
+				# ~ print(dt)
 				last_wd = wd
 				last_vd = vd
 				time.sleep(del_t)
