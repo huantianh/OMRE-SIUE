@@ -83,7 +83,7 @@ def move(xd,yd,thetad):
 	wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 	wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
 	
-	maxAllowedSpeed = 210
+	maxAllowedSpeed = 150
 	
 	if (abs(wheel1RPM) > maxAllowedSpeed or abs(wheel0RPM) > maxAllowedSpeed or abs(wheel2RPM) > maxAllowedSpeed):
 		maxRPM = max(abs(motor_spd_vec))
