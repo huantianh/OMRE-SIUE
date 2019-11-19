@@ -1,6 +1,7 @@
 /*****************************************          RUNNING MOTORS          ***************************************/
 void motor(int motorNumber, int pwm)
 {
+  //////////////////////////////////////////////////Max
   if (pwm > 255)
   {
     pwm = 255;
@@ -11,6 +12,13 @@ void motor(int motorNumber, int pwm)
     pwm = -255;
   }
 
+  //  //////////////////////////////////////////////////Min
+  //   if ((pwm < 18)&&(pwm > -18))
+  //  {
+  //    pwm = 30;
+  //  }
+
+  //////////////////////////////////////////////////
   if (pwm > 0)
   {
     digitalWrite(motorDirPins[motorNumber], FORWARD);

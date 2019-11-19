@@ -14,14 +14,6 @@ oldEncoder0 = 0;oldEncoder1 = 0;oldEncoder2 = 0;newEncoder0 = 0;newEncoder1 = 0;
 #RealSense
 vel_x = 0;vel_y = 0;vel_z = 0;pos_x = 0;pos_y = 0;pos_z = 0;acc_x = 0;acc_y = 0;acc_z = 0
 
-# Declare RealSense pipeline, encapsulating the actual device and sensors
-pipe = rs.pipeline()
-# Build config object and request pose data
-cfg = rs.config()
-cfg.enable_stream(rs.stream.pose)
-# Start streaming with requested config
-pipe.start(cfg)
-
 #pid controller
 integral = np.array([0,0,0])[:,None]
 preError = np.array([0,0,0])[:,None]
@@ -87,50 +79,6 @@ def odometryCalc(xk,yk,thetak,l=0.19, N=2249, r=0.03):
 
 	return  newPos_mat
 
-def odometry_RealSense():
-	global vel_x 
-	global vel_y 
-	global vel_z 
-	global pos_x 
-	global pos_y 
-	global pos_z 
-	global acc_x 
-	global acc_y 
-	global acc_z 
-	
-	frames = pipe.wait_for_frames()
-	pose = frames.get_pose_frame()
-	data = pose.get_pose_data()
-	
-	velocity = data.velocity
-	position = data.translation
-	acceleration = data.acceleration
-	
-	#get Velocity data
-	vel1 = str(velocity)	
-	vel2 = vel1.replace(', ',' ').split(' ')
-	# ~ print(vel2[1] + " , " + vel2[3] + " , " + vel2[5])
-	vel_x = -float(vel2[5]) 
-	vel_y = -float(vel2[1]) 
-	vel_z = float(vel2[3]) 
-	
-	#get Postion data
-	pos1 = str(position)	
-	pos2 = pos1.replace(', ',' ').split(' ')
-	# ~ print(pos2[1] + " , " + pos2[3] + " , " + pos2[5])
-	pos_x = -float(pos2[5]) 
-	pos_y = -float(pos2[1]) 
-	pos_z = float(pos2[3]) 
-	
-	#get Acceleration data
-	acc1 = str(acceleration)	
-	acc2 = acc1.replace(', ',' ').split(' ')
-	# ~ print(acc2[1] + " , " + acc2[3] + " , " + acc2[5])
-	acc_x = -float(acc2[5]) 
-	acc_y = -float(acc2[1]) 
-	acc_z = float(acc2[3]) 
-			
-
 try: 
 	while True:
 		mode = str(input("Enter s to start "))
@@ -138,7 +86,6 @@ try:
 		if mode == 's':
 
 			initOdometry()
-			odometry_RealSense()
 			t = 0
 			del_t  = 0.1
 			
@@ -146,7 +93,8 @@ try:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 0.1
+				k  = 1
+				
 				Kx = k
 				Ky = k
 				Kz = k
@@ -170,7 +118,7 @@ try:
 				############		q_dot_d
 				x_dot_d =  0.1*np.cos(0.1*t)
 				y_dot_d = -0.1*np.sin(0.1*t)
-				theta_dot_d = 0.1
+				theta_dot_d = 0.01
 				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
 				
 				############		J, J_inverse, J_dot, J_transpose
@@ -220,7 +168,7 @@ try:
 				c3 = 1/c2
 				u  = np.sign(u1) * (np.abs(u1)) ** (c3)
 				# ~ print(str(u) +' , '+ str(u1))
-				# ~ print(str(int(u[1]))+" , "+str(int(u[0]))+" , "+str(int(u[2])))
+				print(str(int(u[1]))+" , "+str(int(u[0]))+" , "+str(int(u[2])))
 				
 				m2_pwm_control = float(u[0]) # motor 2 speed [rpm]
 				m1_pwm_control = float(u[1]) # motor 1 speed [rpm]
@@ -230,7 +178,6 @@ try:
 				
 				########################################################			odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
-				pos  = odometry_RealSense()
 				
 				current_x = pose.item(0)
 				current_y = pose.item(1)
@@ -242,7 +189,8 @@ try:
 				# ~ current_theta = pose.item(2)
 
 				########################################################			RealSense velocities
-				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
+				vel = 0
+				# ~ vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
 				# ~ vel = str(vel_x)+" , "+str(vel_y)
 				# ~ print(vel)
 			
@@ -253,7 +201,7 @@ try:
 				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
 				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 				
-				########################################################		Preparing for new loop			
+				########################################################			Preparing for new loop			
 				dt = (time.time() - start)
 				# ~ print(dt)
 				last_wd = wd
