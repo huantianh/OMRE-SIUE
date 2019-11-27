@@ -1,6 +1,8 @@
 # First import the library
 import pyrealsense2 as rs
 import time
+import libomni as robot
+import numpy as np
 
 # Declare RealSense pipeline, encapsulating the actual device and sensors
 pipe = rs.pipeline()
@@ -22,6 +24,9 @@ try:
 		velocity = data.velocity
 		position = data.translation
 		acceleration = data.acceleration
+		rotation = data.rotation
+		
+		# ~ print(rotation)
 		
 		#get Velocity data
 		vel1 = str(velocity)	
@@ -40,7 +45,7 @@ try:
 		pos_y = -float(pos2[1]) 
 		pos_z = float(pos2[3]) 
 		# ~ print(pos1)
-		print(str(pos_x) + " , " + str(pos_y))
+		# ~ print(str(pos_x) + " , " + str(pos_y))
 		# ~ print (pos_x)
 		
 		#get Acceleration data
@@ -53,10 +58,32 @@ try:
 		# ~ print(acc1)
 		# ~ print (acc_x)
 
+		#get Rotation data
+		theta1 = str(rotation)	
+		theta2 = theta1.replace(', ',' ').split(' ')
+		# ~ print(acc2[1] + " , " + acc2[3] + " , " + acc2[5])
+		w_theta = float(theta2[7]) 
+		x_theta = float(theta2[1]) 
+		y_theta = float(theta2[3]) 
+		z_theta = float(theta2[5]) 
+		
+		sin_rs = 2 * (w_theta * z_theta + x_theta * y_theta)
+		cos_rs = 1 - 2 * (y_theta * y_theta + z_theta * z_theta)
+		
+		# ~ theta_rs = -np.arctan2(sin_rs,cos_rs) 
+		theta_rs = np.arccos(w_theta) * 2
+		
+		print(theta_rs)
+		# ~ print(theta2)
+		# ~ robot.move(0,0,-0.5)
+
+
+
 
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:
 	# ~ print('Done')
 	# ~ print(vel2[10])
-	pipe.stop()    
+	# ~ pipe.stop()  
+	robot.stop()  
 	print('\n\n		Stop!!! See you again!')

@@ -150,8 +150,8 @@ void parseCommand()
       PRINT_RPM                             = '0';
       PRINT_IMU                             = '1';
       rpm_setpoint[0] = 0;
-      rpm_setpoint[1] = 100;
-      rpm_setpoint[2] = -100;
+      rpm_setpoint[1] = 50;
+      rpm_setpoint[2] = -50;
       break;
 
     /////////////////////////////////////////////////////////////////            Move Robot Backward

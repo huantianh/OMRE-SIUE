@@ -4,11 +4,9 @@ import numpy as np
 import time,os,serial,math
 
 #folder where saving all the data
-save_folder1 = "path_data/close_loop/"
-save_folder2 = "path_data/open_loop/"
+save_folder = "path_data/"
 current_directory = os.getcwd()
-save_directory1 = os.path.join(current_directory, save_folder1)
-save_directory2 = os.path.join(current_directory, save_folder2)
+save_directory = os.path.join(current_directory, save_folder)
 
 #odometry setups
 oldEncoder0 = 0
@@ -100,6 +98,7 @@ def odometry_RealSense():
 	global acc_x 
 	global acc_y 
 	global acc_z 
+	global theta_rs
 	
 	frames = pipe.wait_for_frames()
 	pose = frames.get_pose_frame()
@@ -108,6 +107,7 @@ def odometry_RealSense():
 	velocity = data.velocity
 	position = data.translation
 	acceleration = data.acceleration
+	rotation = data.rotation
 	
 	#get Velocity data
 	vel1 = str(velocity)	
@@ -133,6 +133,21 @@ def odometry_RealSense():
 	acc_y = -float(acc2[1]) 
 	acc_z = float(acc2[3]) 
 
+	#get Rotation data
+	theta1 = str(rotation)	
+	theta2 = theta1.replace(', ',' ').split(' ')
+	# ~ print(acc2[1] + " , " + acc2[3] + " , " + acc2[5])
+	w_theta = float(theta2[7]) 
+	x_theta = float(theta2[1]) 
+	y_theta = float(theta2[3]) 
+	z_theta = float(theta2[5]) 
+		
+	sin_rs = 2 * (w_theta * z_theta + x_theta * y_theta)
+	cos_rs = 1 - 2 * (y_theta * y_theta + z_theta * z_theta)
+		
+	# ~ theta_rs = -np.arctan2(sin_rs,cos_rs) 
+	theta_rs = np.arccos(w_theta) * 2
+	
 ######################################################################			Path_Following
 def path_f(xd,yd,thetad,b,a,R,step):
 	global current_x
@@ -146,7 +161,7 @@ def path_f(xd,yd,thetad,b,a,R,step):
 	Ky = h
 	Kz = h
 
-	file = open(save_folder2 + "Circle"+"_vr_"+str(vr)+"_K_"+str(h)+"_delta_"+str(delta_min)+'_R_'+str(R)+'_step_'+str(step)+".txt","a")
+	file = open(save_folder + "Circle"+"_vr_"+str(vr)+"_K_"+str(h)+"_delta_"+str(delta_min)+'_R_'+str(R)+'_step_'+str(step)+".txt","a")
 	# ~ file = open(save_folder2 + "Circle"+"_vr_"+str(vr)+"_K_"+str(Kx)+"_"+str(Ky)+"_"+str(Kz)+"_delta_"+str(delta_min)+".txt","a")
 	
 	while True:
@@ -196,14 +211,14 @@ def path_f(xd,yd,thetad,b,a,R,step):
 		pose = odometryCalc(xc,yc,thetac)	
 		pos  = odometry_RealSense()
 		
-		current_x = pose.item(0)
-		current_y = pose.item(1)
+		# ~ current_x = pose.item(0)
+		# ~ current_y = pose.item(1)
 		current_theta = pose.item(2)
 		
 		#use RealSense as feedback
-		# ~ current_x = pos_x
-		# ~ current_y = pos_y
-		# ~ current_theta = pose.item(2)
+		current_x = pos_x
+		current_y = pos_y
+		# ~ current_theta = theta_rs
 		
 		vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
 		# ~ vel = str(vel_x)+" , "+str(vel_y)

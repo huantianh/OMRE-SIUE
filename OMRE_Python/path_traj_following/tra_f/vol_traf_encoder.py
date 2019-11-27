@@ -93,7 +93,7 @@ try:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 1
+				k  = 30
 				
 				Kx = k
 				Ky = k
@@ -122,9 +122,11 @@ try:
 				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
 				
 				############		J, J_inverse, J_dot, J_transpose
-				j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
+				r = 0.03
+				l = 0.19
+				j = (2*np.pi*r/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3)
 				j_inv = np.linalg.inv(j).reshape(3,3)
-				j_dot = (2*np.pi*0.03/60)*np.array([(2/3)*np.cos(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.cos(thetac)*theta_dot_d,(2/3)*np.cos(thetac-np.pi/3)*theta_dot_d,(2/3)*np.sin(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.sin(thetac)*theta_dot_d,(2/3)*np.sin(thetac-np.pi/3)*theta_dot_d,0,0,0]).reshape(3,3)
+				j_dot = (2*np.pi*r/60)*np.array([(2/3)*np.cos(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.cos(thetac)*theta_dot_d,(2/3)*np.cos(thetac-np.pi/3)*theta_dot_d,(2/3)*np.sin(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.sin(thetac)*theta_dot_d,(2/3)*np.sin(thetac-np.pi/3)*theta_dot_d,0,0,0]).reshape(3,3)
 				j_trans = np.transpose(j).reshape(3,3)
 				# ~ print(str(j) +" , "+ str(j_dot))
 				

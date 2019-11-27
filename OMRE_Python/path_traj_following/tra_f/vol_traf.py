@@ -97,6 +97,7 @@ def odometry_RealSense():
 	global acc_x 
 	global acc_y 
 	global acc_z 
+	global theta_rs
 	
 	frames = pipe.wait_for_frames()
 	pose = frames.get_pose_frame()
@@ -128,7 +129,14 @@ def odometry_RealSense():
 	# ~ print(acc2[1] + " , " + acc2[3] + " , " + acc2[5])
 	acc_x = -float(acc2[5]) 
 	acc_y = -float(acc2[1]) 
-	acc_z = float(acc2[3]) 
+	acc_z = float(acc2[3])
+	
+	#get Rotation data
+	theta1 = str(rotation)	
+	theta2 = theta1.replace(', ',' ').split(' ')
+	# ~ print(theta2[1] + " , " + theta2[3] + " , " + theta2[5])
+	theta_rs = float(theta2[3]) 
+	print(theta_rs) 
 			
 
 try: 
@@ -146,7 +154,7 @@ try:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 0.1
+				k  = 150
 				Kx = k
 				Ky = k
 				Kz = k
@@ -174,9 +182,11 @@ try:
 				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
 				
 				############		J, J_inverse, J_dot, J_transpose
-				j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
+				r = 0.03
+				l = 0.19
+				j = (2*np.pi*r/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3)
 				j_inv = np.linalg.inv(j).reshape(3,3)
-				j_dot = (2*np.pi*0.03/60)*np.array([(2/3)*np.cos(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.cos(thetac)*theta_dot_d,(2/3)*np.cos(thetac-np.pi/3)*theta_dot_d,(2/3)*np.sin(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.sin(thetac)*theta_dot_d,(2/3)*np.sin(thetac-np.pi/3)*theta_dot_d,0,0,0]).reshape(3,3)
+				j_dot = (2*np.pi*r/60)*np.array([(2/3)*np.cos(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.cos(thetac)*theta_dot_d,(2/3)*np.cos(thetac-np.pi/3)*theta_dot_d,(2/3)*np.sin(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.sin(thetac)*theta_dot_d,(2/3)*np.sin(thetac-np.pi/3)*theta_dot_d,0,0,0]).reshape(3,3)
 				j_trans = np.transpose(j).reshape(3,3)
 				# ~ print(str(j) +" , "+ str(j_dot))
 				
@@ -191,7 +201,7 @@ try:
 				# ~ print(str(wd) +" , "+str(wd_dot))
 				# ~ print(wd_dot)
 				
-				############		commanded RPM (Wd)
+				############		commanded (Wd)
 				c_rpm2 = float(wd[0])
 				c_rpm1 = float(wd[1])
 				c_rpm3 = float(wd[2])
@@ -228,6 +238,12 @@ try:
 				
 				robot.motor_pwm(int(m1_pwm_control),int(m2_pwm_control),int(m3_pwm_control))
 				
+				m1_rpm_u = int(robot.rpm(0))
+				m2_rpm_u = int(robot.rpm(1))
+				m3_rpm_u = int(robot.rpm(2))
+				data_rpm_u = str(m1_rpm_u)+' , ' +str(m2_rpm_u)+ ' , ' +str(m3_rpm_u)
+				print(data_rpm_u)
+				
 				########################################################			odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
@@ -251,7 +267,7 @@ try:
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 				# ~ print(data_pose)
 				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
-				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 				
 				########################################################		Preparing for new loop			
 				dt = (time.time() - start)
