@@ -158,11 +158,11 @@ try:
 			############################################################		Value for t and delta_t
 			t = 0
 			del_t  = 0.1
-			step_t = 0.1
+			step_t = 0.5
 			
 			############################################################		Kp, Ki, Kd gains
-			kp = 4
-			ki = 0.3
+			kp = 2
+			ki = 0
 			kd = 0
 			
 			while True:
@@ -228,7 +228,7 @@ try:
 				c_rpm1 = float(wheel0RPM)
 				c_rpm2 = float(wheel1RPM)
 				c_rpm3 = float(wheel2RPM)
-				print(str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)) 
+				# ~ print(str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)) 
 				
 				########################################################		Sending input RPM to Arduino
 				robot.motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
@@ -238,7 +238,7 @@ try:
 				m2_rpm = robot.rpm(1)
 				m3_rpm = robot.rpm(2)
 				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
-				# ~ print(data_rpm)
+				print(data_rpm)
 				
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	

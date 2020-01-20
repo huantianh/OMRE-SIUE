@@ -158,18 +158,19 @@ try:
 			initOdometry()
 			odometry_RealSense()
 			t = 0
-			del_t  = 0.1
+			del_t  = 0.06
+			step_t = 0.8
 			
 			while True:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 150
+				k  = 1
 				Kx = k
 				Ky = k
 				Kz = k
 				
-				file = open(save_folder + "Circle_TraF"+"_K_"+str(k)+".txt","a")
+				file = open(save_folder + "Circle_TraF"+"_K_"+str(k)+"_step_t_"+str(step_t)+"_del_t_"+str(del_t)+".txt","a")
 				
 				########################################################			Path
 				xd = np.sin(0.1*t)
@@ -287,7 +288,7 @@ try:
 				last_wd = wd
 				last_vd = vd
 				time.sleep(del_t)
-				t = t + 0.1
+				t = t + step_t
 				
 
 ## Ctrl + c to stop robot
