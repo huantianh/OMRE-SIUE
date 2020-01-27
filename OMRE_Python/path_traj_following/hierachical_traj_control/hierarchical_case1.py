@@ -161,7 +161,7 @@ try:
 			step_t = 0.5
 			
 			############################################################		Kp, Ki, Kd gains
-			kp = 2
+			kp = 0.8
 			ki = 0
 			kd = 0
 			
@@ -272,7 +272,7 @@ try:
 				elapsed_time = (time.time() - start)
 				# ~ print(elapsed_time)
 				time.sleep(del_t)
-				t = t + step_t
+				t = time.time()
 				
 
 ## Ctrl + c to stop robot

@@ -23,6 +23,7 @@ void parseCommand()
       sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
       pidSwitch = '0';
       motor(motorNumber, motorPWM);
+      PRINT_RPM                             = '1';
       break;
 
     ////////////////////////////////////////////////////////////////             ULTRASOUND
@@ -93,7 +94,13 @@ void parseCommand()
     case 'R':
       int rpmNum;
       sscanf(&rcv_buffer[1], " %d \r", &rpmNum);
+      PRINT_RPM                             = '1';
       Serial.println(rpmValues[rpmNum]);
+      //      Serial.print("  ,  ");
+      //      Serial.print(rpmValues[1]);
+      //      Serial.print("  ,  ");
+      //      Serial.println(rpmValues[2]);
+
       break;
 
     //    ///////////////////////////////////////////////////////////////             ENTER GAINS K
@@ -136,7 +143,7 @@ void parseCommand()
     case 'p':
     case 'P':
 
-      printSwitch = '1';
+      printSwitch                           = '1';
       break;
 
     ////////////////////////////////////////////////////////////////             Move Robot Forward

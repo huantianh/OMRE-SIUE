@@ -158,14 +158,14 @@ try:
 			initOdometry()
 			odometry_RealSense()
 			t = 0
-			del_t  = 0.06
+			del_t  = 0.1
 			step_t = 0.1
 			
 			while True:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 1.2
+				k  = 1.5
 				Kx = k
 				Ky = k
 				Kz = k
@@ -223,7 +223,7 @@ try:
 				m2_rpm = int(robot.rpm(1))
 				m3_rpm = int(robot.rpm(2))
 				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
-				# ~ print(data_rpm)
+				print(data_rpm)
 				
 				########################################################			Calculate V
 				e2 = np.array([(m1_rpm-c_rpm1),(m2_rpm-c_rpm2),(m3_rpm-c_rpm3)]).reshape(3,1) 
@@ -255,7 +255,7 @@ try:
 				m2_rpm_u = int(robot.rpm(1))
 				m3_rpm_u = int(robot.rpm(2))
 				data_rpm_u = str(m1_rpm_u)+' , ' +str(m2_rpm_u)+ ' , ' +str(m3_rpm_u)
-				print(data_rpm_u)
+				# ~ print(data_rpm_u)
 				
 				########################################################			odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
@@ -280,7 +280,8 @@ try:
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 				# ~ print(data_pose)
 				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
-				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+				file.writelines(str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(time_running)+ "\n")
 				
 				########################################################		Preparing for new loop			
 				dt = (time.time() - start)
