@@ -7,7 +7,7 @@ https://devtalk.nvidia.com/default/topic/1036338/jetson-tx1/unable-to-complete-p
 
 For jetpack 4.2 or higher:
 https://devtalk.nvidia.com/default/topic/1050477/jetson-tx2/jetpack-4-2-flashing-issues-and-how-to-resolve/
-- sudo ./flash.sh jetson-tx2 mmcblk0p1 // For Jetson TX2
+sudo ./flash.sh jetson-tx2 mmcblk0p1 // For Jetson TX2
 
 Install Arduino:
 https://www.instructables.com/id/Install-Arduino-IDE-182-on-Linux/
