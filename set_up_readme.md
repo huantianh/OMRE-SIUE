@@ -1,9 +1,13 @@
 # OMRE-SIUE
 6 Autonomous Mobile Robots at SIUE
 
-Intall Jetpack: (fixed error)
+Install Jetpack: (fixed error)
 sudo dpkg -i /home/nvidia/cuda-l4t/cuda-repo-l4t-9-0-local_9.0.252-1_arm64.deb
 https://devtalk.nvidia.com/default/topic/1036338/jetson-tx1/unable-to-complete-post-installation-of-jetpack-3-2-on-tx1-cuda-9-0-installation-fails/
+
+For jetpack 4.2 or higher:
+https://devtalk.nvidia.com/default/topic/1050477/jetson-tx2/jetpack-4-2-flashing-issues-and-how-to-resolve/
+sudo ./flash.sh jetson-tx2 mmcblk0p1 // For Jetson TX2
 
 Install Arduino:
 https://www.instructables.com/id/Install-Arduino-IDE-182-on-Linux/
