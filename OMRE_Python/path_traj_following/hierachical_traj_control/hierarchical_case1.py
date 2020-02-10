@@ -158,7 +158,7 @@ try:
 			############################################################		Value for t and delta_t
 			t = 0
 			del_t  = 0.1
-			step_t = 0.5
+			speed = 0.2
 			
 			############################################################		Kp, Ki, Kd gains
 			kp = 0.8
@@ -169,11 +169,11 @@ try:
 				
 				start = time.time()
 						
-				xd = np.sin(0.1*t)
-				yd = np.cos(0.1*t)
+				xd = np.sin(speed*t)
+				yd = np.cos(speed*t)
 				thetad = 0
 				
-				file = open(save_folder + "Circle_TraF"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_wait_"+str(del_t)+"_stept_"+str(step_t)+".txt","a")
+				file = open(save_folder + "Circle_TraF"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_wait_"+str(del_t)+"_speed_"+str(speed)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
