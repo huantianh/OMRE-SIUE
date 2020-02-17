@@ -21,6 +21,7 @@ https://shiroku.net/robotics/install-opencv-on-jetson-tx2/
 
 Install Intel_RealSense
 https://www.robotexchange.io/t/guide-install-librealsense-l-ubuntu-16/218
+https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md
 
 update pip:
 https://askubuntu.com/questions/642533/python-pip-broken-on-ubuntu
