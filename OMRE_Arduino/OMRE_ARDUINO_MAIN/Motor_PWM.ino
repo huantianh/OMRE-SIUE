@@ -1,5 +1,5 @@
 /*****************************************          RUNNING MOTORS          ***************************************/
-void motor(int motorNumber, int pwm)
+void motor(int motorNumber, float pwm)
 {
   if (pwm > 255)
   {

@@ -99,12 +99,3 @@ except KeyboardInterrupt:
         # Close serial connection
 	robot.stop()     
 	print('\n\n		Stop!!! See you again!')
-		
-		
-
-
-
-
-
-
-

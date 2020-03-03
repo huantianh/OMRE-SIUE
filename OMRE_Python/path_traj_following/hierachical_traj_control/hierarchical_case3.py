@@ -26,12 +26,25 @@ pipe.start(cfg)
 integral = np.array([0,0,0])[:,None]
 preError = np.array([0,0,0])[:,None]
 
+global output1
+global output2
+global output3
 global last_wd
 global last_vd
 global dt
+global last_output1
+global last_output2
+global last_output3
+output1 = 0
+output2 = 0
+output3 = 0
+last_output1 = 0
+last_output2 = 0
+last_output3 = 0
 last_vd = 0
 last_wd = 0
 dt      = 0
+
 
 #####################################################		Reset encoder
 def initOdometry():
@@ -157,24 +170,37 @@ try:
 
 			initOdometry()
 			odometry_RealSense()
-			t = 0
-			del_t  = 0.06
-			step_t = 0.1
 			
-			while True:
+			R = 0.5
+			speed = 1
+			###### time gain
+			elapsed_time = 0.1
+			t = 0
+			delay = 0.1
+			test_t = 60
+			
+			###### derivative gain
+			del_t  = delay
+			# ~ del_t  = 0.08
+			
+			###### filter gain
+			dt_tau = delay         #1   
+			tau = 2                #0.05
+			
+			while t < test_t:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 1.2
+				k  = 0.5
 				Kx = k
 				Ky = k
 				Kz = k
 				
-				file = open(save_folder + "Circle_TraF"+"_K_"+str(k)+"_step_t_"+str(step_t)+"_del_t_"+str(del_t)+".txt","a")
+				file = open(save_folder + "Case3"+"_K_"+str(k)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				
 				########################################################			Path
-				xd = np.sin(0.1*t)
-				yd = np.cos(0.1*t)
+				xd = R*np.sin(speed*t)
+				yd = R*np.cos(speed*t)
 				thetad = 0
 				
 				########################################################			Parameters
@@ -187,8 +213,8 @@ try:
 				
 				########################################################			Q_dot and J 
 				############		q_dot_d
-				x_dot_d =  0.1*np.cos(0.1*t)
-				y_dot_d = -0.1*np.sin(0.1*t)
+				x_dot_d =  R*speed*np.cos(speed*t)
+				y_dot_d = -R*speed*np.sin(speed*t)
 				theta_dot_d = 0.1
 				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
 				
@@ -208,7 +234,8 @@ try:
 				
 				############		Wd vector		
 				wd = np.dot( j_inv, w1, out=None).reshape(3,1) 		
-				wd_dot = (last_wd - wd)/del_t
+				# ~ wd_dot = (last_wd - wd)/del_t
+				wd_dot = (last_wd - wd)/elapsed_time
 				# ~ print(str(wd) +" , "+str(wd_dot))
 				# ~ print(wd_dot)
 				
@@ -222,17 +249,39 @@ try:
 				m1_rpm = int(robot.rpm(0))
 				m2_rpm = int(robot.rpm(1))
 				m3_rpm = int(robot.rpm(2))
-				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
+				
+				# ~ alpha = del_t / tau
+				alpha = elapsed_time / tau
+				
+				input1 = m1_rpm
+				input2 = m2_rpm
+				input3 = m3_rpm
+				
+				output1 = output1 + alpha*(input1 - output1)
+				output2 = output2 + alpha*(input2 - output2)
+				output3 = output3 + alpha*(input3 - output3)
+				
+				# ~ output1 += alpha*(input1 - last_output1)
+				# ~ output2 += alpha*(input2 - last_output2)
+				# ~ output3 += alpha*(input3 - last_output3)
+				
+				m1_rpm_f = output1
+				m2_rpm_f = output2
+				m3_rpm_f = output3
+				
+				data_rpm = str(m1_rpm_f)+' , ' +str(m2_rpm_f)+ ' , ' +str(m3_rpm_f)
 				# ~ print(data_rpm)
 				
 				########################################################			Calculate V
+				# ~ e2 = np.array([(m1_rpm_f-c_rpm1),(m2_rpm_f-c_rpm2),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
 				e2 = np.array([(m1_rpm-c_rpm1),(m2_rpm-c_rpm2),(m3_rpm-c_rpm3)]).reshape(3,1) 
 				z1 = np.dot(j,e2,out=None).reshape(3,1) 
 				j1 = np.dot(j_inv,j_dot,out=None) 
 				j2 = np.dot(j_inv,e1,out=None) 
 				
 				vd = 1/b1*a1*wd + 1/b1*wd_dot - 1/b1*np.dot(j1,e2,out=None) - 1/b1*j2
-				vd_dot = (last_vd-vd)/del_t
+				# ~ vd_dot = (last_vd-vd)/del_t
+				vd_dot = (last_vd-vd)/elapsed_time
 				# ~ print(str(vd)+" , "+str(vd_dot)) 
 
 				########################################################			Input U
@@ -255,7 +304,7 @@ try:
 				m2_rpm_u = int(robot.rpm(1))
 				m3_rpm_u = int(robot.rpm(2))
 				data_rpm_u = str(m1_rpm_u)+' , ' +str(m2_rpm_u)+ ' , ' +str(m3_rpm_u)
-				print(data_rpm_u)
+				# ~ print(data_rpm_u)
 				
 				########################################################			odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
@@ -283,12 +332,17 @@ try:
 				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 				
 				########################################################		Preparing for new loop			
-				dt = (time.time() - start)
-				# ~ print(dt)
+				time.sleep(delay)
+				elapsed_time = (time.time() - start)
+				t = t + elapsed_time
+				
 				last_wd = wd
 				last_vd = vd
-				time.sleep(del_t)
-				t = time.time()
+				last_output1 = output1
+				last_output2 = output2
+				last_output3 = output3
+				
+			robot.stop()
 				
 
 ## Ctrl + c to stop robot
