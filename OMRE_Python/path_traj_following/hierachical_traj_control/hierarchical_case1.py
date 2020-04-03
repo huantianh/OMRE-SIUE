@@ -155,18 +155,18 @@ try:
 			initOdometry()
 			odometry_RealSense()
 
-			R = 0.5
+			R = 1
 			############################################################		Value for t and delta_t
 			t = 0
 			delay = 0.1
-			speed = 0.3
+			speed = 0.5
 			
 			############################################################		Kp, Ki, Kd gains
-			kp = 2
-			ki = 0.1
+			kp = 1
+			ki = 0
 			kd = 0
 			
-			test_t = 60
+			test_t = 30
 			
 			while t < test_t:
 				

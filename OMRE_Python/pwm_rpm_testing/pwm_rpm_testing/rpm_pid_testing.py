@@ -51,19 +51,9 @@ def motors(m1,m2,m3):
 
 
 try: 
-	mode = str(input("Enter mode: s for serial, t for RPM testing "))
+	mode = str(input("Enter mode: s to start testing  "))
 
 	if(mode == 's'):
-
-	############## Simple Serial Communicator to Arduino ##############
-		while True:
-			command = input("Enter Command: ")
-			command = command+'\r'
-			ser.write(command.encode())
-			print (ser.readline().decode())
-
-
-	elif mode == 't':
 		
 		#~ motor_num = int(input("enter motor number: "))
 		f = open("rpm_values.txt",'r')

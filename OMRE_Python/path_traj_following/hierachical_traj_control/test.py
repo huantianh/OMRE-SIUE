@@ -2,20 +2,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sym
 
-thetad = sym.Symbol('thetad')
+# ~ thetad = sym.Symbol('thetad')
 
 # ~ thetad = 0
 
-j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
-j_inv = np.linalg.inv(j).reshape(3,3)
+# ~ j = (2*np.pi*0.03/60)*np.array([(2/3)*np.sin(thetad+np.pi/3),(-2/3)*np.sin(thetad),(2/3)*np.sin(thetad-np.pi/3),(-2/3)*np.cos(thetad+np.pi/3),(2/3)*np.cos(thetad),(-2/3)*np.cos(thetad-np.pi/3),-1/(3*0.19),-1/(3*0.19),-1/(3*0.19)]).reshape(3,3)
+# ~ j_inv = np.linalg.inv(j).reshape(3,3)
 
-j_inv_dot = sym.diff(j)
-print(j)
-
-
+# ~ j_inv_dot = sym.diff(j)
+# ~ print(j)
 
 
+R = 0.5
+a = 0
+b = 0
+step = 0.01
 
+y1 = np.arange(R,-R,-step)
+w1 = R*R - (y1-b)*(y1-b)
+x1 = a + np.sqrt(w1)
+
+y2 = np.arange(-R,R,step)
+# ~ y3 = np.append(y2,0)
+w2 = R*R - (y2-b)*(y2-b)
+x2 = a - np.sqrt(w2)
+
+print(y2)
 
 
 

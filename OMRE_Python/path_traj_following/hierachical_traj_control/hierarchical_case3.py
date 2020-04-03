@@ -23,6 +23,8 @@ cfg.enable_stream(rs.stream.pose)
 pipe.start(cfg)
 
 #pid controller
+global integral
+global preError
 integral = np.array([0,0,0])[:,None]
 preError = np.array([0,0,0])[:,None]
 
@@ -171,13 +173,15 @@ try:
 			initOdometry()
 			odometry_RealSense()
 			
+			###### radius and speed
 			R = 0.5
-			speed = 1
+			speed = 0.1
+			
 			###### time gain
 			elapsed_time = 0.1
 			t = 0
-			delay = 0.1
-			test_t = 60
+			delay = 1
+			test_t = 30
 			
 			###### derivative gain
 			del_t  = delay
@@ -191,11 +195,15 @@ try:
 				start = time.time()
 				
 				########################################################			Gain K
-				k  = 0.5
+				# ~ kp  = 1
+				# ~ ki  = 0.02
+				# ~ kd  = 0
+				k = 1
 				Kx = k
 				Ky = k
 				Kz = k
 				
+				# ~ file = open(save_folder + "Case3"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				file = open(save_folder + "Case3"+"_K_"+str(k)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				
 				########################################################			Path
@@ -232,8 +240,27 @@ try:
 				e1 = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
 				w1 = np.dot(-K,e1,out=None) + q_dot_d
 				
+				# ~ Kp = kp
+				# ~ Ki = ki
+				# ~ Kd = kd
+				
+				# ~ setPoint     = np.array([xd,yd,thetad])[:,None]
+				# ~ currentPoint = np.array([xc,yc,thetac])[:,None]
+				# ~ error        = currentPoint - setPoint
+				# ~ preError     = error
+				# ~ integral     = integral + error
+				# ~ derivative   = error - preError
+				
+				# ~ print(str(integral) +" , "+str(error))
+				
+				# ~ output = Kp*error + Ki*integral + Kd*derivative	
+				# ~ e = (-output).reshape(3,1)
+				# ~ s = e + q_dot_d
+				
+				
 				############		Wd vector		
 				wd = np.dot( j_inv, w1, out=None).reshape(3,1) 		
+				# ~ wd = np.dot( j_inv, s, out=None).reshape(3,1) 		
 				# ~ wd_dot = (last_wd - wd)/del_t
 				wd_dot = (last_wd - wd)/elapsed_time
 				# ~ print(str(wd) +" , "+str(wd_dot))
@@ -273,8 +300,8 @@ try:
 				# ~ print(data_rpm)
 				
 				########################################################			Calculate V
-				# ~ e2 = np.array([(m1_rpm_f-c_rpm1),(m2_rpm_f-c_rpm2),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
-				e2 = np.array([(m1_rpm-c_rpm1),(m2_rpm-c_rpm2),(m3_rpm-c_rpm3)]).reshape(3,1) 
+				e2 = np.array([(m1_rpm_f-c_rpm1),(m2_rpm_f-c_rpm2),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
+				# ~ e2 = np.array([(m1_rpm-c_rpm1),(m2_rpm-c_rpm2),(m3_rpm-c_rpm3)]).reshape(3,1) 
 				z1 = np.dot(j,e2,out=None).reshape(3,1) 
 				j1 = np.dot(j_inv,j_dot,out=None) 
 				j2 = np.dot(j_inv,e1,out=None) 

@@ -35,8 +35,8 @@ with open(root.filename,'r') as csvfile:
 		y3.append(float(row[3]))
 
 fig = plt.plot(x,y1, 'b', label='Motor1', linewidth=3)
-fig = plt.plot(x,y2, 'g', label='Motor2', linewidth=3)
-fig = plt.plot(x,y3, 'r', label='Motor3', linewidth=3)
+# ~ fig = plt.plot(x,y2, 'g', label='Motor2', linewidth=3)
+# ~ fig = plt.plot(x,y3, 'r', label='Motor3', linewidth=3)
 plt.legend()
 plt.plot(x,200*np.ones(len(x)),'m')
 plt.autoscale(enable=True, axis='x', tight=True)
@@ -47,7 +47,7 @@ plt.title(my_txt1)
 #Save image into full size 
 fig = plt.gcf()
 fig.set_size_inches((20, 11), forward=False)
-fig.savefig(my_txt1+'.png', dpi=500)
+fig.savefig(my_txt1+'.png', dpi=200)
 
 #will not stop the figure if use this
 plt.show()

@@ -156,12 +156,12 @@ def path_f(xd,yd,thetad,b,a,R,step):
 	
 	delta_min = 0.1
 	vr = 0.1
-	h = 3
-	Kx = h	
-	Ky = h
-	Kz = h
+	k = 5
+	Kx = k	
+	Ky = k
+	Kz = k
 
-	file = open(save_folder + "Circle"+"_vr_"+str(vr)+"_K_"+str(h)+"_delta_"+str(delta_min)+'_R_'+str(R)+'_step_'+str(step)+".txt","a")
+	file = open(save_folder + "Circle"+"_vr_"+str(vr)+"_K_"+str(k)+"_delta_"+str(delta_min)+'_R_'+str(R)+'_step_'+str(step)+".txt","a")
 	# ~ file = open(save_folder2 + "Circle"+"_vr_"+str(vr)+"_K_"+str(Kx)+"_"+str(Ky)+"_"+str(Kz)+"_delta_"+str(delta_min)+".txt","a")
 	
 	while True:
@@ -196,28 +196,33 @@ def path_f(xd,yd,thetad,b,a,R,step):
 		e = np.array([(xc - xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
 		
 		s = np.dot(-K,e,out=None) + q_dot_d
-				
-		vm = np.dot( j_inv, s, out=None)
 		
-		motor_spd_vec = vm
+		########################################################		Input W	(RPM)	
+		w = np.dot( j_inv, s, out=None)	
+		motor_spd_vec = w
 		# ~ print(vm)
 		
+		########################################################		commanded RPM
 		wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
 		wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
 		wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
+		
+		c_rpm1 = float(wheel0RPM)
+		c_rpm2 = float(wheel1RPM)
+		c_rpm3 = float(wheel2RPM)
 			
-		robot.motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
+		robot.motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 		
 		pose = odometryCalc(xc,yc,thetac)	
 		pos  = odometry_RealSense()
 		
-		# ~ current_x = pose.item(0)
-		# ~ current_y = pose.item(1)
+		current_x = pose.item(0)
+		current_y = pose.item(1)
 		current_theta = pose.item(2)
 		
 		#use RealSense as feedback
-		current_x = pos_x
-		current_y = pos_y
+		# ~ current_x = pos_x
+		# ~ current_y = pos_y
 		# ~ current_theta = theta_rs
 		
 		vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
@@ -240,7 +245,8 @@ def path_f(xd,yd,thetad,b,a,R,step):
 		data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 		print(data_pose)
 		# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
-		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+		# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+		file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 		
 		if delta < delta_min:	
 			file.close()
@@ -249,40 +255,52 @@ def path_f(xd,yd,thetad,b,a,R,step):
 
 try: 
 	while True:
-			# ~ mode = str(input("Enter s to start "))
-			
-			# ~ if mode == 's':
-			# ~ a = float(input("enter a: "))
-			# ~ b = float(input("enter b: "))
 		R = float(input("Enter R: "))		
 		
 		initOdometry()
 		odometry_RealSense()
 		
-		# ~ while True:	
-		b = R
-		# ~ b = 0.15	
+		b = 0
 		a = 0
 			
 		step = 0.01
 			
-		y1 = np.arange(0,b*2,step)
-		w1 = R*R - (y1-b)*(y1-b)
-		x1 = a + np.sqrt(w1)
+		# ~ y1 = np.arange(0,b*2,step)
+		# ~ w1 = R*R - (y1-b)*(y1-b)
+		# ~ x1 = a + np.sqrt(w1)
+		# ~ y2 = np.arange(b*2,0,-step)
+		# ~ y3 = np.append(y2,0)
+		# ~ w2 = R*R - (y3-b)*(y3-b)
+		# ~ x2 = a - np.sqrt(w2)
 
-		y2 = np.arange(b*2,0,-step)
-		y3 = np.append(y2,0)
-		w2 = R*R - (y3-b)*(y3-b)
-		x2 = a - np.sqrt(w2)
+		delay = 0.1
+		t = 0
+		test_t = 30
 
-		x = np.concatenate((x1,x2))
-		y = np.concatenate((y1,y3))
-					
-		for i,j in zip(x,y):
-			xd = i
-			yd = j
-			thetad = 0
-			path_f(float(xd),float(yd),float(thetad),float(b),float(a),float(R),float(step))
+		while t < test_t:
+			start = time.time()
+			
+			y1 = np.arange(R,-R,-step)
+			w1 = R*R - (y1-b)*(y1-b)
+			x1 = a + np.sqrt(w1)
+
+			y2 = np.arange(-R,R,step)
+			y3 = np.append(y2,R)
+			w2 = R*R - (y2-b)*(y2-b)
+			x2 = a - np.sqrt(w2)
+
+			x = np.concatenate((x1,x2))
+			y = np.concatenate((y1,y3))
+						
+			for i,j in zip(x,y):
+				xd = i
+				yd = j
+				thetad = 0
+				path_f(float(xd),float(yd),float(thetad),float(b),float(a),float(R),float(step))
+				
+				# ~ time.sleep(delay)
+			elapsed_time = (time.time() - start)
+			t = t + elapsed_time
 	
 ## Ctrl + c to stop robot
 except KeyboardInterrupt:
