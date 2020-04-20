@@ -63,10 +63,10 @@ with open(root.filename,'r') as csvfile:
 
 #circle path
 theta = np.linspace(0, 2*np.pi, 100)
-b = 1
+b = 0.2
 r = b
-x1 = r*np.cos(theta) 
-x2 = r*np.sin(theta)
+x1 = np.cos(theta) 
+x2 = np.sin(2*theta)/2
 
 fig = plt.figure()
 fig.suptitle(my_txt1,fontsize=16)
@@ -79,7 +79,7 @@ ax4 = fig.add_subplot(224)
 ax1 = plt.subplot(221)
 ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
 ax1.plot(rs1,rs2,'g',label='RealSense', linewidth=3)
-ax1.plot(x1,x2, 'r--', label='Circle', linewidth=1.5)
+ax1.plot(x1,x2, 'r--', label='Infinite', linewidth=1.5)
 ax1.set_xlabel('X')
 ax1.set_ylabel('Y')
 ax1.set_title('OMRE_Path'+'_R_'+str(r), fontsize=12)

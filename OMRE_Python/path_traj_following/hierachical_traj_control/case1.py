@@ -155,14 +155,14 @@ try:
 			initOdometry()
 			odometry_RealSense()
 
-			R = 1
+			R = 0.2
 			############################################################		Value for t and delta_t
 			t = 0
 			delay = 0.1
-			speed = 0.5
-			
+			speed = 0.4
+						
 			############################################################		Kp, Ki, Kd gains
-			kp = 1
+			kp = 4
 			ki = 0
 			kd = 0
 			
@@ -247,14 +247,14 @@ try:
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)		
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
