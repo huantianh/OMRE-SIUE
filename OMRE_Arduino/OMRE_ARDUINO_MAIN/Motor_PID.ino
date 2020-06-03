@@ -13,7 +13,7 @@ double SampleTime             = 1000;
 double SampleTimeInSec = ((double)SampleTime)/1000;
 
 double kp = 1;
-double ki = 0.1 * SampleTimeInSec;
+double ki = 0.15 * SampleTimeInSec;
 double kd = 0 / SampleTimeInSec;
 
 //double kp = 0.3;

@@ -174,37 +174,27 @@ try:
 			odometry_RealSense()
 			
 			###### radius and speed
-			R = 0.5
-			speed = 0.1
+			R = 1
+			speed = 0.5
 			
 			###### time gain
-			elapsed_time = 0.1
 			t = 0
-			delay = 1
+			delay = 0.01
 			test_t = 30
 			
-			###### derivative gain
-			del_t  = delay
-			# ~ del_t  = 0.08
-			
 			###### filter gain
-			dt_tau = delay         #1   
+			dt_tau = 1             #1   
 			tau = 2                #0.05
 			
 			while t < test_t:
 				start = time.time()
 				
 				########################################################			Gain K
-				# ~ kp  = 1
-				# ~ ki  = 0.02
-				# ~ kd  = 0
-				k = 1
-				Kx = k
-				Ky = k
-				Kz = k
+				kp  = 1
+				ki  = 0.03
+				kd  = 0
 				
-				# ~ file = open(save_folder + "Case3"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
-				file = open(save_folder + "Case3"+"_K_"+str(k)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
+				file = open(save_folder + "Case3"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				
 				########################################################			Path
 				xd = R*np.sin(speed*t)
@@ -220,102 +210,97 @@ try:
 				thetac = current_theta
 				
 				########################################################			Q_dot and J 
-				############		q_dot_d
-				x_dot_d =  R*speed*np.cos(speed*t)
-				y_dot_d = -R*speed*np.sin(speed*t)
-				theta_dot_d = 0.1
-				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
+				############		qd_dot
+				xd_dot =  R*speed*np.cos(speed*t)
+				yd_dot = -R*speed*np.sin(speed*t)
+				thetad_dot = 0
+				qd_dot = np.array([xd_dot,yd_dot,thetad_dot]).reshape(3,1)
 				
 				############		J, J_inverse, J_dot, J_transpose
 				r = 0.03
 				l = 0.19
 				j = (2*np.pi*r/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3)
 				j_inv = np.linalg.inv(j).reshape(3,3)
-				j_dot = (2*np.pi*r/60)*np.array([(2/3)*np.cos(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.cos(thetac)*theta_dot_d,(2/3)*np.cos(thetac-np.pi/3)*theta_dot_d,(2/3)*np.sin(thetac+np.pi/3)*theta_dot_d,(-2/3)*np.sin(thetac)*theta_dot_d,(2/3)*np.sin(thetac-np.pi/3)*theta_dot_d,0,0,0]).reshape(3,3)
+				j_dot = (2*np.pi*r/60)*np.array([(2/3)*np.cos(thetac+np.pi/3)*thetad_dot,(-2/3)*np.cos(thetac)*thetad_dot,(2/3)*np.cos(thetac-np.pi/3)*thetad_dot,(2/3)*np.sin(thetac+np.pi/3)*thetad_dot,(-2/3)*np.sin(thetac)*thetad_dot,(2/3)*np.sin(thetac-np.pi/3)*thetad_dot,0,0,0]).reshape(3,3)
 				j_trans = np.transpose(j).reshape(3,3)
 				# ~ print(str(j) +" , "+ str(j_dot))
 				
 				########################################################			Calculate W				
-				K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
-				e1 = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
-				w1 = np.dot(-K,e1,out=None) + q_dot_d
+				Kp = kp
+				Ki = ki
+				Kd = kd
 				
-				# ~ Kp = kp
-				# ~ Ki = ki
-				# ~ Kd = kd
+				setPoint     = np.array([xd,yd,thetad])[:,None]
+				currentPoint = np.array([xc,yc,thetac])[:,None]
+				e1           = currentPoint - setPoint
+				preError     = e1
+				integral     = integral + e1
+				derivative   = e1 - preError
+			
+				output = Kp*e1 + Ki*integral + Kd*derivative	
+				e1_dot = (-output).reshape(3,1)
+				s = e1_dot + qd_dot
 				
-				# ~ setPoint     = np.array([xd,yd,thetad])[:,None]
-				# ~ currentPoint = np.array([xc,yc,thetac])[:,None]
-				# ~ error        = currentPoint - setPoint
-				# ~ preError     = error
-				# ~ integral     = integral + error
-				# ~ derivative   = error - preError
-				
-				# ~ print(str(integral) +" , "+str(error))
-				
-				# ~ output = Kp*error + Ki*integral + Kd*derivative	
-				# ~ e = (-output).reshape(3,1)
-				# ~ s = e + q_dot_d
-				
-				
-				############		Wd vector		
-				wd = np.dot( j_inv, w1, out=None).reshape(3,1) 		
-				# ~ wd = np.dot( j_inv, s, out=None).reshape(3,1) 		
-				# ~ wd_dot = (last_wd - wd)/del_t
-				wd_dot = (last_wd - wd)/elapsed_time
-				# ~ print(str(wd) +" , "+str(wd_dot))
-				# ~ print(wd_dot)
+				############		Wd vector			
+				wd = np.dot( j_inv, s, out=None).reshape(3,1) 		
+				wd_dot1 = np.sqrt(3)*R*speed*(333.333333333333*(speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac) - np.cos(thetac + np.pi/6)) - 333.333333333333*(speed*np.cos(speed*t) + np.sin(speed*t))*((-np.sin(thetac) + np.cos(thetac + np.pi/6))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) + (np.sin(thetac + np.pi/6) + np.cos(thetac))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) - 7.91700075e+19*(speed*np.cos(speed*t) + np.sin(speed*t))*(4.2103486390769e-18*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) + np.cos(thetac)) - 6.31552295861536e-18*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2)/np.pi
+				wd_dot2 = np.sqrt(3)*R*speed*(333.333333333333*(speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6)) + 1.3889475e+17*(speed*np.cos(speed*t) + np.sin(speed*t))*(2.39989872427384e-15*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3)) - 3.59984808641075e-15*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 + 333.333333333333*(speed*np.cos(speed*t) + np.sin(speed*t))*((np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6)) + (np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))/(np.cos(thetac) + np.cos(thetac + np.pi/3)))/np.pi
+				wd_dot3 = 333.333333333333*np.sqrt(3)*R*speed*(-(speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) + (speed*np.cos(speed*t) + np.sin(speed*t))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))/np.pi
+				wd_dot = np.array([wd_dot1,wd_dot2,wd_dot3]).reshape(3,1)
+
 				
 				############		commanded (Wd)
 				c_rpm2 = float(wd[0])
 				c_rpm1 = float(wd[1])
 				c_rpm3 = float(wd[2])
-				# ~ print(str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)) 
+			
 				
 				############		actual RPM (Wc)
-				m1_rpm = int(robot.rpm(0))
-				m2_rpm = int(robot.rpm(1))
-				m3_rpm = int(robot.rpm(2))
+				m1_rpm = float(robot.rpm(0))
+				m2_rpm = float(robot.rpm(1))
+				m3_rpm = float(robot.rpm(2))
 				
-				# ~ alpha = del_t / tau
-				alpha = elapsed_time / tau
+				alpha = dt_tau / tau
 				
-				input1 = m1_rpm
-				input2 = m2_rpm
-				input3 = m3_rpm
+				input1 = float(m1_rpm)
+				input2 = float(m2_rpm)
+				input3 = float(m3_rpm)
 				
-				output1 = output1 + alpha*(input1 - output1)
-				output2 = output2 + alpha*(input2 - output2)
-				output3 = output3 + alpha*(input3 - output3)
-				
-				# ~ output1 += alpha*(input1 - last_output1)
-				# ~ output2 += alpha*(input2 - last_output2)
-				# ~ output3 += alpha*(input3 - last_output3)
+				output1 += alpha*(input1 - last_output1)
+				output2 += alpha*(input2 - last_output2)
+				output3 += alpha*(input3 - last_output3)
 				
 				m1_rpm_f = output1
 				m2_rpm_f = output2
 				m3_rpm_f = output3
 				
 				data_rpm = str(m1_rpm_f)+' , ' +str(m2_rpm_f)+ ' , ' +str(m3_rpm_f)
-				# ~ print(data_rpm)
 				
 				########################################################			Calculate V
-				e2 = np.array([(m1_rpm_f-c_rpm1),(m2_rpm_f-c_rpm2),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
-				# ~ e2 = np.array([(m1_rpm-c_rpm1),(m2_rpm-c_rpm2),(m3_rpm-c_rpm3)]).reshape(3,1) 
+				# ~ e2 = np.array([(m2_rpm_f-c_rpm2),(m1_rpm_f-c_rpm1),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
+				e2 = np.array([(m2_rpm-c_rpm2),(m1_rpm-c_rpm1),(m3_rpm-c_rpm3)]).reshape(3,1) 
+
 				z1 = np.dot(j,e2,out=None).reshape(3,1) 
 				j1 = np.dot(j_inv,j_dot,out=None) 
 				j2 = np.dot(j_inv,e1,out=None) 
 				
 				vd = 1/b1*a1*wd + 1/b1*wd_dot - 1/b1*np.dot(j1,e2,out=None) - 1/b1*j2
-				# ~ vd_dot = (last_vd-vd)/del_t
-				vd_dot = (last_vd-vd)/elapsed_time
-				# ~ print(str(vd)+" , "+str(vd_dot)) 
+				vd_dot1 = np.sqrt(3)*R*speed*(-0.00445513677269892*speed*(666.666666666667*(-speed*np.sin(speed*t) + np.cos(speed*t))*((-np.sin(thetac) + np.cos(thetac + np.pi/6))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) + (np.sin(thetac + np.pi/6) + np.cos(thetac))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))*(np.sin(thetac) + np.sin(thetac + np.pi/3))/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 + 666.666666666667*(-speed*np.sin(speed*t) + np.cos(speed*t))*((-np.sin(thetac) + np.cos(thetac + np.pi/6))*(np.cos(thetac) + np.cos(thetac + np.pi/3)) - (np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) + np.cos(thetac)))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) + 1.58340015e+20*(-speed*np.sin(speed*t) + np.cos(speed*t))*(4.2103486390769e-18*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) + np.cos(thetac)) - 6.31552295861536e-18*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))**2/(np.cos(thetac) + np.cos(thetac + np.pi/3))**3 + 7.91700075e+19*(-speed*np.sin(speed*t) + np.cos(speed*t))*(4.2103486390769e-18*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) + np.cos(thetac)) - 6.31552295861536e-18*np.sqrt(3))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) - 333.333333333333*(speed*np.cos(speed*t) + np.sin(speed*t))*(np.sin(thetac + np.pi/6) + np.cos(thetac))) + 18.0730048412486*(speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac) - np.cos(thetac + np.pi/6)) - 18.0730048412486*(speed*np.cos(speed*t) + np.sin(speed*t))*((-np.sin(thetac) + np.cos(thetac + np.pi/6))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) + (np.sin(thetac + np.pi/6) + np.cos(thetac))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) - 4.29251978648757e+18*(speed*np.cos(speed*t) + np.sin(speed*t))*(4.2103486390769e-18*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) + np.cos(thetac)) - 6.31552295861536e-18*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 - 1.48504559089964*((-np.sin(thetac) + np.cos(thetac + np.pi/6))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) + (np.sin(thetac + np.pi/6) + np.cos(thetac))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))*np.sin(speed*t)/(np.cos(thetac) + np.cos(thetac + np.pi/3)) - 3.52713211708099e+17*(4.2103486390769e-18*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) + np.cos(thetac)) - 6.31552295861536e-18*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))*np.sin(speed*t)/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 - 1.48504559089964*(np.sin(thetac) - np.cos(thetac + np.pi/6))*np.cos(speed*t))/np.pi
+				vd_dot2 = np.sqrt(3)*R*speed*(-0.00445513677269892*speed*(666.666666666667*(speed*np.sin(speed*t) - np.cos(speed*t))*(-(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3)) + (np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) + 2.777895e+17*(speed*np.sin(speed*t) - np.cos(speed*t))*(2.39989872427384e-15*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3)) - 3.59984808641075e-15*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))**2/(np.cos(thetac) + np.cos(thetac + np.pi/3))**3 + 1.3889475e+17*(speed*np.sin(speed*t) - np.cos(speed*t))*(2.39989872427384e-15*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3)) - 3.59984808641075e-15*np.sqrt(3))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) + 666.666666666667*(speed*np.sin(speed*t) - np.cos(speed*t))*((np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6)) + (np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))*(np.sin(thetac) + np.sin(thetac + np.pi/3))/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 + 333.333333333333*(speed*np.cos(speed*t) + np.sin(speed*t))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3))) + 18.0730048412486*(speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6)) + 7.53073646752205e+15*(speed*np.cos(speed*t) + np.sin(speed*t))*(2.39989872427384e-15*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3)) - 3.59984808641075e-15*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 + 18.0730048412486*(speed*np.cos(speed*t) + np.sin(speed*t))*((np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6)) + (np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))/(np.cos(thetac) + np.cos(thetac + np.pi/3)) + 618795108259824.0*(2.39989872427384e-15*(np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3)) - 3.59984808641075e-15*np.sqrt(3))*(np.sin(thetac) + np.sin(thetac + np.pi/3))*np.sin(speed*t)/(np.cos(thetac) + np.cos(thetac + np.pi/3))**2 + 1.48504559089964*((np.sin(thetac) + np.sin(thetac + np.pi/3))*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6)) + (np.sin(thetac + np.pi/6) - np.cos(thetac + np.pi/3))*(np.cos(thetac) + np.cos(thetac + np.pi/3)))*np.sin(speed*t)/(np.cos(thetac) + np.cos(thetac + np.pi/3)) - 1.48504559089964*(np.sin(thetac + np.pi/3) + np.cos(thetac + np.pi/6))*np.cos(speed*t))/np.pi
+				vd_dot3 = np.sqrt(3)*R*speed*(1.48504559089964*speed*((speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) - (speed*np.cos(speed*t) + np.sin(speed*t))*(np.cos(thetac) + np.cos(thetac + np.pi/3))) - 18.0730048412486*(speed*np.sin(speed*t) - np.cos(speed*t))*(np.sin(thetac) + np.sin(thetac + np.pi/3)) + 18.0730048412486*(speed*np.cos(speed*t) + np.sin(speed*t))*(np.cos(thetac) + np.cos(thetac + np.pi/3)) + 1.48504559089964*(np.sin(thetac) + np.sin(thetac + np.pi/3))*np.cos(speed*t) + 1.48504559089964*(np.cos(thetac) + np.cos(thetac + np.pi/3))*np.sin(speed*t))/np.pi
+				vd_dot = np.array([vd_dot1,vd_dot2,vd_dot3]).reshape(3,1)
 
 				########################################################			Input U
 				j3 = np.dot(j_trans,z1,out=None)
 				u1 = 1/b2*(vd_dot + a2*vd + b1*j3)
 				c3 = 1/c2
-				u  = np.sign(u1) * (np.abs(u1)) ** (c3)
+				u11 = np.sign(u1[0]) * (np.abs(u1[0])) ** (c3)
+				u21 = np.sign(u1[1]) * (np.abs(u1[1])) ** (c3)
+				u31 = np.sign(u1[2]) * (np.abs(u1[2])) ** (c3)
+				
+				u  = np.array([u11,u21,u31]).reshape(3,1)
+				
+				# ~ u  = np.sign(u1) * (np.abs(u1)) ** (c3)
 				# ~ print(str(u) +' , '+ str(u1))
 				# ~ print(str(int(u[1]))+" , "+str(int(u[0]))+" , "+str(int(u[2])))
 				
@@ -354,9 +339,9 @@ try:
 				########################################################			Recording data
 				time_running = time.time()		
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-				# ~ print(data_pose)
-				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
+				print(data_pose)
 				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(xd)+" , "+str(yd)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 				
 				########################################################		Preparing for new loop			
 				time.sleep(delay)
