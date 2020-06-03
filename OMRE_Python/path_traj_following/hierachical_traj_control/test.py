@@ -81,23 +81,23 @@ vd_dot = sym.diff(vd, thetac,t)
 print(wd_dot)
 
 
-# ~ j3 = j_trans*z1
-# ~ u1 = (1/b2*(vd_dot + a2*vd + b1*j3))
-# ~ c3 = 1/c2
+j3 = j_trans*z1
+u1 = (1/b2*(vd_dot + a2*vd + b1*j3))
+c3 = 1/c2
 
-# ~ u11 = (u1.row(0))**c3
-# ~ u21 = (u1.row(1))**c3
-# ~ u31 = (u1.row(2))**c3
+u11 = (u1.row(0))**c3
+u21 = (u1.row(1))**c3
+u31 = (u1.row(2))**c3
 
-# ~ u_equ = Matrix([
-# ~ [u11],
-# ~ [u21],
-# ~ [u31]
-# ~ ])
+u_equ = Matrix([
+[u11],
+[u21],
+[u31]
+])
 
-# ~ u_num = (t, R, speed, xc, yc, thetac, m1_rpm, c_rpm1, m2_rpm, c_rpm2, m3_rpm, c_rpm3)
-# ~ u_final = lambdify(u_num, u_equ, modules='numpy')
-# ~ u2 = u_final(30,0.2,0.3,1,1,1,1,1,1,1,1,1)
+u_num = (t, R, speed, xc, yc, thetac, m1_rpm, c_rpm1, m2_rpm, c_rpm2, m3_rpm, c_rpm3)
+u_final = lambdify(u_num, u_equ, modules='numpy')
+u2 = u_final(30,0.2,0.3,1,1,1,1,1,1,1,1,1)
 
 # ~ print (vd_dot[2])
 

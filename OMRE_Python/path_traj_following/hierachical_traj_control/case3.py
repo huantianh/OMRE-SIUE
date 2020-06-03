@@ -174,7 +174,7 @@ try:
 			odometry_RealSense()
 			
 			###### radius and speed
-			R = 1
+			R = 0.2
 			speed = 0.5
 			
 			###### time gain
@@ -190,8 +190,8 @@ try:
 				start = time.time()
 				
 				########################################################			Gain K
-				kp  = 1
-				ki  = 0.03
+				kp  = 3
+				ki  = 0
 				kd  = 0
 				
 				file = open(save_folder + "Case3"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
