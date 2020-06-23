@@ -174,7 +174,7 @@ try:
 			odometry_RealSense()
 			
 			###### radius and speed
-			R = 0.2
+			R = 0.8
 			speed = 0.5
 			
 			###### time gain
@@ -183,18 +183,18 @@ try:
 			test_t = 30
 			
 			###### filter gain
-			dt_tau = 1             #1   
+			dt_tau = 0.1             #1   
 			tau = 2                #0.05
 			
 			while t < test_t:
 				start = time.time()
 				
 				########################################################			Gain K
-				kp  = 3
+				kp  = 4
 				ki  = 0
 				kd  = 0
 				
-				file = open(save_folder + "Case3"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
+				file = open(save_folder + "Case3"+"_R_"+str(R)+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				
 				########################################################			Path
 				xd = R*np.sin(speed*t)
@@ -277,8 +277,8 @@ try:
 				data_rpm = str(m1_rpm_f)+' , ' +str(m2_rpm_f)+ ' , ' +str(m3_rpm_f)
 				
 				########################################################			Calculate V
-				# ~ e2 = np.array([(m2_rpm_f-c_rpm2),(m1_rpm_f-c_rpm1),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
-				e2 = np.array([(m2_rpm-c_rpm2),(m1_rpm-c_rpm1),(m3_rpm-c_rpm3)]).reshape(3,1) 
+				e2 = np.array([(m2_rpm_f-c_rpm2),(m1_rpm_f-c_rpm1),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
+				# ~ e2 = np.array([(m2_rpm-c_rpm2),(m1_rpm-c_rpm1),(m3_rpm-c_rpm3)]).reshape(3,1) 
 
 				z1 = np.dot(j,e2,out=None).reshape(3,1) 
 				j1 = np.dot(j_inv,j_dot,out=None) 
@@ -322,14 +322,14 @@ try:
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################			odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)
 
 				########################################################			RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)

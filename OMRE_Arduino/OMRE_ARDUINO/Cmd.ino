@@ -4,7 +4,7 @@ void parseCommand()
   char command = rcv_buffer[0]; // our first byte tells us the command char is equivalent to byte
   switch (command)
   {
-    ///////////////////////////////////////////////////////////////             ENCODER
+    ////////////////////////////////////////////////////////////////             ENCODER
     case 'E':
     case 'e':
       int encoderNum;
@@ -14,7 +14,7 @@ void parseCommand()
       Serial.println(encoderCounts[encoderNum]);
       break;
 
-    ////////////////////////////////////////////////////////////////             MOTOR
+    ////////////////////////////////////////////////////////////////             MOTOR PWM
     case 'M':
     case 'm':
       int  motorNumber;
@@ -23,6 +23,7 @@ void parseCommand()
       sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
       pidSwitch = '0';
       motor(motorNumber, motorPWM);
+      PRINT_RPM                             = '1';
       break;
 
     ////////////////////////////////////////////////////////////////             ULTRASOUND
@@ -31,6 +32,12 @@ void parseCommand()
       int ultrasonicNumber;
       sscanf(&rcv_buffer[1], " %d \r", &ultrasonicNumber);
       ultrasonicSwitch = '1';
+
+      PRINT_ULTRASOUND                      = '1';
+      PRINT_IR                              = '0';
+      PRINT_RPM                             = '0';
+      PRINT_IMU                             = '0';
+
       Serial.println(m_US[ultrasonicNumber]);
       break;
 
@@ -41,10 +48,15 @@ void parseCommand()
       int infraredNumber;
       sscanf(&rcv_buffer[1], " %d \r", &infraredNumber);
       IRSwitch = '1';
+
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '1';
+      PRINT_RPM                             = '0';
+      PRINT_IMU                             = '0';
       Serial.println (m_IR[infraredNumber]);
       break;
-
-    ////////////////////////////////////////////////////////////////              ENTER RPM_GOAL
+      
+    ////////////////////////////////////////////////////////////////              MOTOR RPM
     case 'v':
     case 'V':
 
@@ -53,6 +65,12 @@ void parseCommand()
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
       pidSwitch = '1';
+
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_RPM                             = '1';
+      PRINT_IMU                             = '0';
+
       rpm_setpoint[0] = rpm0;
       rpm_setpoint[1] = rpm1;
       rpm_setpoint[2] = rpm2;
@@ -63,27 +81,30 @@ void parseCommand()
     case 'R':
       int rpmNum;
       sscanf(&rcv_buffer[1], " %d \r", &rpmNum);
-      printDouble(rpmValues[rpmNum], 1000000000);
+      PRINT_RPM                             = '1';
+      Serial.println(rpmValues[rpmNum]);
+      //      Serial.print("  ,  ");
+      //      Serial.print(rpmValues[1]);
+      //      Serial.print("  ,  ");
+      //      Serial.println(rpmValues[2]);
+
       break;
 
-    //    ///////////////////////////////////////////////////////////////               ENTER GAINS K
-    //    case 'k':
-    //    case 'K':
-    //      char  pValue[20];
-    //      char  iValue[20];
-    //      sscanf(&rcv_buffer[1], " %s %s \r", &pValue, &iValue);
-    //      char *ptr;
-    //      for (int i = 0; i < 3; i++)
-    //      {
-    //        Kp[i] = strtod(pValue, &ptr);
-    //        Ki[i] = strtod(iValue, &ptr);
-    //      }
-    //      break;
-
-    ////////////////////////////////////////////////////////////////              STOP
+    ////////////////////////////////////////////////////////////////            STOP
     case 's':
     case 'S':
-      printSwitch = 0;
+
+      pidSwitch                             = '0';
+      ultrasonicSwitch                      = '0';
+      IRSwitch                              = '0';
+      IMUSwitch                             = '0';
+      printSwitch                           = '0';
+
+      //      PRINT_ULTRASOUND                      = '0';
+      //      PRINT_IR                              = '0';
+      //      PRINT_RPM                             = '0';
+      //      PRINT_IMU                             = '0';
+
       for (int i = 0; i < 3; i++)
       {
         motor(i, 0);
@@ -94,22 +115,32 @@ void parseCommand()
     ////////////////////////////////////////////////////////////////             PRINT DATA
     case 'p':
     case 'P':
-      printSwitch = '1';
+
+      printSwitch                           = '1';
       break;
 
     ////////////////////////////////////////////////////////////////             Move Robot Forward
     case 'f':
     case 'F':
 
+      pidSwitch = '1';
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_RPM                             = '0';
+      PRINT_IMU                             = '1';
       rpm_setpoint[0] = 0;
-      rpm_setpoint[1] = 50;
-      rpm_setpoint[2] = -50;
+      rpm_setpoint[1] = 100;
+      rpm_setpoint[2] = -100;
       break;
 
     /////////////////////////////////////////////////////////////////            Move Robot Backward
     case 'b':
     case 'B':
 
+      pidSwitch                             = '1';
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_RPM                             = '0';
       rpm_setpoint[0] = 0;
       rpm_setpoint[1] = -50;
       rpm_setpoint[2] = 50;

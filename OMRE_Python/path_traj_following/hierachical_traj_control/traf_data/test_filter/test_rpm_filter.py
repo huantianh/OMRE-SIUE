@@ -31,7 +31,7 @@ delta_t = t[1]-t[0]
 print delta_t
 tau = 2
 # ~ alpha = delta_t / tau
-alpha = 0.1 / tau
+alpha = 0.5 / tau
 
 ############################	filter Motor1
 input1 = rpm1

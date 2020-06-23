@@ -8,11 +8,21 @@ double error[3]               = {0, 0, 0};
 double dInput[3]              = {0, 0, 0};
 double pwm_pid[3]             = {0, 0, 0};
 int    rpms[3]                = {0, 0, 0};
-int SampleTime                = 1000;
+double SampleTime             = 1000;
 
-double Kp[] = {0.5, 0.5, 0.5};
-double Ki[] = {0.1, 0.1, 0.1};
-double Kd[] = {0, 0, 0};
+double SampleTimeInSec = ((double)SampleTime)/1000;
+
+double kp = 1;
+double ki = 0.15 * SampleTimeInSec;
+double kd = 0 / SampleTimeInSec;
+
+//double kp = 0.3;
+//double ki = 0.02; 
+//double kd = 0;
+
+double Kp[] = {kp, kp, kp};
+double Ki[] = {ki, ki, ki};
+double Kd[] = {kd, kd, kd};
 
 void speed_pid()
 {

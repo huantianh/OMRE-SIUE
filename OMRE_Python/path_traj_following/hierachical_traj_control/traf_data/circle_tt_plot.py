@@ -63,7 +63,7 @@ with open(root.filename,'r') as csvfile:
 
 #circle path
 theta = np.linspace(0, 2*np.pi, 100)
-b = 0.2
+b = 0.8
 r = b
 x1 = r*np.cos(theta) 
 x2 = r*np.sin(theta)
