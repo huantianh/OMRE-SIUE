@@ -22,6 +22,9 @@ text = f.read()
 x = []
 y = []
 z = []
+xd = []
+yd = []
+zd = []
 rs1 = []
 rs2 = []
 rpm1 =[]
@@ -39,7 +42,7 @@ with open(root.filename,'r') as csvfile:
 	plots = csv.reader(csvfile, delimiter=',')
 	for idx, row in enumerate(plots):
 		if idx == 0:
-			t0 = float(row[14])
+			t0 = float(row[17])
 		x.append(float(row[0]))
 		y.append(float(row[1]))
 		z.append(float(row[2]))
@@ -59,14 +62,19 @@ with open(root.filename,'r') as csvfile:
 		vy.append(float(row[12]))
 		v.append(float(row[13]))
 		
-		t.append(float(row[14])-t0)
+		xd.append(float(row[14]))
+		yd.append(float(row[15]))
+		zd.append(float(row[16]))
+		
+		t.append(float(row[17])-t0)
 
 #circle path
 theta = np.linspace(0, 2*np.pi, 100)
 b = 0.8
 r = b
 x1 = r*np.cos(theta) 
-x2 = r*np.sin(theta)
+x2 = r*np.sin(theta)-r
+test_t = 30
 
 fig = plt.figure()
 fig.suptitle(my_txt1,fontsize=16)
@@ -77,7 +85,7 @@ ax4 = fig.add_subplot(224)
 
 #Circle
 ax1 = plt.subplot(221)
-ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
+# ~ ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
 ax1.plot(rs1,rs2,'g',label='RealSense', linewidth=3)
 ax1.plot(x1,x2, 'r--', label='Circle', linewidth=1.5)
 ax1.set_xlabel('X')
@@ -85,6 +93,43 @@ ax1.set_ylabel('Y')
 ax1.set_title('OMRE_Path'+'_R_'+str(r), fontsize=12)
 plt.grid(True)
 plt.legend()
+
+#pos_x
+# ~ ax2 = plt.subplot(222)
+# ~ ax2.plot(t, x, 'm', label='OMRE', linewidth=3)
+# ~ ax2.plot(t, xd, 'r--', label='Goal', linewidth=1.5)
+# ~ ax2.set_xlabel('Time (s)')
+# ~ ax2.set_ylabel('m')
+# ~ ax2.set_title('X[m]', fontsize=12)
+# ~ ax2.set_xlim(0, test_t)
+# ~ ax2.set_ylim(-1, 2)
+# ~ plt.grid(True)
+# ~ plt.legend()
+
+# ~ #pos_y
+# ~ ax3 = plt.subplot(223)
+# ~ ax3.plot(t,y, 'g', label='OMRE', linewidth=3)
+# ~ ax3.plot(t,yd, 'r--', label='Goal', linewidth=1.5)
+# ~ ax3.set_xlabel('Time (s)')
+# ~ ax3.set_ylabel('m')
+# ~ ax3.set_title('Y[m]', fontsize=12)
+# ~ ax3.set_xlim(0, test_t)
+# ~ ax3.set_ylim(-2, 1)
+# ~ plt.grid(True)
+# ~ plt.legend()
+
+# ~ #pos_t
+# ~ ax4 = plt.subplot(224)
+# ~ ax4.plot(t,z, 'c', label='OMRE', linewidth=3)
+# ~ ax4.plot(t,zd, 'r--', label='Goal', linewidth=1.5)
+# ~ ax4.set_xlabel('Time (s)')
+# ~ ax4.set_ylabel('m')
+# ~ ax4.set_title('Theta[m]', fontsize=12)
+# ~ ax4.set_xlim(0, test_t)
+# ~ ax4.set_ylim(-1, 2)
+# ~ plt.grid(True)
+# ~ plt.legend()
+
 
 #motor1
 ax2 = plt.subplot(222)

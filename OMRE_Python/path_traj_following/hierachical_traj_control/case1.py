@@ -155,15 +155,14 @@ try:
 			initOdometry()
 			odometry_RealSense()
 
-			R = 0.2
+			R = 0.8
 			############################################################		Value for t and delta_t
 			t = 0
-			delay = 0.1
-			speed = 1
-									
+			delay = 0.01
+			speed = 0.5				
 			############################################################		Kp, Ki, Kd gains
-			kp = 1
-			ki = 0.3
+			kp = 6
+			ki = 0
 			kd = 0
 			
 			test_t = 30
@@ -173,7 +172,7 @@ try:
 				start = time.time()
 						
 				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)
+				yd = R*np.cos(speed*t)-R
 				thetad = 0
 				
 				file = open(save_folder + "Case1"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
@@ -269,15 +268,13 @@ try:
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 				# ~ print(data_pose)
 				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
-				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(xd)+" , "+str(yd)+" , "+str(thetad)+" , "+str(time_running)+"\n")
 					
 				########################################################		Remembering value for new loop			
 				time.sleep(delay)
 				elapsed_time = (time.time() - start)
-				# ~ print(elapsed_time)
 				t = t + elapsed_time
-				# ~ t = t + 0.5
-				# ~ print(t)
+				
 			robot.stop()
 				
 

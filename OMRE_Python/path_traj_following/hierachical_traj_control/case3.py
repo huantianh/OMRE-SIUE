@@ -175,7 +175,7 @@ try:
 			
 			###### radius and speed
 			R = 0.8
-			speed = 0.5
+			speed = 0.7
 			
 			###### time gain
 			t = 0
@@ -183,22 +183,22 @@ try:
 			test_t = 30
 			
 			###### filter gain
-			dt_tau = 0.1             #1   
+			dt_tau = 0.5           #1   
 			tau = 2                #0.05
 			
 			while t < test_t:
 				start = time.time()
 				
-				########################################################			Gain K
-				kp  = 4
+				#######################################################			Gain K
+				kp  = 9
 				ki  = 0
 				kd  = 0
 				
-				file = open(save_folder + "Case3"+"_R_"+str(R)+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
+				file = open(save_folder + "Case3"+"_R_"+str(R)+"_Kp_"+str(kp)+"_tau_"+str(dt_tau)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				
 				########################################################			Path
 				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)
+				yd = R*np.cos(speed*t)-R
 				thetad = 0
 				
 				########################################################			Parameters
@@ -339,8 +339,8 @@ try:
 				########################################################			Recording data
 				time_running = time.time()		
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
-				print(data_pose)
-				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
+				# ~ print(data_pose)
+				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(xd)+" , "+str(yd)+" , "+str(thetad)+" , "+str(time_running)+"\n")
 				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(xd)+" , "+str(yd)+" , "+str(m1_rpm_u)+" , "+str(m2_rpm_u)+" , "+str(m3_rpm_u)+" , "+str(float(u[1]))+" , "+str(float(u[0]))+" , "+str(float(u[2]))+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(time_running)+ "\n")
 				
 				########################################################		Preparing for new loop			
