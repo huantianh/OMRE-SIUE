@@ -1,12 +1,12 @@
 /****************************************            COUNTING ENCODERS          *********************************/
 void encoder0_ISR() // encoder0 interrupt service routine
 {
-//  noInterrupts();
+  //  noInterrupts();
   if (digitalRead(motorDirPins[0]) == HIGH)
     encoderCounts[0]++;
   else
     encoderCounts[0]--;
-//  interrupts();
+  //  interrupts();
   //  Serial.println(encoderCounts[0]);
 }
 void encoder1_ISR()
@@ -52,4 +52,20 @@ void irSensor()
   m_IR[1] = (IR_Sensor1.getDistance()) * 0.01;
   m_IR[2] = (IR_Sensor2.getDistance()) * 0.01;
   m_IR[3] = (IR_Sensor3.getDistance()) * 0.01;
+}
+
+/*****************************************             Motor Current            ***************************************************************/
+void m_current()
+{
+  for (int i = 0; i < 3; i++)
+  {
+    if (pwm_dir[i]   == '0')
+    {
+      m_cur[i] = analogRead(motorCurrentPins[i]);
+    }
+    if (pwm_dir[i]   == '1')
+    {
+      m_cur[i] = -analogRead(motorCurrentPins[i]);
+    }
+  }
 }

@@ -159,9 +159,9 @@ try:
 			############################################################		Value for t and delta_t
 			t = 0
 			delay = 0.01
-			speed = 0.5				
+			speed = 0.3			
 			############################################################		Kp, Ki, Kd gains
-			kp = 6
+			kp = 5
 			ki = 0
 			kd = 0
 			
@@ -171,19 +171,19 @@ try:
 				
 				start = time.time()
 						
-				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)-R
+				xd = np.cos(speed*t)-1
+				yd = np.sin(speed*2*t)/2
 				thetad = 0
 				
-				file = open(save_folder + "Case1"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
+				file = open(save_folder + "Inf1"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
 				thetac = current_theta
 				
 				########################################################		q_dot_d
-				x_dot_d =  R*speed*np.cos(speed*t)
-				y_dot_d = -R*speed*np.sin(speed*t)
+				x_dot_d = -speed*np.sin(speed*t)
+				y_dot_d = speed*np.cos(speed*2*t)
 				theta_dot_d = 0
 				
 				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
@@ -242,25 +242,18 @@ try:
 				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
 				# ~ print(data_rpm)
 				
-				
-				m1_cur = robot.motor_current(0)
-				m2_cur = robot.motor_current(1)
-				m3_cur = robot.motor_current(2)
-				data_cur = str(m1_cur)+' , ' +str(m2_cur)+ ' , ' +str(m3_cur)
-				# ~ print(data_cur)
-				
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)		
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)

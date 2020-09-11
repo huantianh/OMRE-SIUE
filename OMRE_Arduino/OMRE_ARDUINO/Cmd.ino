@@ -19,11 +19,28 @@ void parseCommand()
     case 'm':
       int  motorNumber;
       int  motorPWM;
-      int  motorDirection;
       sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
-      pidSwitch = '0';
+      pidSwitch                             = '0';
       motor(motorNumber, motorPWM);
+
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
       PRINT_RPM                             = '1';
+      PRINT_MCUR                            = '0';
+      break;
+
+    ////////////////////////////////////////////////////////////////             MOTOR CURRENT
+    case 'c':
+    case 'C':
+      int curNum;
+      sscanf(&rcv_buffer[1], " %d \r", &curNum);
+      MCURSwitch                            = '1';
+
+      PRINT_RPM                             = '0';
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_MCUR                            = '1';
+      Serial.println(m_cur[curNum]);
       break;
 
     ////////////////////////////////////////////////////////////////             ULTRASOUND
@@ -36,14 +53,14 @@ void parseCommand()
       PRINT_ULTRASOUND                      = '1';
       PRINT_IR                              = '0';
       PRINT_RPM                             = '0';
-      PRINT_IMU                             = '0';
+      PRINT_MCUR                            = '0';
 
       Serial.println(m_US[ultrasonicNumber]);
       break;
 
     ////////////////////////////////////////////////////////////////              INFARED
     case 'i':
-    case 'I':
+    case 'D':
 
       int infraredNumber;
       sscanf(&rcv_buffer[1], " %d \r", &infraredNumber);
@@ -52,10 +69,10 @@ void parseCommand()
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '1';
       PRINT_RPM                             = '0';
-      PRINT_IMU                             = '0';
+      PRINT_MCUR                            = '0';
       Serial.println (m_IR[infraredNumber]);
       break;
-      
+
     ////////////////////////////////////////////////////////////////              MOTOR RPM
     case 'v':
     case 'V':
@@ -64,12 +81,29 @@ void parseCommand()
       int rpm1;
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
-      pidSwitch = '1';
+      pidSwitch                             = '1';
+      MCURSwitch                            = '1';
 
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
       PRINT_RPM                             = '1';
-      PRINT_IMU                             = '0';
+      PRINT_MCUR                            = '1';
+
+      rpm[0] = rpm0;
+      rpm[1] = rpm1;
+      rpm[2] = rpm2;
+
+      for (int i = 0; i < 3; i++)
+      {
+        if (rpm[i] > 0)
+        {
+          pwm_dir[i]   = '0';
+        }
+        if (rpm[i] < 0)
+        {
+          pwm_dir[i]   = '1';;
+        }
+      }
 
       rpm_setpoint[0] = rpm0;
       rpm_setpoint[1] = rpm1;
@@ -97,13 +131,8 @@ void parseCommand()
       pidSwitch                             = '0';
       ultrasonicSwitch                      = '0';
       IRSwitch                              = '0';
-      IMUSwitch                             = '0';
+      MCURSwitch                            = '0';
       printSwitch                           = '0';
-
-      //      PRINT_ULTRASOUND                      = '0';
-      //      PRINT_IR                              = '0';
-      //      PRINT_RPM                             = '0';
-      //      PRINT_IMU                             = '0';
 
       for (int i = 0; i < 3; i++)
       {
@@ -123,11 +152,11 @@ void parseCommand()
     case 'f':
     case 'F':
 
-      pidSwitch = '1';
+      pidSwitch                             = '1';
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
-      PRINT_RPM                             = '0';
-      PRINT_IMU                             = '1';
+      PRINT_RPM                             = '1';
+      PRINT_MCUR                            = '0';
       rpm_setpoint[0] = 0;
       rpm_setpoint[1] = 100;
       rpm_setpoint[2] = -100;
@@ -140,13 +169,11 @@ void parseCommand()
       pidSwitch                             = '1';
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
-      PRINT_RPM                             = '0';
+      PRINT_RPM                             = '1';
       rpm_setpoint[0] = 0;
-      rpm_setpoint[1] = -50;
-      rpm_setpoint[2] = 50;
+      rpm_setpoint[1] = -100;
+      rpm_setpoint[2] = 100;
       break;
-      //    default:
-      //      Serial.println("Error: Serial input incorrect");
   }
 }
 

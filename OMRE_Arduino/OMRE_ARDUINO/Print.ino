@@ -37,4 +37,14 @@ void printdata(void)
     Serial.println(rpmValues[2]);
   }
 
+  if (PRINT_MCUR == '1')
+  {
+    Serial.print(m_cur[0]);
+    Serial.print("  ,  ");
+    Serial.print(m_cur[1]);
+    Serial.print("  ,  ");
+    Serial.println(m_cur[2]);
+  }
+
+
 }

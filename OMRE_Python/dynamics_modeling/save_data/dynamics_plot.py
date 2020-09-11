@@ -22,6 +22,9 @@ text = f.read()
 x = []
 y = []
 z = []
+m1_cur = []
+m2_cur = []
+m3_cur = []
 rs1 = []
 rs2 = []
 rpm1 =[]
@@ -51,22 +54,15 @@ with open(root.filename,'r') as csvfile:
 		rpm2.append(float(row[6]))
 		rpm3.append(float(row[7]))
 		
-		c_rpm1.append(float(row[8]))
-		c_rpm2.append(float(row[9]))
-		c_rpm3.append(float(row[10]))
+		vx.append(float(row[8]))
+		vy.append(float(row[9]))
+		v.append(float(row[10]))
 		
-		vx.append(float(row[11]))
-		vy.append(float(row[12]))
-		v.append(float(row[13]))
+		m1_cur.append(float(row[11]))
+		m2_cur.append(float(row[12]))
+		m3_cur.append(float(row[13]))
 		
 		t.append(float(row[14])-t0)
-
-#circle path
-theta = np.linspace(0, 2*np.pi, 100)
-b = 0.2
-r = b
-x1 = np.cos(theta) -1
-x2 = np.sin(2*theta)/2
 
 fig = plt.figure()
 fig.suptitle(my_txt1,fontsize=16)
@@ -75,46 +71,48 @@ ax2 = fig.add_subplot(222)
 ax3 = fig.add_subplot(223)
 ax4 = fig.add_subplot(224)
 
-#Circle
+#Path
 ax1 = plt.subplot(221)
 # ~ ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
 ax1.plot(rs1,rs2,'g',label='RealSense', linewidth=3)
-ax1.plot(x1,x2, 'r--', label='Infinite', linewidth=1.5)
 ax1.set_xlabel('X')
 ax1.set_ylabel('Y')
 ax1.set_title('OMRE_Path', fontsize=12)
+plt.ylim(-2,2)
 plt.grid(True)
-plt.legend()
+plt.legend(loc=4)
 
-#motor1
+#Vrobot
 ax2 = plt.subplot(222)
-ax2.plot(t,rpm1, 'm', label='RPM1', linewidth=3)
-ax2.plot(t,c_rpm1, 'r--', label='Commanded PWM', linewidth=1.5)
+ax2.plot(t,v, 'b', label='V Robot', linewidth=3)
 ax2.set_xlabel('Time (s)')
-ax2.set_ylabel('RPM')
-ax2.set_title('Motor1', fontsize=12)
+ax2.set_ylabel('m/s')
+ax2.set_title('V Robot', fontsize=12)
 plt.grid(True)
-plt.legend()
+plt.legend(loc=4)
 
-#motor2
+#WheelV
 ax3 = plt.subplot(223)
-ax3.plot(t,rpm2, 'g', label='RPM2', linewidth=3)
-ax3.plot(t,c_rpm2, 'r--', label='Commanded PWM', linewidth=1.5)
+ax3.plot(t,rpm1, 'r', label='RPM1', linewidth=3)
+ax3.plot(t,rpm2, 'b', label='RPM2', linewidth=3)
+ax3.plot(t,rpm3, 'g', label='RPM3', linewidth=3)
 ax3.set_xlabel('Time (s)')
 ax3.set_ylabel('RPM')
-ax3.set_title('Motor2', fontsize=12)
+ax3.set_title('V Wheels', fontsize=12)
 plt.grid(True)
-plt.legend()
+plt.legend(loc=7)
 
 #motor3
 ax4 = plt.subplot(224)
-ax4.plot(t,rpm3, 'c', label='RPM3', linewidth=3)
-ax4.plot(t,c_rpm3, 'r--', label='Commanded PWM', linewidth=1.5)
+ax4.plot(t,m1_cur, 'r', label='M1 Current', linewidth=3)
+ax4.plot(t,m2_cur, 'b', label='M2 Current', linewidth=3)
+ax4.plot(t,m3_cur, 'g', label='M3 Current', linewidth=3)
 ax4.set_xlabel('Time (s)')
-ax4.set_ylabel('RPM')
-ax4.set_title('Motor3', fontsize=12)
+ax4.set_ylabel('A')
+ax4.set_title('Motors Current', fontsize=12)
 plt.grid(True)
-plt.legend()
+plt.legend(loc=7)
+
 
 plt.subplots_adjust(left=0.15, wspace=0.4, hspace = 0.4, top=0.85)
 

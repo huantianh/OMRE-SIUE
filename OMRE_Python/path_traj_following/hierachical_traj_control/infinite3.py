@@ -175,11 +175,11 @@ try:
 			
 			###### radius and speed
 			R = 0.8
-			speed = 0.7
+			speed = 0.4
 			
 			###### time gain
 			t = 0
-			delay = 0.005           #0.01
+			delay = 0.01           #0.01
 			test_t = 30
 			
 			###### filter gain
@@ -194,11 +194,11 @@ try:
 				ki  = 0
 				kd  = 0
 				
-				file = open(save_folder + "Case3"+"_R_"+str(R)+"_Kp_"+str(kp)+"_tau_"+str(dt_tau)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
+				file = open(save_folder + "Inf3"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+".txt","a")
 				
 				########################################################			Path
-				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)-R
+				xd = np.cos(speed*t)-1
+				yd = np.sin(speed*2*t)/2
 				thetad = 0
 				
 				########################################################			Parameters
@@ -211,8 +211,8 @@ try:
 				
 				########################################################			Q_dot and J 
 				############		qd_dot
-				xd_dot =  R*speed*np.cos(speed*t)
-				yd_dot = -R*speed*np.sin(speed*t)
+				xd_dot = -speed*np.sin(speed*t)
+				yd_dot = speed*np.cos(speed*2*t)
 				thetad_dot = 0
 				qd_dot = np.array([xd_dot,yd_dot,thetad_dot]).reshape(3,1)
 				

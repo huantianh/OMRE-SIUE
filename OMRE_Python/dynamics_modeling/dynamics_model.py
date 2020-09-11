@@ -4,7 +4,7 @@ import numpy as np
 import time,os,serial,math
 
 #folder where saving all the data
-save_folder = "traf_data/"
+save_folder = "save_data/"
 current_directory = os.getcwd()
 save_directory = os.path.join(current_directory, save_folder)
 
@@ -13,6 +13,14 @@ oldEncoder0 = 0;oldEncoder1 = 0;oldEncoder2 = 0;newEncoder0 = 0;newEncoder1 = 0;
 
 #RealSense
 vel_x = 0;vel_y = 0;vel_z = 0;pos_x = 0;pos_y = 0;pos_z = 0;acc_x = 0;acc_y = 0;acc_z = 0;
+
+m1_rpm = 0;m2_rpm = 0;m3_rpm = 0;
+
+global m1_cur
+global m2_cur
+global m3_cur
+
+m1_cur = 0;m2_cur = 0;m3_cur = 0;
 
 # Declare RealSense pipeline, encapsulating the actual device and sensors
 pipe = rs.pipeline()
@@ -154,85 +162,38 @@ try:
 			############################################################		Reset encoder and Enable RealSense
 			initOdometry()
 			odometry_RealSense()
-
-			R = 0.8
-			############################################################		Value for t and delta_t
-			t = 0
-			delay = 0.01
-			speed = 0.5				
-			############################################################		Kp, Ki, Kd gains
-			kp = 6
-			ki = 0
-			kd = 0
 			
-			test_t = 30
+			t = 0
+			test_t = 5
+			delay = 0.01
+			# ~ vx = 0.31416
+			# ~ vx = 0.502656
+			vx = 0.659736
 			
 			while t < test_t:
 				
 				start = time.time()
-						
-				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)-R
-				thetad = 0
 				
-				file = open(save_folder + "Case1"+"_Kp_"+str(kp)+"_Ki_"+str(ki)+"_Kd_"+str(kd)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
+				file = open(save_folder + "Dynamics"+"_Vx_"+str(vx)+"_test_t_"+str(test_t)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
 				thetac = current_theta
 				
-				########################################################		q_dot_d
-				x_dot_d =  R*speed*np.cos(speed*t)
-				y_dot_d = -R*speed*np.sin(speed*t)
-				theta_dot_d = 0
-				
-				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
-				
-				########################################################		J_inverse
-				r = 0.03
-				l = 0.19
-				j = (2*np.pi*r/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3)
-				j_inv = np.linalg.inv(j).reshape(3,3)
-				
-				########################################################		PI Controller Trajectory	
-				Kp = kp
-				Ki = ki
-				Kd = kd
-				
-				setPoint     = np.array([xd,yd,thetad])[:,None]
-				currentPoint = np.array([xc,yc,thetac])[:,None]
-				error        = currentPoint - setPoint
-				preError     = error
-				integral     = integral + error
-				derivative   = error - preError
-				
-				# ~ print(str(integral) +" , "+str(error))
-				
-				output = Kp*error + Ki*integral + Kd*derivative	
-				e = (-output).reshape(3,1)
-				s = e + q_dot_d
-				
-				########################################################		P Controller
-				# ~ K = np.array([Kx,0,0,0,Ky,0,0,0,Kz]).reshape(3,3)
-				# ~ e = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 						
-				# ~ s = np.dot(-K,e,out=None) + q_dot_d
-				
-				########################################################		Input W	(RPM)	
-				w = np.dot( j_inv, s, out=None)	
-				motor_spd_vec = w
-				# ~ print(vm)
-				
-				########################################################		commanded RPM
-				wheel1RPM = motor_spd_vec[0] # motor 2 speed [rpm]
-				wheel0RPM = motor_spd_vec[1] # motor 1 speed [rpm]
-				wheel2RPM = motor_spd_vec[2] # motor 3 speed [rpm]
-				
-				c_rpm1 = float(wheel0RPM)
-				c_rpm2 = float(wheel1RPM)
-				c_rpm3 = float(wheel2RPM)
-				# ~ print(str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)) 
-				
 				########################################################		Sending input RPM to Arduino
+			
+				# ~ wheel0RPM = 0
+				# ~ wheel1RPM = 100
+				# ~ wheel2RPM = -100
+				
+				# ~ wheel0RPM = 0
+				# ~ wheel1RPM = 160
+				# ~ wheel2RPM = -160
+				
+				wheel0RPM = 0
+				wheel1RPM = 210
+				wheel2RPM = -210
+				
 				robot.motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 				
 				########################################################		reading actual RPM
@@ -240,42 +201,34 @@ try:
 				m2_rpm = robot.rpm(1)
 				m3_rpm = robot.rpm(2)
 				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
-				# ~ print(data_rpm)
-				
-				
-				m1_cur = robot.motor_current(0)
-				m2_cur = robot.motor_current(1)
-				m3_cur = robot.motor_current(2)
+					
+				m1_cur = robot.motor_current(0)/100
+				m2_cur = robot.motor_current(1)/100
+				m3_cur = robot.motor_current(2)/100
 				data_cur = str(m1_cur)+' , ' +str(m2_cur)+ ' , ' +str(m3_cur)
-				# ~ print(data_cur)
+				print(data_cur)
 				
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)		
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
-				# ~ vel = str(vel_x)+" , "+str(vel_y)
-				# ~ print(vel)
-				
-				delta = np.sqrt(((xd-current_x)**2)+((yd-current_y)**2))
-				# ~ print(delta)
 				
 				########################################################		Recording data
 				time_running = time.time()
 				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
 				# ~ print(data_pose)
-				# ~ file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(time_running)+ "\n")
-				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(c_rpm1)+" , "+str(c_rpm2)+" , "+str(c_rpm3)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(xd)+" , "+str(yd)+" , "+str(thetad)+" , "+str(time_running)+"\n")
+				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(m1_cur)+" , "+str(m2_cur)+" , "+str(m3_cur)+" , "+str(time_running)+"\n")
 					
 				########################################################		Remembering value for new loop			
 				time.sleep(delay)
