@@ -22,6 +22,22 @@ https://shiroku.net/robotics/install-opencv-on-jetson-tx2/
 Install Intel_RealSense
 https://www.robotexchange.io/t/guide-install-librealsense-l-ubuntu-16/218
 https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md
+https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md
+
+Patch-realsense:
+https://github.com/freemanlo/librealsense/blob/master/scripts/patch-realsense-ubuntu-xenial-jetson-tx2.sh
+
+Realsense for JetPack 3.1:
+https://www.jetsonhacks.com/2017/08/14/intel-realsense-camera-librealsense-nvidia-jetson-tx-dev-kits/
+
+Realsense for JetPack 3.2:
+https://github.com/syedharoonalam/installLibrealsenseTX2
+https://github.com/jetsonhacks/buildLibrealsense2TX
+https://www.jetsonhacks.com/2018/07/10/librealsense-update-nvidia-jetson-tx-dev-kits/
+
+pyrealsense2
+https://github.com/IntelRealSense/librealsense/tree/master/wrappers/python#building-from-source
+https://github.com/IntelRealSense/librealsense/issues/2586
 
 update pip:
 https://askubuntu.com/questions/642533/python-pip-broken-on-ubuntu
@@ -35,3 +51,15 @@ sudo apt-get install python-gi-cairo
 
 cmake:
 https://devtalk.nvidia.com/default/topic/1048533/how-to-install-cmake-3-8-in-jetson-tx2-/
+
+Aruino Error with Permission Denied:
+https://www.youtube.com/watch?v=Sdou3Uib9Hw
+
+Serial Install:
+https://zoomadmin.com/HowToInstall/UbuntuPackage/python-serial
+
+Numpy Install:
+https://linuxconfig.org/install-numpy-on-ubuntu-18-04-bionic-beaver-linux
+
+tightVNC
+http://ubuntuhandbook.org/index.php/2016/07/remote-access-ubuntu-16-04/
