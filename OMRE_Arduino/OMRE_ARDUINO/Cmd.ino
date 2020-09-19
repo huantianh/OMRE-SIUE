@@ -87,7 +87,7 @@ void parseCommand()
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
       PRINT_RPM                             = '1';
-      PRINT_MCUR                            = '1';
+      PRINT_MCUR                            = '0';
 
       rpm[0] = rpm0;
       rpm[1] = rpm1;

@@ -81,7 +81,7 @@ inputv = v
 # ~ print(input1)	
 outputv = [None] * len(v)
 outputvn = v[0]
-for n in range(0,len(rpm1)):
+for n in range(0,len(v)):
 	outputvn += alpha * (v[n]-outputvn)
 	outputv[n]=outputvn
 

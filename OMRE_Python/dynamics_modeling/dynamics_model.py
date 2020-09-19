@@ -150,6 +150,8 @@ def odometry_RealSense():
 	# ~ theta_rs = -np.arctan2(sin_rs,cos_rs) 
 	theta_rs = np.arccos(w_theta) * 2
 	# ~ print(theta_rs)
+	# ~ print(rotation)
+	
 			
 
 try: 
@@ -166,69 +168,122 @@ try:
 			t = 0
 			test_t = 5
 			delay = 0.01
-			# ~ vx = 0.31416
-			# ~ vx = 0.502656
-			vx = 0.659736
+		
 			
 			while t < test_t:
 				
 				start = time.time()
 				
-				file = open(save_folder + "Dynamics"+"_Vx_"+str(vx)+"_test_t_"+str(test_t)+".txt","a")
+				########################################################		Sending input RPM to Arduino
+				#######		Fv
+				# ~ vx = 0.30109
+				# ~ wheel0RPM = 0
+				# ~ wheel1RPM = 83
+				# ~ wheel2RPM = -83
+								
+				# ~ vx = 0.50061
+				# ~ wheel0RPM = 0
+				# ~ wheel1RPM = 138
+				# ~ wheel2RPM = -138
+				
+				# ~ vx = 0.70013
+				# ~ wheel0RPM = 0
+				# ~ wheel1RPM = 193
+				# ~ wheel2RPM = -193
+				
+				# ~ vx = 0.76179
+				# ~ wheel0RPM = 0
+				# ~ wheel1RPM = 210
+				# ~ wheel2RPM = -210
+				
+				#######		Fvn
+				# ~ vx = 0.30159
+				# ~ wheel0RPM = 96
+				# ~ wheel1RPM = -48
+				# ~ wheel2RPM = -48
+								
+				# ~ vx = 0.40212
+				# ~ wheel0RPM = 128
+				# ~ wheel1RPM = -64
+				# ~ wheel2RPM = -64
+				
+				# ~ vx = 0.50265
+				# ~ wheel0RPM = 160
+				# ~ wheel1RPM = -80
+				# ~ wheel2RPM = -80
+							
+				# ~ vx = 0.60004
+				# ~ wheel0RPM = 191
+				# ~ wheel1RPM = -96
+				# ~ wheel2RPM = -96				
+				
+				
+				li = 46.85                  #reduction of motors
+				Kt1 = 1.16516 / 5.6			#Motor Torque Constant
+				Kt2 = 1.16516 / 5.6			#Motor Torque Constant
+				Kt3 = 1.16516 / 5.6			#Motor Torque Constant
+				r = 0.03					#Wheel Radius
+				l = 0.19                    #distance from wheel to CG
+				
+				file = open(save_folder + "Dynamics_Vn"+"_Vx_"+str(vx)+"_test_t_"+str(test_t)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
 				thetac = current_theta
 				
-				########################################################		Sending input RPM to Arduino
-			
-				# ~ wheel0RPM = 0
-				# ~ wheel1RPM = 100
-				# ~ wheel2RPM = -100
-				
-				# ~ wheel0RPM = 0
-				# ~ wheel1RPM = 160
-				# ~ wheel2RPM = -160
-				
-				wheel0RPM = 0
-				wheel1RPM = 210
-				wheel2RPM = -210
-				
 				robot.motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 				
-				########################################################		reading actual RPM
+				########################################################		Caculating
+				##########				Wheel RPM
 				m1_rpm = robot.rpm(0)
 				m2_rpm = robot.rpm(1)
 				m3_rpm = robot.rpm(2)
-				data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
-					
+				data_rpm = str(m1_rpm)+' , '+str(m2_rpm)+' , '+str(m3_rpm)
+				##########				Motor Current	
 				m1_cur = robot.motor_current(0)/100
 				m2_cur = robot.motor_current(1)/100
 				m3_cur = robot.motor_current(2)/100
-				data_cur = str(m1_cur)+' , ' +str(m2_cur)+ ' , ' +str(m3_cur)
-				print(data_cur)
+				data_cur = str(m1_cur)+' , '+str(m2_cur)+' , '+str(m3_cur)
+				# ~ print(data_cur)
+				##########				Rotation Torque
+				T1 = li*Kt1*m1_cur
+				T2 = li*Kt2*m2_cur
+				T3 = li*Kt3*m3_cur
+				##########				Wheel Traction Force
+				f1 = T1/r
+				f2 = T2/r
+				f3 = T3/r
+				##########				Robot Traction Force
+				Fv = f2*np.cos(30) - f3*np.cos(30)
+				Fvn = f1 - f2*np.sin(30) - f3*np.sin(30)
+				R_f = (-f1-f2-f3)*l
+				data_trac = str(Fv)+' , '+str(Fvn)+' , '+str(R_f)
 				
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				# ~ current_x = pose.item(0)
-				# ~ current_y = pose.item(1)
-				# ~ current_theta = pose.item(2)
+				current_x = pose.item(0)
+				current_y = pose.item(1)
+				current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				current_x = pos_x
-				current_y = pos_y
-				current_theta = pose.item(2)		
+				# ~ current_x = pos_x
+				# ~ current_y = pos_y
+				# ~ current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
+				data_vel = str(vel_x)+' , '+str(vel_y)+' , '+str(vel)
+				print(vel)
 				
 				########################################################		Recording data
 				time_running = time.time()
-				data_pose = "x: "+str(pose[0][0])+"  y: "+str(pose[1][0])+"  theta: "+str(pose[2][0])
+				data_pose = str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])
+				data_pos  = str(pos_x)+" , "+str(pos_y)
+				
 				# ~ print(data_pose)
-				file.writelines(str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])+" , "+str(pos_x)+" , "+str(pos_y)+" , "+str(m1_rpm)+" , "+str(m2_rpm)+" , "+str(m3_rpm)+" , "+str(vel_x)+" , "+str(vel_y)+" , "+str(vel)+" , "+str(m1_cur)+" , "+str(m2_cur)+" , "+str(m3_cur)+" , "+str(time_running)+"\n")
+				file.writelines(str(data_pose)+" , "+str(data_pos)+" , "+str(data_rpm)+" , "+str(data_vel)+" , "+str(data_cur)+" , "+str(data_trac)+" , "+str(time_running)+"\n")
 					
 				########################################################		Remembering value for new loop			
 				time.sleep(delay)
