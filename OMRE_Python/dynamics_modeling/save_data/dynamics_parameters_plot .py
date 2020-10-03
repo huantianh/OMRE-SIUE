@@ -36,11 +36,12 @@ c_rpm2 = []
 c_rpm3 = []
 vx= []
 vy= []
-v = []
+vw = []
 Fv= []
 Fvn = []
 R_f = []
 t = []
+w = []
 
 n = []
 
@@ -69,7 +70,7 @@ with open(root.filename,'r') as csvfile:
 		
 		vx.append(float(row[8]))
 		vy.append(float(row[9]))
-		v.append(float(row[10]))
+		vw.append(float(row[10]))
 		
 		m1_cur.append(float(row[11]))
 		m2_cur.append(float(row[12]))
@@ -84,7 +85,7 @@ with open(root.filename,'r') as csvfile:
 ##################################################### 		Motor Current
 ###find indice of the current mean
 for i in range(0,len(t)):
-	if t[i] > 2 and t[i] < 4:
+	if t[i] > 2 and t[i] < 7:
 		n.append(i)
 
 ### find motor current mean
@@ -122,15 +123,15 @@ f3 = T3/r
 
 Fv = f2*np.cos(30) - f3*np.cos(30)
 Fvn = f1 - f2*np.sin(30) - f3*np.sin(30)
-R_f = (f1+f2+f3)*l
+R_f = (-f1-f2-f3)*l
 
-print(Fvn)
+print(R_f)
 
 #####################################################		Fv
-Fv1 = 119.563245425
-Fv2 = 175.06364178
-Fv3 = 222.946590835
-Fv4 = 228.799945729
+Fv1 = 134.521450247
+Fv2 = 201.561397973
+Fv3 = 250.843313995
+Fv4 = 255.161385259
 
 v1 = 0.30109
 v2 = 0.50061
@@ -138,13 +139,13 @@ v3 = 0.70013
 v4 = 0.76179
 
 v_p = np.arange(0.3,0.76179,0.01)
-Fv_p = 242.0180*v_p + 49.6341
+Fv_p = 266.6164 *v_p + 59.6423
 
 #####################################################		Fvn
-Fvn1 = 198.710595537
-Fvn2 = 223.638076706
-Fvn3 = 230.499953681
-Fvn4 = 247.730034891
+Fvn1 = 216.321479776
+Fvn2 = 257.508844057
+Fvn3 = 286.898612441
+Fvn4 = 279.156706357
 
 vn1 = 0.30159
 vn2 = 0.40212
@@ -152,43 +153,72 @@ vn3 = 0.50265
 vn4 = 0.60004
 
 vn_p = np.arange(0.3,0.6004,0.01)
-Fvn_p =  154.5796*vn_p + 155.3365
+Fvn_p = 219.6386*vn_p + 160.7826
+
+#####################################################		R_f
+Rf1 = 42.2331330322
+Rf2 = 79.0366181184
+Rf3 = 167.510730087
+Rf4 = 252.927091313
+
+w1 = 0.5
+w2 = 1
+w3 = 2
+w4 = 3
+
+w = np.arange(0.5,3,0.01)
+Rf_p =  85.0661*w -2.8055
+
 
 fig = plt.figure()
-txt = 'Fv=242.0180*v+49.6341_&_Fvn=154.5796*vn+155.3365'
-fig.suptitle('Fv = 242.0180*v + 49.6341 & Fvn =  154.5796*vn + 155.3365' ,fontsize=16)
+txt = 'Fv_Fvn_Rf'
+fig.suptitle('Fv = 266.6164*v + 59.6423 & Fvn = 219.6386*vn + 160.7826 & Rf =  85.0661*w -2.8055',fontsize=16)
 
-ax1 = fig.add_subplot(121)
-ax2 = fig.add_subplot(122)
+ax1 = fig.add_subplot(131)
+ax2 = fig.add_subplot(132)
+ax2 = fig.add_subplot(133)
 
-ax1 = plt.subplot(121)
+ax1 = plt.subplot(131)
 ax1.plot(v1,Fv1,'r*',linewidth=3)
 ax1.plot(v2,Fv2,'r*',linewidth=3)
 ax1.plot(v3,Fv3,'r*',linewidth=3)
 ax1.plot(v4,Fv4,'r*',linewidth=3)
 ax1.plot(v_p,Fv_p,'b',linewidth=3)
-ax1.text(0.3,230,'Bv = 242.0180',color='green', fontsize=9)
-ax1.text(0.3,220,'Cv = 49.6341',color='green', fontsize=9)
+ax1.text(0.3,260,'Bv = 266.6164',color='green', fontsize=9)
+ax1.text(0.3,255,'Cv = 59.6423',color='green', fontsize=9)
 plt.xlabel('v(m/s)')
 plt.ylabel('Fv(N)')
 plt.grid(True)
 
-ax2 = plt.subplot(122)
+ax2 = plt.subplot(132)
 ax2.plot(vn1,Fvn1,'r*',linewidth=3)
 ax2.plot(vn2,Fvn2,'r*',linewidth=3)
 ax2.plot(vn3,Fvn3,'r*',linewidth=3)
 ax2.plot(vn4,Fvn4,'r*',linewidth=3)
 ax2.plot(vn_p,Fvn_p,'b',linewidth=3)
-ax2.text(0.3,245,'Bvn = 154.5796',color='green', fontsize=9)
-ax2.text(0.3,240,'Cvn = 155.3365',color='green', fontsize=9)
+ax2.text(0.3,290,'Bvn = 219.6386',color='green', fontsize=9)
+ax2.text(0.3,285,'Cvn = 160.7826',color='green', fontsize=9)
 plt.xlabel('v(m/s)')
 plt.ylabel('Fvn(N)')
 plt.grid(True)
 
+ax3 = plt.subplot(133)
+ax3.plot(w1,Rf1,'r*',linewidth=3)
+ax3.plot(w2,Rf2,'r*',linewidth=3)
+ax3.plot(w3,Rf3,'r*',linewidth=3)
+ax3.plot(w4,Rf4,'r*',linewidth=3)
+ax3.plot(w,Rf_p,'b',linewidth=3)
+ax3.text(0.5,245,'Bw = 85.0661',color='green', fontsize=9)
+ax3.text(0.5,235,'Cw = -2.8055',color='green', fontsize=9)
+plt.xlabel('w(rad/s)')
+plt.ylabel('Rf(N)')
+plt.grid(True)
+
+
 #Save image into full size 
 fig = plt.gcf()
-fig.set_size_inches((10, 10), forward=False)
-fig.savefig(txt+'.png', dpi=100)
+fig.set_size_inches((15, 15), forward=False)
+fig.savefig(txt+'.png', dpi=200)
 
 #will not stop the figure if use this
 plt.show()

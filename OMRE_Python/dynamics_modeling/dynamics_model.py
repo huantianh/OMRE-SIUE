@@ -1,7 +1,8 @@
 import libomni as robot  #Library tha handles all the serial commands to arduino AtMega
 import pyrealsense2 as rs
 import numpy as np
-import time,os,serial,math
+import time,os,serial
+import math as m
 
 #folder where saving all the data
 save_folder = "save_data/"
@@ -19,7 +20,12 @@ m1_rpm = 0;m2_rpm = 0;m3_rpm = 0;
 global m1_cur
 global m2_cur
 global m3_cur
+global last_yaw
+global vx
+global vy
+global omega
 
+last_yaw = 0;vx = 0; vy =0;omega = 0;
 m1_cur = 0;m2_cur = 0;m3_cur = 0;
 
 # Declare RealSense pipeline, encapsulating the actual device and sensors
@@ -102,6 +108,7 @@ def odometry_RealSense():
 	global acc_y 
 	global acc_z 
 	global theta_rs
+	global yaw
 	
 	frames = pipe.wait_for_frames()
 	pose = frames.get_pose_frame()
@@ -140,18 +147,24 @@ def odometry_RealSense():
 	theta1 = str(rotation)	
 	theta2 = theta1.replace(', ',' ').split(' ')
 	# ~ print(acc2[1] + " , " + acc2[3] + " , " + acc2[5])
-	w_theta = float(theta2[7]) 
-	x_theta = float(theta2[1]) 
-	y_theta = float(theta2[3]) 
-	z_theta = float(theta2[5]) 
+	# ~ w_theta = float(theta2[7]) 
+	# ~ x_theta = float(theta2[1]) 
+	# ~ y_theta = float(theta2[3]) 
+	# ~ z_theta = float(theta2[5]) 
+	w_theta =  data.rotation.w
+	x_theta = -data.rotation.z
+	y_theta =  data.rotation.x
+	z_theta = -data.rotation.y
 		
-	# ~ sin_rs = 2 * (w_theta * z_theta + x_theta * y_theta)
-	# ~ cos_rs = 1 - 2 * (y_theta * y_theta + z_theta * z_theta)	
-	# ~ theta_rs = -np.arctan2(sin_rs,cos_rs) 
-	theta_rs = np.arccos(w_theta) * 2
+	theta_rs = np.arccos(w_theta) * 2 * 180/np.pi
 	# ~ print(theta_rs)
-	# ~ print(rotation)
+	pitch =  -np.arcsin(2.0 * (x_theta*z_theta - w_theta*y_theta));
+	roll  =  np.arctan2(2.0 * (w_theta*x_theta + y_theta*z_theta), w_theta*w_theta - x_theta*x_theta - y_theta*y_theta + z_theta*z_theta);
+	yaw   =  -np.arctan2(2.0 * (w_theta*z_theta + x_theta*y_theta), w_theta*w_theta + x_theta*x_theta - y_theta*y_theta - z_theta*z_theta);
 	
+	# ~ print("Frame #{}".format(pose.frame_number))
+	# ~ print("RPY [deg]: Roll: {0:.7f}, Pitch: {1:.7f}, Yaw: {2:.7f}".format(roll, pitch, yaw))
+
 			
 
 try: 
@@ -166,7 +179,7 @@ try:
 			odometry_RealSense()
 			
 			t = 0
-			test_t = 5
+			test_t = 9
 			delay = 0.01
 		
 			
@@ -174,48 +187,81 @@ try:
 				
 				start = time.time()
 				
-				########################################################		Sending input RPM to Arduino
-				#######		Fv
-				# ~ vx = 0.30109
-				# ~ wheel0RPM = 0
-				# ~ wheel1RPM = 83
-				# ~ wheel2RPM = -83
+				
+				if t < 2:
+					wheel0RPM = 0
+					wheel1RPM = 0
+					wheel2RPM = 0
+				if t > 2 and t < 7:
+					########################################################		Sending input RPM to Arduino
+					###########################		Fv
+					# ~ vx = 0.30109
+					# ~ wheel0RPM = 0
+					# ~ wheel1RPM = 83
+					# ~ wheel2RPM = -83
+									
+					# ~ vx = 0.50061
+					# ~ wheel0RPM = 0
+					# ~ wheel1RPM = 138
+					# ~ wheel2RPM = -138
+					
+					# ~ vx = 0.70013
+					# ~ wheel0RPM = 0
+					# ~ wheel1RPM = 193
+					# ~ wheel2RPM = -193
+					
+					# ~ vx = 0.76179
+					# ~ wheel0RPM = 0
+					# ~ wheel1RPM = 210
+					# ~ wheel2RPM = -210
+					
+					###########################		Fvn
+					# ~ vy = 0.30159
+					# ~ wheel0RPM = 96
+					# ~ wheel1RPM = -48
+					# ~ wheel2RPM = -48
+									
+					# ~ vy = 0.40212
+					# ~ wheel0RPM = 128
+					# ~ wheel1RPM = -64
+					# ~ wheel2RPM = -64
+					
+					# ~ vy = 0.50265
+					# ~ wheel0RPM = 160
+					# ~ wheel1RPM = -80
+					# ~ wheel2RPM = -80
 								
-				# ~ vx = 0.50061
-				# ~ wheel0RPM = 0
-				# ~ wheel1RPM = 138
-				# ~ wheel2RPM = -138
-				
-				# ~ vx = 0.70013
-				# ~ wheel0RPM = 0
-				# ~ wheel1RPM = 193
-				# ~ wheel2RPM = -193
-				
-				# ~ vx = 0.76179
-				# ~ wheel0RPM = 0
-				# ~ wheel1RPM = 210
-				# ~ wheel2RPM = -210
-				
-				#######		Fvn
-				# ~ vx = 0.30159
-				# ~ wheel0RPM = 96
-				# ~ wheel1RPM = -48
-				# ~ wheel2RPM = -48
-								
-				# ~ vx = 0.40212
-				# ~ wheel0RPM = 128
-				# ~ wheel1RPM = -64
-				# ~ wheel2RPM = -64
-				
-				# ~ vx = 0.50265
-				# ~ wheel0RPM = 160
-				# ~ wheel1RPM = -80
-				# ~ wheel2RPM = -80
-							
-				# ~ vx = 0.60004
-				# ~ wheel0RPM = 191
-				# ~ wheel1RPM = -96
-				# ~ wheel2RPM = -96				
+					vy = 0.60004
+					wheel0RPM = 191
+					wheel1RPM = -96
+					wheel2RPM = -96		
+					
+					###########################		Omega
+					# ~ omega = 0.5
+					# ~ wheel0RPM = -30
+					# ~ wheel1RPM = -30
+					# ~ wheel2RPM = -30
+					
+					# ~ omega = 1
+					# ~ wheel0RPM = -60
+					# ~ wheel1RPM = -60
+					# ~ wheel2RPM = -60
+					
+					# ~ omega = 2
+					# ~ wheel0RPM = -120
+					# ~ wheel1RPM = -120
+					# ~ wheel2RPM = -120
+					
+					# ~ omega = 3
+					# ~ wheel0RPM = -181
+					# ~ wheel1RPM = -181
+					# ~ wheel2RPM = -181
+					
+				if t > 7:
+					wheel0RPM = 0
+					wheel1RPM = 0
+					wheel2RPM = 0		
+					
 				
 				
 				li = 46.85                  #reduction of motors
@@ -225,7 +271,9 @@ try:
 				r = 0.03					#Wheel Radius
 				l = 0.19                    #distance from wheel to CG
 				
-				file = open(save_folder + "Dynamics_Vn"+"_Vx_"+str(vx)+"_test_t_"+str(test_t)+".txt","a")
+				# ~ file = open(save_folder + "Dynamics"+"_Vx0.76179_"+"_test_t_"+str(test_t)+".txt","a")
+				file = open(save_folder + "Dynamics"+"_Vy0.60004_"+"_test_t_"+str(test_t)+".txt","a")
+				# ~ file = open(save_folder + "Dynamics"+"_W3_"+"_test_t_"+str(test_t)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
@@ -240,9 +288,9 @@ try:
 				m3_rpm = robot.rpm(2)
 				data_rpm = str(m1_rpm)+' , '+str(m2_rpm)+' , '+str(m3_rpm)
 				##########				Motor Current	
-				m1_cur = robot.motor_current(0)/100
-				m2_cur = robot.motor_current(1)/100
-				m3_cur = robot.motor_current(2)/100
+				m1_cur = robot.motor_current(0)
+				m2_cur = robot.motor_current(1)
+				m3_cur = robot.motor_current(2)
 				data_cur = str(m1_cur)+' , '+str(m2_cur)+' , '+str(m3_cur)
 				# ~ print(data_cur)
 				##########				Rotation Torque
@@ -263,19 +311,21 @@ try:
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)		
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
-				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)
-				data_vel = str(vel_x)+' , '+str(vel_y)+' , '+str(vel)
-				print(vel)
+				dt = (time.time() - start)
+				dyaw = yaw - last_yaw
+				vel_ang = dyaw/dt
+				data_vel = str(vel_x)+' , '+str(vel_y)+' , '+str(vel_ang)
+				print(vel_y)
 				
 				########################################################		Recording data
 				time_running = time.time()
@@ -288,6 +338,7 @@ try:
 				########################################################		Remembering value for new loop			
 				time.sleep(delay)
 				elapsed_time = (time.time() - start)
+				last_yaw = yaw
 				t = t + elapsed_time
 				
 			robot.stop()

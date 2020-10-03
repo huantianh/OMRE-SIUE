@@ -25,12 +25,12 @@ ser.reset_output_buffer()
 # This functions sends  pwm signals to the motor and reverses the direction if given negative
 # Example motor(255,0,0) would turn motor 0 on all the away and 1,2 off
 # motor(125,-200,-100) motor 0 would have a half duty cycle, motor 1 would move backwards at a pwm of 200 etc...
-def motors(m1,m2,m3):
+def motor_pwm(m1,m2,m3):
 	motorValues = [m1,m2,m3]
 	for x in range(3):
-		ser.write(("m %d %d %d\r" % (x, abs(motorValues[x]), int(motorValues[x]>=0))).encode())
+		ser.write(("m %d %d \r" % (x, motorValues[x])).encode())
 
-def motorVelocity(m1,m2,m3):
+def motor_rpm(m1,m2,m3):
 	motorV= [m1,m2,m3]
 	ser.write(("v %d %d %d \r" %(motorV[0],motorV[1],motorV[2])).encode())
 
@@ -57,20 +57,26 @@ def rpm(rpmNum):
 	ser.reset_input_buffer()
 	ser.write(("r %f \r" % (rpmNum)).encode())
 	rpmValue = (ser.readline().decode("ascii"))
-	return rpmValue.rstrip()
+	return float(rpmValue.rstrip())
+	
+def motor_current(curNum):
+	ser.reset_input_buffer()
+	ser.write(("c %f \r" % (curNum)).encode())
+	curValue = (ser.readline().decode("ascii"))
+	return int(curValue.rstrip())	
 
 def stop():
 	ser.write(("s \r").encode())	
 
-def move(xd,yd,thetad):
+def move(v_x, v_y, v_theta):
 
 	r = 0.03 # radius of each wheel [m]
 	l = 0.19 # distance from each wheel to the point of reference [m]
  
-	xd_des = xd # velocity in the x-direction in the local frame [m/s]
-	yd_des = yd # velocity in the y-direction in the local frame [m/s]
-	thd_des = thetad # velocity in the x-direction in the local frame [rad/sa]
- 
+	xd_des = v_x # velocity in the x-direction in the local frame [m/s]
+	yd_des = v_y # velocity in the y-direction in the local frame [m/s]
+	thd_des = v_theta # velocity in the x-direction in the local frame [rad/sa]
+
 	vel_des = np.array([xd_des,yd_des,thd_des]).reshape(3,1)
  
 	FK_M = (2*np.pi*r/60)*np.array([1/np.sqrt(3),0,-1/np.sqrt(3),-1/3,2/3,-1/3,-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3) # Forward kinematics matrix
@@ -93,8 +99,8 @@ def move(xd,yd,thetad):
 		wheel1RPM = wheel1RPM/ratio
 		wheel2RPM = wheel2RPM/ratio
 	
-	#~ print("Wheel0 RPM: " +str(wheel0RPM))
-	#~ print("Wheel1 RPM: " +str(wheel1RPM))
-	#~ print("Wheel2 RPM: " +str(wheel2RPM))
+	# ~ #~ print("Wheel0 RPM: " +str(wheel0RPM))
+	# ~ #~ print("Wheel1 RPM: " +str(wheel1RPM))
+	# ~ #~ print("Wheel2 RPM: " +str(wheel2RPM))
 
-	motorVelocity(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
+	motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))

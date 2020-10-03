@@ -19,6 +19,14 @@ const int motorPWMPins[3]                  = {8, 9, 10};
 const int motorDirPins[3]                  = {29, 28, 27};
 
 const int motorCurrentPins[3] = {A8, A9, A10};
+//////////////////////////////////////////////////////////////////////
+const int motorVolPins = A11;
+const int avgSamples = 10;
+
+int sensorValue = 0;
+float sensitivity = 0.369;
+float Vref = 2500;
+/////////////////////////////////////////////////////////////////////
 
 const int ultrasonicSensorTrigPins[]       = {30, 32, 34, 36, 38, 40};
 const int ultrasonicSensorEchoPins[]       = {31, 33, 35, 37, 39, 41};
@@ -27,7 +35,9 @@ const int infraredSensorPins[]             = {0, 1, 2, 3};
 double rpm[3]                              = {0, 0, 0};
 double rpm_setpoint[3]                     = {0, 0, 0};
 int    rpmValues[3]                        = {0, 0, 0};
-int    m_cur[3]                            = {0, 0, 0};
+float    m_cur[3]                            = {0, 0, 0};
+double    m_vol                               = 0;
+int    vol_sen                             = 0;
 
 double duration_US[6]                      = {0, 0, 0, 0, 0, 0};
 double m_US[6]                             = {0, 0, 0, 0, 0, 0};
@@ -56,7 +66,7 @@ char ultrasonicSwitch                      = '0';
 char IRSwitch                              = '0';
 char MCURSwitch                            = '0';
 char printSwitch                           = '0';
-char pwm_dir[3]                            = {'0','0','0'};
+char pwm_dir[3]                            = {'0', '0', '0'};
 
 /*****************************************        PRINT DATA SETUP        **************************************************************/
 char PRINT_ULTRASOUND                      = '0';
@@ -123,11 +133,13 @@ void loop()
   {
     printdata(); //print data IMU
   }
-
+  /////////////////////////////////////    Current
   if (MCURSwitch == '1')
   {
     m_current();
   }
+  /////////////////////////////////////    Voltage
+  //  m_voltage();
 
 }
 /***************************************************************************************************************************************/

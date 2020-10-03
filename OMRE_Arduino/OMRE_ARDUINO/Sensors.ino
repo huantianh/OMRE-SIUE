@@ -61,11 +61,50 @@ void m_current()
   {
     if (pwm_dir[i]   == '0')
     {
-      m_cur[i] = analogRead(motorCurrentPins[i]);
+      for (int m = 0; m < avgSamples; m++)
+      {
+        m_cur[i] += analogRead(motorCurrentPins[i]) * 0.01;
+      }
+      m_cur[i] = m_cur[i] / avgSamples;
     }
     if (pwm_dir[i]   == '1')
     {
-      m_cur[i] = -analogRead(motorCurrentPins[i]);
+      for (int m = 0; m < avgSamples; m++)
+      {
+        m_cur[i] += -analogRead(motorCurrentPins[i]) * 0.01;
+      }
+      m_cur[i] = m_cur[i] / avgSamples;
     }
   }
+}
+/*****************************************             Motor Voltage            ***************************************************************/
+void m_voltage()
+{
+  for (int i = 0; i < avgSamples; i++)
+  {
+    sensorValue += analogRead(motorVolPins);
+    delay(2);
+  }
+  sensorValue = sensorValue / avgSamples;
+  float voltage = sensorValue * 4.88;
+  float current = (voltage - Vref) * sensitivity;
+  float sense = 0.018 / (voltage - Vref);
+  Serial.print(voltage);
+  Serial.print(" , ");
+  Serial.print(sense);
+  Serial.print(" , ");
+  Serial.println(current);
+  delay(200);
+  sensorValue = 0;
+
+  //  vol_sen = analogRead(motorVolPins);
+  //  //  m_vol   = map(vol_sen,0,1023, 0,2500) + 0;
+  //  //  m_vol = (vol_sen - 512)* 0.073170;
+  //  m_vol = ((vol_sen + 0.5)* 5.0) / 1024.0;
+  //  Serial.print(vol_sen);
+  //  Serial.print(" , ");
+  //  Serial.println(m_vol);
+  //  delay(500);
+
+
 }

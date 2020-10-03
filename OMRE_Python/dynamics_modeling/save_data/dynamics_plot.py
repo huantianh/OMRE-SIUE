@@ -37,7 +37,8 @@ c_rpm2 = []
 c_rpm3 = []
 vx= []
 vy= []
-v = []
+vw = []
+
 Fv= []
 Fvn = []
 R_f = []
@@ -70,7 +71,7 @@ with open(root.filename,'r') as csvfile:
 		
 		vx.append(float(row[8]))
 		vy.append(float(row[9]))
-		v.append(float(row[10]))
+		vw.append(float(row[10]))
 		
 		m1_cur.append(float(row[11]))
 		m2_cur.append(float(row[12]))
@@ -82,16 +83,18 @@ with open(root.filename,'r') as csvfile:
 		
 		t.append(float(row[17])-t0)
 
+
+
 fig = plt.figure()
 fig.suptitle(my_txt1,fontsize=16)
-ax1 = fig.add_subplot(331)
-ax2 = fig.add_subplot(332)
-ax3 = fig.add_subplot(333)
-ax4 = fig.add_subplot(334)
-ax5 = fig.add_subplot(335)
+ax1 = fig.add_subplot(221)
+ax2 = fig.add_subplot(222)
+ax3 = fig.add_subplot(223)
+ax4 = fig.add_subplot(224)
+# ~ ax5 = fig.add_subplot(335)
 
 #Path
-ax1 = plt.subplot(331)
+ax1 = plt.subplot(221)
 # ~ ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
 ax1.plot(rs1,rs2,'g',label='RealSense', linewidth=3)
 ax1.set_xlabel('X')
@@ -102,8 +105,8 @@ plt.grid(True)
 plt.legend(loc=4,fontsize=8)
 
 #Vrobot
-ax2 = plt.subplot(332)
-ax2.plot(t,v, 'b', label='V Robot', linewidth=3)
+ax2 = plt.subplot(222)
+ax2.plot(t,vw, 'b', label='V Robot', linewidth=3)
 ax2.set_xlabel('Time (s)')
 ax2.set_ylabel('m/s')
 ax2.set_title('V Robot', fontsize=12)
@@ -111,7 +114,7 @@ plt.grid(True)
 plt.legend(loc=4,fontsize=8)
 
 #WheelV
-ax3 = plt.subplot(333)
+ax3 = plt.subplot(223)
 ax3.plot(t,rpm1, 'r', label='RPM1', linewidth=3)
 ax3.plot(t,rpm2, 'b', label='RPM2', linewidth=3)
 ax3.plot(t,rpm3, 'g', label='RPM3', linewidth=3)
@@ -122,7 +125,7 @@ plt.grid(True)
 plt.legend(loc=7,fontsize=8)
 
 #motor_current
-ax4 = plt.subplot(334)
+ax4 = plt.subplot(224)
 ax4.plot(t,m1_cur, 'r', label='M1 Current', linewidth=3)
 ax4.plot(t,m2_cur, 'b', label='M2 Current', linewidth=3)
 ax4.plot(t,m3_cur, 'g', label='M3 Current', linewidth=3)
@@ -132,23 +135,23 @@ ax4.set_title('Motors Current', fontsize=12)
 plt.grid(True)
 plt.legend(loc=7,fontsize=8)
 
-#Fv
-ax5 = plt.subplot(335)
-ax5.plot(vx,Fv, 'r', label='Fv', linewidth=3)
-ax5.set_xlabel('vx(m/s)')
-ax5.set_ylabel('Fv(N)')
-ax5.set_title('Traction Forces Fv', fontsize=12)
-plt.grid(True)
-plt.legend(loc=7,fontsize=8)
+# ~ #Fv
+# ~ ax5 = plt.subplot(335)
+# ~ ax5.plot(vx,Fv, 'r', label='Fv', linewidth=3)
+# ~ ax5.set_xlabel('vx(m/s)')
+# ~ ax5.set_ylabel('Fv(N)')
+# ~ ax5.set_title('Traction Forces Fv', fontsize=12)
+# ~ plt.grid(True)
+# ~ plt.legend(loc=7,fontsize=8)
 
-#Fvn
-ax6 = plt.subplot(336)
-ax6.plot(vy,Fvn, 'r', label='Fv', linewidth=3)
-ax6.set_xlabel('vy(m/s)')
-ax6.set_ylabel('Fvn(N)')
-ax6.set_title('Traction Forces Fvn', fontsize=12)
-plt.grid(True)
-plt.legend(loc=7,fontsize=8)
+# ~ #Fvn
+# ~ ax6 = plt.subplot(336)
+# ~ ax6.plot(vy,Fvn, 'r', label='Fv', linewidth=3)
+# ~ ax6.set_xlabel('vy(m/s)')
+# ~ ax6.set_ylabel('Fvn(N)')
+# ~ ax6.set_title('Traction Forces Fvn', fontsize=12)
+# ~ plt.grid(True)
+# ~ plt.legend(loc=7,fontsize=8)
 
 
 plt.subplots_adjust(left=0.15, wspace=0.4, hspace = 0.4, top=0.85)

@@ -63,7 +63,7 @@ def motor_current(curNum):
 	ser.reset_input_buffer()
 	ser.write(("c %f \r" % (curNum)).encode())
 	curValue = (ser.readline().decode("ascii"))
-	return int(curValue.rstrip())	
+	return float(curValue.rstrip())	
 
 def stop():
 	ser.write(("s \r").encode())	
