@@ -21,12 +21,18 @@ void parseCommand()
       int  motorPWM;
       sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
       pidSwitch                             = '0';
+      MVOLSwitch                            = '1';
+      MCURSwitch                            = '1';
+
       motor(motorNumber, motorPWM);
 
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
-      PRINT_RPM                             = '1';
+      PRINT_RPM                             = '0';
       PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '1';
       break;
 
     ////////////////////////////////////////////////////////////////             MOTOR CURRENT
@@ -40,7 +46,42 @@ void parseCommand()
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
       PRINT_MCUR                            = '1';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
       Serial.println(m_cur[curNum]);
+      break;
+
+    ////////////////////////////////////////////////////////////////             MOTOR Voltage
+    case 't':
+    case 'T':
+
+      MVOLSwitch                            = '1';
+
+      PRINT_RPM                             = '0';
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '1';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
+      Serial.println(m_vol);
+      break;
+
+    ////////////////////////////////////////////////////////////////             Current Sensor
+    case 'o':
+    case 'O':
+
+      CURSSwitch                            = '1';
+
+      PRINT_RPM                             = '0';
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '1';
+      PRINT_DYNM                            = '0';
+      Serial.println(cur_s);
       break;
 
     ////////////////////////////////////////////////////////////////             ULTRASOUND
@@ -54,13 +95,16 @@ void parseCommand()
       PRINT_IR                              = '0';
       PRINT_RPM                             = '0';
       PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
 
       Serial.println(m_US[ultrasonicNumber]);
       break;
 
     ////////////////////////////////////////////////////////////////              INFARED
     case 'i':
-    case 'D':
+    case 'I':
 
       int infraredNumber;
       sscanf(&rcv_buffer[1], " %d \r", &infraredNumber);
@@ -70,6 +114,9 @@ void parseCommand()
       PRINT_IR                              = '1';
       PRINT_RPM                             = '0';
       PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
       Serial.println (m_IR[infraredNumber]);
       break;
 
@@ -88,6 +135,9 @@ void parseCommand()
       PRINT_IR                              = '0';
       PRINT_RPM                             = '1';
       PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
 
       rpm[0] = rpm0;
       rpm[1] = rpm1;
@@ -133,6 +183,9 @@ void parseCommand()
       IRSwitch                              = '0';
       MCURSwitch                            = '0';
       printSwitch                           = '0';
+      MVOLSwitch                            = '0';
+      CURSSwitch                            = '0';
+      PRINT_DYNM                            = '0';
 
       for (int i = 0; i < 3; i++)
       {
@@ -157,6 +210,10 @@ void parseCommand()
       PRINT_IR                              = '0';
       PRINT_RPM                             = '1';
       PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
+
       rpm_setpoint[0] = 0;
       rpm_setpoint[1] = 100;
       rpm_setpoint[2] = -100;
@@ -170,6 +227,9 @@ void parseCommand()
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
       PRINT_RPM                             = '1';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+
       rpm_setpoint[0] = 0;
       rpm_setpoint[1] = -100;
       rpm_setpoint[2] = 100;

@@ -231,10 +231,10 @@ try:
 					# ~ wheel1RPM = -80
 					# ~ wheel2RPM = -80
 								
-					vy = 0.60004
-					wheel0RPM = 191
-					wheel1RPM = -96
-					wheel2RPM = -96		
+					# ~ vy = 0.60004
+					# ~ wheel0RPM = 191
+					# ~ wheel1RPM = -96
+					# ~ wheel2RPM = -96		
 					
 					###########################		Omega
 					# ~ omega = 0.5
@@ -242,10 +242,10 @@ try:
 					# ~ wheel1RPM = -30
 					# ~ wheel2RPM = -30
 					
-					# ~ omega = 1
-					# ~ wheel0RPM = -60
-					# ~ wheel1RPM = -60
-					# ~ wheel2RPM = -60
+					omega = 1
+					wheel0RPM = -60
+					wheel1RPM = -60
+					wheel2RPM = -60
 					
 					# ~ omega = 2
 					# ~ wheel0RPM = -120
@@ -293,6 +293,13 @@ try:
 				m3_cur = robot.motor_current(2)
 				data_cur = str(m1_cur)+' , '+str(m2_cur)+' , '+str(m3_cur)
 				# ~ print(data_cur)
+				##########				Motor Voltage	
+				m1_vol = robot.motor_voltage()
+				# ~ m2_vol = robot.motor_voltage(1)
+				# ~ m3_vol = robot.motor_voltage(2)
+				print(m1_vol)
+				# ~ data_vol = str(m1_vol)+' , '+str(m2_vol)+' , '+str(m3_vol)
+				# ~ print(data_cur)
 				##########				Rotation Torque
 				T1 = li*Kt1*m1_cur
 				T2 = li*Kt2*m2_cur
@@ -311,21 +318,21 @@ try:
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				# ~ current_x = pose.item(0)
-				# ~ current_y = pose.item(1)
-				# ~ current_theta = pose.item(2)
+				current_x = pose.item(0)
+				current_y = pose.item(1)
+				current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				current_x = pos_x
-				current_y = pos_y
-				current_theta = pose.item(2)		
+				# ~ current_x = pos_x
+				# ~ current_y = pos_y
+				# ~ current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				dt = (time.time() - start)
 				dyaw = yaw - last_yaw
 				vel_ang = dyaw/dt
 				data_vel = str(vel_x)+' , '+str(vel_y)+' , '+str(vel_ang)
-				print(vel_y)
+				# ~ print(vel_y)
 				
 				########################################################		Recording data
 				time_running = time.time()

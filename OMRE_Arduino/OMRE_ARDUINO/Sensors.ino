@@ -80,31 +80,26 @@ void m_current()
 /*****************************************             Motor Voltage            ***************************************************************/
 void m_voltage()
 {
-  for (int i = 0; i < avgSamples; i++)
+  for (int m = 0; m < avgSamples; m++)
   {
-    sensorValue += analogRead(motorVolPins);
-    delay(2);
+    sensorValue += alpha * (analogRead(motorVolPins)-last_sensorValue);
   }
   sensorValue = sensorValue / avgSamples;
-  float voltage = sensorValue * 4.88;
-  float current = (voltage - Vref) * sensitivity;
-  float sense = 0.018 / (voltage - Vref);
-  Serial.print(voltage);
-  Serial.print(" , ");
-  Serial.print(sense);
-  Serial.print(" , ");
-  Serial.println(current);
-  delay(200);
-  sensorValue = 0;
+  vOUT = (sensorValue * 5.0) / 1024.0;
+  m_vol = vOUT / (R2 / (R1 + R2))*10;
+  last_sensorValue = sensorValue;
+}
 
-  //  vol_sen = analogRead(motorVolPins);
-  //  //  m_vol   = map(vol_sen,0,1023, 0,2500) + 0;
-  //  //  m_vol = (vol_sen - 512)* 0.073170;
-  //  m_vol = ((vol_sen + 0.5)* 5.0) / 1024.0;
-  //  Serial.print(vol_sen);
-  //  Serial.print(" , ");
-  //  Serial.println(m_vol);
-  //  delay(500);
+/*****************************************             Current sensor           ***************************************************************/
+void current_sensor()
+{
+  for (int i = 0; i < c_avgSamples; i++)
+  {
+    c_sensorValue += analogRead(CurrentPin);
+  }
 
-
+  c_sensorValue = c_sensorValue / c_avgSamples;
+  c_voltage = 4.88 * c_sensorValue;
+  cur_s = (c_voltage - Vref) * sensitivity;
+  last_c_sensorValue = c_sensorValue;
 }

@@ -46,5 +46,29 @@ void printdata(void)
     Serial.println(m_cur[2]);
   }
 
+  if (PRINT_MVOL == '1')
+  {
+    Serial.println(m_vol);
+  }
+
+  if (PRINT_CURS == '1')
+  {
+    Serial.println(cur_s);
+  }
+
+  if (PRINT_DYNM == '1')
+  {
+    Serial.print(micros() * 0.000001);
+    Serial.print("  ,  ");
+    Serial.print(m_cur[0]);
+    Serial.print("  ,  ");
+    Serial.print(m_vol);
+    Serial.print("  ,  ");
+    Serial.println(rpmValues[0]);
+  }
+
+
+
+
 
 }

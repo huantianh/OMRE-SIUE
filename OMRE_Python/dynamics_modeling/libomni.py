@@ -64,6 +64,12 @@ def motor_current(curNum):
 	ser.write(("c %f \r" % (curNum)).encode())
 	curValue = (ser.readline().decode("ascii"))
 	return float(curValue.rstrip())	
+	
+def motor_voltage():
+	ser.reset_input_buffer()
+	ser.write(("t \r").encode())
+	volValue = (ser.readline().decode("ascii"))
+	return float(volValue.rstrip())		
 
 def stop():
 	ser.write(("s \r").encode())	
