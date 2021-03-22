@@ -92,7 +92,7 @@ void m_voltage()
     //    m_vol[i] = vOUT[i] / (R2 / (R1 + R2)) * 10;
 
     //    sensorValue[i] = analogRead(motorVolPins[i]);
-    m_vol[i] = (sensorValue[i] - 512) * 0.07317 - 2.62;
+    m_vol[i] = (sensorValue[i] - 512) * 0.07317 +1.30;
     last_sensorValue[i] = sensorValue[i];
   }
 }
