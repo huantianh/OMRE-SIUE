@@ -55,7 +55,8 @@ void parseCommand()
     ////////////////////////////////////////////////////////////////             MOTOR Voltage
     case 't':
     case 'T':
-
+      int volNum;
+      sscanf(&rcv_buffer[1], " %d \r", &volNum);
       MVOLSwitch                            = '1';
 
       PRINT_RPM                             = '0';
@@ -65,7 +66,7 @@ void parseCommand()
       PRINT_MVOL                            = '1';
       PRINT_CURS                            = '0';
       PRINT_DYNM                            = '0';
-      Serial.println(m_vol);
+      Serial.println(m_vol[volNum]);
       break;
 
     ////////////////////////////////////////////////////////////////             Current Sensor

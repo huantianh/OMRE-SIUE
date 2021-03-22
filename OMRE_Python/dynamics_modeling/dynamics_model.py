@@ -187,76 +187,35 @@ try:
 				
 				start = time.time()
 				
+				x_dot = 0;              #max 0.7618
+				y_dot = 0;           #max 0.6597
+				theta_dot = 3;          #max 3.4723
+
+
+				############		J, J_inverse, J_dot, J_transpose
+				r = 0.03
+				l = 0.19
+				
+				J2_inv = np.array([1/r,0,0, 0,1/r,0, 0,0,1/r]).reshape(3,3)
+				J1     = np.array([np.sqrt(3)/2,-1/2,-l, 0,1,-l, -np.sqrt(3)/2,-1/2,-l]).reshape(3,3)
+
+				v_robot= np.array([x_dot, y_dot, theta_dot]).reshape(3,1)  
+				J2_inv_J1 = np.dot( J2_inv, J1, out=None).reshape(3,3) 
+				phi_dot =  np.dot( J2_inv_J1, v_robot, out=None).reshape(3,1) 
+
+				rpm1 = phi_dot.item(0)*60/(2*np.pi)
+				rpm0 = phi_dot.item(1)*60/(2*np.pi)
+				rpm2 = phi_dot.item(2)*60/(2*np.pi)
+				
 				
 				if t < 2:
 					wheel0RPM = 0
 					wheel1RPM = 0
 					wheel2RPM = 0
 				if t > 2 and t < 7:
-					########################################################		Sending input RPM to Arduino
-					###########################		Fv
-					# ~ vx = 0.30109
-					# ~ wheel0RPM = 0
-					# ~ wheel1RPM = 83
-					# ~ wheel2RPM = -83
-									
-					# ~ vx = 0.50061
-					# ~ wheel0RPM = 0
-					# ~ wheel1RPM = 138
-					# ~ wheel2RPM = -138
-					
-					# ~ vx = 0.70013
-					# ~ wheel0RPM = 0
-					# ~ wheel1RPM = 193
-					# ~ wheel2RPM = -193
-					
-					# ~ vx = 0.76179
-					# ~ wheel0RPM = 0
-					# ~ wheel1RPM = 210
-					# ~ wheel2RPM = -210
-					
-					###########################		Fvn
-					# ~ vy = 0.30159
-					# ~ wheel0RPM = 96
-					# ~ wheel1RPM = -48
-					# ~ wheel2RPM = -48
-									
-					# ~ vy = 0.40212
-					# ~ wheel0RPM = 128
-					# ~ wheel1RPM = -64
-					# ~ wheel2RPM = -64
-					
-					# ~ vy = 0.50265
-					# ~ wheel0RPM = 160
-					# ~ wheel1RPM = -80
-					# ~ wheel2RPM = -80
-								
-					# ~ vy = 0.60004
-					# ~ wheel0RPM = 191
-					# ~ wheel1RPM = -96
-					# ~ wheel2RPM = -96		
-					
-					###########################		Omega
-					# ~ omega = 0.5
-					# ~ wheel0RPM = -30
-					# ~ wheel1RPM = -30
-					# ~ wheel2RPM = -30
-					
-					omega = 1
-					wheel0RPM = -60
-					wheel1RPM = -60
-					wheel2RPM = -60
-					
-					# ~ omega = 2
-					# ~ wheel0RPM = -120
-					# ~ wheel1RPM = -120
-					# ~ wheel2RPM = -120
-					
-					# ~ omega = 3
-					# ~ wheel0RPM = -181
-					# ~ wheel1RPM = -181
-					# ~ wheel2RPM = -181
-					
+					wheel0RPM = rpm0
+					wheel1RPM = rpm1
+					wheel2RPM = rpm2
 				if t > 7:
 					wheel0RPM = 0
 					wheel1RPM = 0
@@ -271,9 +230,9 @@ try:
 				r = 0.03					#Wheel Radius
 				l = 0.19                    #distance from wheel to CG
 				
-				# ~ file = open(save_folder + "Dynamics"+"_Vx0.76179_"+"_test_t_"+str(test_t)+".txt","a")
-				file = open(save_folder + "Dynamics"+"_Vy0.60004_"+"_test_t_"+str(test_t)+".txt","a")
-				# ~ file = open(save_folder + "Dynamics"+"_W3_"+"_test_t_"+str(test_t)+".txt","a")
+				# ~ file = open(save_folder + "Dynamics"+"_Vx0.76_"+"_test_t_"+str(test_t)+".txt","a")
+				# ~ file = open(save_folder + "Dynamics"+"_Vy0.6_"+"_test_t_"+str(test_t)+".txt","a")
+				file = open(save_folder + "Dynamics"+"_W3_"+"_test_t_"+str(test_t)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
@@ -294,38 +253,37 @@ try:
 				data_cur = str(m1_cur)+' , '+str(m2_cur)+' , '+str(m3_cur)
 				# ~ print(data_cur)
 				##########				Motor Voltage	
-				m1_vol = robot.motor_voltage()
-				# ~ m2_vol = robot.motor_voltage(1)
-				# ~ m3_vol = robot.motor_voltage(2)
-				print(m1_vol)
-				# ~ data_vol = str(m1_vol)+' , '+str(m2_vol)+' , '+str(m3_vol)
-				# ~ print(data_cur)
-				##########				Rotation Torque
-				T1 = li*Kt1*m1_cur
-				T2 = li*Kt2*m2_cur
-				T3 = li*Kt3*m3_cur
-				##########				Wheel Traction Force
-				f1 = T1/r
-				f2 = T2/r
-				f3 = T3/r
-				##########				Robot Traction Force
-				Fv = f2*np.cos(30) - f3*np.cos(30)
-				Fvn = f1 - f2*np.sin(30) - f3*np.sin(30)
-				R_f = (-f1-f2-f3)*l
-				data_trac = str(Fv)+' , '+str(Fvn)+' , '+str(R_f)
+				m1_vol = robot.motor_voltage(0)
+				m2_vol = robot.motor_voltage(1)
+				m3_vol = robot.motor_voltage(2)
+				# ~ print(m1_vol)
+				data_vol = str(m1_vol)+' , '+str(m2_vol)+' , '+str(m3_vol)
+				# ~ ##########				Rotation Torque
+				# ~ T1 = li*Kt1*m1_cur
+				# ~ T2 = li*Kt2*m2_cur
+				# ~ T3 = li*Kt3*m3_cur
+				# ~ ##########				Wheel Traction Force
+				# ~ f1 = T1/r
+				# ~ f2 = T2/r
+				# ~ f3 = T3/r
+				# ~ ##########				Robot Traction Force
+				# ~ fx = f2*np.sin(60) - f3*np.sin(60)
+				# ~ fy = f1 - f2*np.cos(60) - f3*np.cos(60)
+				# ~ M = (-f1-f2-f3)*l
+				# ~ data_trac = str(fx)+' , '+str(fy)+' , '+str(M)
 				
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)		
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				dt = (time.time() - start)
@@ -340,7 +298,7 @@ try:
 				data_pos  = str(pos_x)+" , "+str(pos_y)
 				
 				# ~ print(data_pose)
-				file.writelines(str(data_pose)+" , "+str(data_pos)+" , "+str(data_rpm)+" , "+str(data_vel)+" , "+str(data_cur)+" , "+str(data_trac)+" , "+str(time_running)+"\n")
+				file.writelines(str(data_pose)+" , "+str(data_pos)+" , "+str(data_rpm)+" , "+str(data_vol)+" , "+str(data_cur)+" , "+str(data_vel)+" , "+str(time_running)+"\n")
 					
 				########################################################		Remembering value for new loop			
 				time.sleep(delay)

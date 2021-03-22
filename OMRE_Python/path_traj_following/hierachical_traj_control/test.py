@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sympy as sym
 from sympy import *
+import numpy as np
 
 # ~ R = 0.2
 # ~ speed = 0.5
@@ -24,11 +25,18 @@ j = (2*pi*r/60)*Matrix([
 [-1/(3*l),-1/(3*l),-1/(3*l)]
 ])
 
-j_dot = sym.diff(j,thetac)
+j_dot = np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
+
+
+# ~ j_dot = sym.diff(j,thetac)
 j_ddot = sym.diff(j_dot,thetac)
+print(j_dot)
 
 j_inv = j.inv()
 j_inv_dot = sym.diff(j_inv,thetac)
+print(j_inv_dot)
+
+
 
 j_trans = j.transpose()
 j_trans_dot = sym.diff(j_trans,thetac)
@@ -78,7 +86,7 @@ j2 = j_inv*e1
 
 vd = 1/b1*a1*wd + 1/b1*wd_dot - 1/b1*j1*e2 - 1/b1*j2
 vd_dot = sym.diff(vd, thetac,t)
-print(wd_dot)
+# ~ print(wd_dot)
 
 
 j3 = j_trans*z1

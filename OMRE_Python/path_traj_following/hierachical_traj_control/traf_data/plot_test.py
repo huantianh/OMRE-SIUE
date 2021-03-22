@@ -66,7 +66,7 @@ ax4 = fig.add_subplot(224)
 
 #Circle
 ax1 = plt.subplot(221)
-ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
+# ~ ax1.plot(x,y, 'b', label='Encoder', linewidth=3)
 ax1.plot(rs1,rs2,'g',label='RealSense', linewidth=3)
 ax1.plot(x1,x2, 'r--', label='Circle', linewidth=1.5)
 ax1.set_xlabel('X')

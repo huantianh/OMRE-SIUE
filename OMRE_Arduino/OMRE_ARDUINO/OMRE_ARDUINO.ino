@@ -24,14 +24,14 @@ float del = 0.2;
 float tau = 2;
 float alpha = del/tau;
 
-const int motorVolPins = A11;
+const int motorVolPins[3] = {A12, A13, A14};
 const int avgSamples = 50;
-float vOUT = 0.0;
-float m_vol = 0.0;
+float vOUT[3] = {0.0, 0.0, 0.0};
+float m_vol[3] = {0.0, 0.0, 0.0};
 float R1 = 30000.0;
 float R2 = 7500.0;
-int sensorValue = 0;
-int last_sensorValue = 0;
+int sensorValue[3] = {0, 0, 0};
+int last_sensorValue[3] = {0, 0, 0};
 ///////////////////////////////////////////////////////////////////// Current Sensor
 const int CurrentPin = A12;
 const int c_avgSamples = 30;

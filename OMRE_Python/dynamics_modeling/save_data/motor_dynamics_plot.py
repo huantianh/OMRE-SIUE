@@ -20,12 +20,22 @@ text = f.read()
 
 #plotting
 t = []
-c = []
-v = []
-r = []
+c1 = []
+c2 = []
+c3 = []
+v1 = []
+v2 = []
+v3 = []
+r1 = []
+r2 = []
+r3 = []
 p = []
-v_filter = []
-c_filter = []
+v_filter1 = []
+v_filter2 = []
+v_filter3 = []
+c_filter1 = []
+c_filter2 = []
+c_filter3 = []
 
 with open(root.filename,'r') as csvfile:
 	plots = csv.reader(csvfile, delimiter=',')
@@ -33,10 +43,16 @@ with open(root.filename,'r') as csvfile:
 		if idx == 0:
 			x0 = float(row[0])
 		t.append(float(row[0])-x0)
-		c.append(float(row[1]))
-		v.append(float(row[2]))
-		r.append(float(row[3]))
-		p.append(float(row[4]))
+		c1.append(float(row[1]))
+		c2.append(float(row[2]))
+		c3.append(float(row[3]))
+		v1.append(float(row[4]))
+		v2.append(float(row[5]))
+		v3.append(float(row[6]))
+		r1.append(float(row[7]))
+		r2.append(float(row[8]))
+		r3.append(float(row[9]))
+		p.append(float(row[10]))
 
 
 global alpha 
@@ -49,29 +65,79 @@ alpha = 0.2 / tau
 
 
 ############################	filter Voltage
-inputv = v
-outputv = [None] * len(v)
-outputvn = v[0]
-for n in range(0,len(v)):
-	outputvn += alpha * (v[n]-outputvn)
-	outputv[n]= outputvn
+inputv1 = v1
+outputv1 = [None] * len(v1)
+outputvn1 = v1[0]
+for n in range(0,len(v1)):
+	outputvn1 += alpha * (v1[n]-outputvn1)
+	outputv1[n]= outputvn1
+
+inputv2 = v2
+outputv2 = [None] * len(v2)
+outputvn2 = v2[0]
+for n in range(0,len(v2)):
+	outputvn2 += alpha * (v2[n]-outputvn2)
+	outputv2[n]= outputvn2
+
+inputv3 = v3
+outputv3 = [None] * len(v3)
+outputvn3 = v3[0]
+for n in range(0,len(v3)):
+	outputvn3 += alpha * (v3[n]-outputvn3)
+	outputv3[n]= outputvn3	
+
 
 ############################	filter Current
-inputc = c
-outputc = [None] * len(c)
-outputcn = c[0]
+inputc1 = c1
+outputc1 = [None] * len(c1)
+outputcn1 = c1[0]
+for n in range(0,len(c1)):
+	outputcn1 += alpha * (c1[n]-outputcn1)
+	outputc1[n]= outputcn1
 
-for n in range(0,len(c)):
-	outputcn += alpha * (c[n]-outputcn)
-	outputc[n]= outputcn
+inputc2 = c2
+outputc2 = [None] * len(c2)
+outputcn2 = c2[0]
+for n in range(0,len(c2)):
+	outputcn2 += alpha * (c2[n]-outputcn2)
+	outputc2[n]= outputcn2
 
-np_outputv = np.array(outputv).reshape((-1, 1))
-np_outputc = np.array(outputc).reshape((-1, 1))
+inputc3 = c3
+outputc3 = [None] * len(c3)
+outputcn3 = c3[0]
+for n in range(0,len(c3)):
+	outputcn3 += alpha * (c3[n]-outputcn3)
+	outputc3[n]= outputcn3
+
+np_outputv1 = np.array(outputv1).reshape((-1, 1))
+np_outputv2 = np.array(outputv2).reshape((-1, 1))
+np_outputv3 = np.array(outputv3).reshape((-1, 1))
+np_outputc1 = np.array(outputc1).reshape((-1, 1))
+np_outputc2 = np.array(outputc2).reshape((-1, 1))
+np_outputc3 = np.array(outputc3).reshape((-1, 1))
 np_t = np.array(t).reshape((-1, 1))
-np_r = np.array(r).reshape((-1, 1))
+np_r1 = np.array(r1).reshape((-1, 1))
+np_r2 = np.array(r2).reshape((-1, 1))
+np_r3 = np.array(r3).reshape((-1, 1))
 np_p = np.array(p).reshape((-1, 1))
-np_outputAll = np.hstack((np_t,np_outputc,np_outputv,np_r,np_p))
-np.savetxt('Motor1_dynamics_filter.txt', np_outputAll, delimiter=',',fmt='%2.4f')
+np_outputAll = np.hstack((np_t,np_outputc1,np_outputc2,np_outputc3,np_outputv1,np_outputv2,np_outputv3,np_r1,np_r2,np_r3,np_p))
+np.savetxt('Motor_dynamics_filter.txt', np_outputAll, delimiter=',',fmt='%2.4f')
+
+np_t = np.array(t).reshape((-1, 1))
+np_c1 = np.array(c1).reshape((-1, 1))
+np_c2 = np.array(c2).reshape((-1, 1))
+np_c3 = np.array(c3).reshape((-1, 1))
+np_v1 = np.array(v1).reshape((-1, 1))
+np_v2 = np.array(v2).reshape((-1, 1))
+np_v3 = np.array(v3).reshape((-1, 1))
+np_r1 = np.array(r1).reshape((-1, 1))
+np_r2 = np.array(r2).reshape((-1, 1))
+np_r3 = np.array(r3).reshape((-1, 1))
+np_p = np.array(p).reshape((-1, 1))
+np_outputAll = np.hstack((np_t,np_c1,np_c2,np_c3,np_v1,np_v2,np_v3,np_r1,np_r2,np_r3,np_p))
+np.savetxt(my_txt1+'_fixed.txt', np_outputAll, delimiter=',',fmt='%2.4f')
+
+
 
 
 fig = plt.figure()
@@ -84,7 +150,9 @@ ax3 = fig.add_subplot(133)
 #PWM-RPM
 ax1 = plt.subplot(131)
 ax1.plot(t,p, 'r', label='PWM', linewidth=3)
-ax1.plot(t,r, 'b', label='RPM', linewidth=3)
+ax1.plot(t,r1, 'b', label='RPM1', linewidth=3)
+ax1.plot(t,r2, 'g', label='RPM2', linewidth=3)
+ax1.plot(t,r3, 'k', label='RPM3', linewidth=3)
 ax1.set_xlabel('time')
 ax1.set_ylabel('RPM')
 ax1.set_title('PWM_RPM', fontsize=12)
@@ -94,7 +162,9 @@ plt.legend(loc=8,fontsize=8)
 #PWM-Voltage
 ax1 = plt.subplot(132)
 # ~ ax1.plot(t,outputv, 'r', label='filter Voltage', linewidth=3)
-ax1.plot(t,v, 'b', label='Voltage', linewidth=3)
+ax1.plot(t,v1, 'b', label='Voltage1', linewidth=3)
+ax1.plot(t,v2, 'g', label='Voltage2', linewidth=3)
+ax1.plot(t,v3, 'k', label='Voltage3', linewidth=3)
 ax1.set_xlabel('time')
 ax1.set_ylabel('Voltage')
 ax1.set_title('PWM_Voltage', fontsize=12)
@@ -104,7 +174,9 @@ plt.legend(loc=8,fontsize=8)
 #PWM-current
 ax1 = plt.subplot(133)
 # ~ ax1.plot(t,outputc, 'r', label='filter Current', linewidth=3)
-ax1.plot(t,c, 'b', label='Current', linewidth=3)
+ax1.plot(t,c1, 'b', label='Current1', linewidth=3)
+ax1.plot(t,c2, 'g', label='Current2', linewidth=3)
+ax1.plot(t,c3, 'k', label='Current3', linewidth=3)
 ax1.set_xlabel('time')
 ax1.set_ylabel('Ampe')
 ax1.set_title('PWM_Current', fontsize=12)

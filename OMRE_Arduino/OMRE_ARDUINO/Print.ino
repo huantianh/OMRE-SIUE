@@ -48,7 +48,11 @@ void printdata(void)
 
   if (PRINT_MVOL == '1')
   {
-    Serial.println(m_vol);
+    Serial.print(m_vol[0]);
+    Serial.print("  ,  ");
+    Serial.print(m_vol[1]);
+    Serial.print("  ,  ");
+    Serial.println(m_vol[2]);
   }
 
   if (PRINT_CURS == '1')
@@ -62,9 +66,21 @@ void printdata(void)
     Serial.print("  ,  ");
     Serial.print(m_cur[0]);
     Serial.print("  ,  ");
-    Serial.print(m_vol);
+    Serial.print(m_cur[1]);
     Serial.print("  ,  ");
-    Serial.println(rpmValues[0]);
+    Serial.print(m_cur[2]);
+    Serial.print("  ,  ");
+    Serial.print(m_vol[0]);
+    Serial.print("  ,  ");
+    Serial.print(m_vol[1]);
+    Serial.print("  ,  ");
+    Serial.print(m_vol[2]);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[0]);
+    Serial.print("  ,  ");
+    Serial.print(rpmValues[1]);
+    Serial.print("  ,  ");
+    Serial.println(rpmValues[2]);
   }
 
 

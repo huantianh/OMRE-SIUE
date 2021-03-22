@@ -72,7 +72,7 @@ try:
 			motor_pwm(int(pwm))
 		
 			
-			file = open(save_folder + "Motors_1_dynamics"+".txt","a")		
+			file = open(save_folder + "Motors_dynamics_test"+".txt","a")		
 			
 			start = time.time()
 		
