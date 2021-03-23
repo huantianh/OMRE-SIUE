@@ -82,26 +82,30 @@ void m_voltage()
 {
   for (int i = 0; i < 3; i++)
   {
-    for (int m = 0; m < avgSamples; m++)
-    {
-      sensorValue[i] += alpha * (analogRead(motorVolPins[i]) - last_sensorValue[i]);
-    }
-    sensorValue[i] = sensorValue[i] / avgSamples;
-    vOUT[i] = (sensorValue[i] * 5.0) / 1024.0;
-    m_vol[i] = vOUT[i] / (R2 / (R1 + R2)) * 10;
+    //    for (int m = 0; m < avgSamples; m++)
+    //    {
+    //      sensorValue[i] += alpha * (analogRead(motorVolPins[i]) - last_sensorValue[i]);
+    //    }
+    sensorValue[i] += alpha * (analogRead(motorVolPins[i]) - last_sensorValue[i]);
+    //    sensorValue[i] = (sensorValue[i] / avgSamples);
+    //    vOUT[i] = (sensorValue[i] * 5.0) / 1024.0;
+    //    m_vol[i] = vOUT[i] / (R2 / (R1 + R2)) * 10;
+
+    //    sensorValue[i] = analogRead(motorVolPins[i]);
+    m_vol[i] = (sensorValue[i] - 512) * 0.07317 - 2.62;
     last_sensorValue[i] = sensorValue[i];
   }
 }
-  /*****************************************             Current sensor           ***************************************************************/
-  void current_sensor()
+/*****************************************             Current sensor           ***************************************************************/
+void current_sensor()
+{
+  for (int i = 0; i < c_avgSamples; i++)
   {
-    for (int i = 0; i < c_avgSamples; i++)
-    {
-      c_sensorValue += analogRead(CurrentPin);
-    }
-
-    c_sensorValue = c_sensorValue / c_avgSamples;
-    c_voltage = 4.88 * c_sensorValue;
-    cur_s = (c_voltage - Vref) * sensitivity;
-    last_c_sensorValue = c_sensorValue;
+    c_sensorValue += analogRead(CurrentPin);
   }
+
+  c_sensorValue = c_sensorValue / c_avgSamples;
+  c_voltage = 4.88 * c_sensorValue;
+  cur_s = (c_voltage - Vref) * sensitivity;
+  last_c_sensorValue = c_sensorValue;
+}

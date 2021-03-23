@@ -198,7 +198,7 @@ try:
 				
 				########################################################			Path
 				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)-R
+				yd = R*np.cos(speed*t)
 				thetad = 0
 				
 				########################################################			Parameters
@@ -322,14 +322,14 @@ try:
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				# ~ current_x = pose.item(0)
-				# ~ current_y = pose.item(1)
-				# ~ current_theta = pose.item(2)
+				current_x = pose.item(0)
+				current_y = pose.item(1)
+				current_theta = pose.item(2)
 				
 				########################################################			odometry using RealSense
-				current_x = pos_x
-				current_y = pos_y
-				current_theta = pose.item(2)
+				# ~ current_x = pos_x
+				# ~ current_y = pos_y
+				# ~ current_theta = pose.item(2)
 
 				########################################################			RealSense velocities
 				vel = np.sqrt(vel_x*vel_x + vel_y*vel_y + vel_z*vel_z)

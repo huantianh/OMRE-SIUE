@@ -20,7 +20,7 @@ const int motorDirPins[3]                  = {29, 28, 27};
 
 const int motorCurrentPins[3] = {A8, A9, A10};
 ///////////////////////////////////////////////////////////////////// Voltage Sensor
-float del = 0.2;
+float del = 0.5;
 float tau = 2;
 float alpha = del/tau;
 

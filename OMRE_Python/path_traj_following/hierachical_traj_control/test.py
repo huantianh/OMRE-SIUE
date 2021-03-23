@@ -12,100 +12,100 @@ import numpy as np
 # ~ thetac = 0
 
 
-k = Kx = Ky = Kz = 5
+# ~ k = Kx = Ky = Kz = 5
 
-t , R, speed, xc, yc, thetac, m1_rpm, c_rpm1, m2_rpm, c_rpm2, m3_rpm, c_rpm3 = sym.symbols('t R speed xc yc thetac m1_rpm c_rpm1 m2_rpm c_rpm2 m3_rpm c_rpm3')
+r , t , R, speed, xc, yc, thetac, m1_rpm, c_rpm1, m2_rpm, c_rpm2, m3_rpm, c_rpm3, K = sym.symbols('r t R speed xc yc thetac m1_rpm c_rpm1 m2_rpm c_rpm2 m3_rpm c_rpm3 K')
 
-r = 0.03
-l = 0.19
+# ~ r = 0.03
+# ~ l = 0.19
 
-j = (2*pi*r/60)*Matrix([
-[(2/3)*sin(thetac+pi/3),(-2/3)*sin(thetac),(2/3)*sin(thetac-pi/3)],
-[(-2/3)*cos(thetac+pi/3),(2/3)*cos(thetac),(-2/3)*cos(thetac-pi/3)],
-[-1/(3*l),-1/(3*l),-1/(3*l)]
-])
+# ~ j = (2*pi*r/60)*Matrix([
+# ~ [(2/3)*sin(thetac+pi/3),(-2/3)*sin(thetac),(2/3)*sin(thetac-pi/3)],
+# ~ [(-2/3)*cos(thetac+pi/3),(2/3)*cos(thetac),(-2/3)*cos(thetac-pi/3)],
+# ~ [-1/(3*l),-1/(3*l),-1/(3*l)]
+# ~ ])
 
-j_dot = np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
+# ~ j_dot = np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
 
 
 # ~ j_dot = sym.diff(j,thetac)
-j_ddot = sym.diff(j_dot,thetac)
-print(j_dot)
+# ~ j_ddot = sym.diff(j_dot,thetac)
+# ~ print(j_dot)
 
-j_inv = j.inv()
-j_inv_dot = sym.diff(j_inv,thetac)
-print(j_inv_dot)
+# ~ j_inv = j.inv()
+# ~ j_inv_dot = sym.diff(j_inv,thetac)
+# ~ print(j_inv_dot)
 
 
 
-j_trans = j.transpose()
-j_trans_dot = sym.diff(j_trans,thetac)
+# ~ j_trans = j.transpose()
+# ~ j_trans_dot = sym.diff(j_trans,thetac)
 
-xd = R*sin(speed*t)
-yd = R*cos(speed*t)
-thetad = 0
+# ~ xd = R*sin(speed*t)
+# ~ yd = R*cos(speed*t)
+# ~ thetad = 0
 
-xd_dot = sym.diff(xd,t)
-yd_dot = sym.diff(yd,t)
-thetad_dot = sym.diff(thetad,t)
+# ~ xd_dot = sym.diff(xd,t)
+# ~ yd_dot = sym.diff(yd,t)
+# ~ thetad_dot = sym.diff(thetad,t)
 
-qd_dot = Matrix([
-[xd_dot],
-[yd_dot],
-[thetad_dot]
-])
+# ~ qd_dot = Matrix([
+# ~ [xd_dot],
+# ~ [yd_dot],
+# ~ [thetad_dot]
+# ~ ])
 
-K = Matrix([
-[1,0,0],
-[0,1,0],
-[0,0,1]
-])
+# ~ K = Matrix([
+# ~ [1,0,0],
+# ~ [0,1,0],
+# ~ [0,0,1]
+# ~ ])
 
-e1 = Matrix([
-[xc-xd],
-[yc-yd],
-[thetac-thetad]
-])
+# ~ e1 = Matrix([
+# ~ [xc-xd],
+# ~ [yc-yd],
+# ~ [thetac-thetad]
+# ~ ])
 
-w1 = -K*e1+qd_dot
-wd = j_inv*w1
+# ~ w1 = -K*e1+qd_dot
+# ~ wd = j_inv*w1
 # ~ wd_dot = sym.diff(wd,thetac,t)
-wd_dot = sym.diff(wd,t)
+# ~ wd_dot = sym.diff(wd,t)
 
-e2 = Matrix([
-[m2_rpm-c_rpm2],
-[m1_rpm-c_rpm1],
-[m3_rpm-c_rpm3]
-])
+# ~ e2 = Matrix([
+# ~ [m2_rpm-c_rpm2],
+# ~ [m1_rpm-c_rpm1],
+# ~ [m3_rpm-c_rpm3]
+# ~ ])
 
-a1 = 12.17; b1 = 224.46; a2 = 4.74; b2 = 10.08; c2 = 0.32;
+# ~ a1 = 12.17; b1 = 224.46; a2 = 4.74; b2 = 10.08; c2 = 0.32;
 
-z1 = j*e2
-j1 = j_inv*j_dot
-j2 = j_inv*e1
+# ~ z1 = j*e2
+# ~ j1 = j_inv*j_dot
+# ~ j2 = j_inv*e1
 
-vd = 1/b1*a1*wd + 1/b1*wd_dot - 1/b1*j1*e2 - 1/b1*j2
-vd_dot = sym.diff(vd, thetac,t)
+# ~ vd = 1/b1*a1*wd + 1/b1*wd_dot - 1/b1*j1*e2 - 1/b1*j2
+# ~ vd_dot = sym.diff(vd, thetac,t)
 # ~ print(wd_dot)
 
 
-j3 = j_trans*z1
-u1 = (1/b2*(vd_dot + a2*vd + b1*j3))
-c3 = 1/c2
+# ~ j3 = j_trans*z1
+# ~ u1 = (1/b2*(vd_dot + a2*vd + b1*j3))
+# ~ c3 = 1/c2
 
-u11 = (u1.row(0))**c3
-u21 = (u1.row(1))**c3
-u31 = (u1.row(2))**c3
+# ~ u11 = (u1.row(0))**c3
+# ~ u21 = (u1.row(1))**c3
+# ~ u31 = (u1.row(2))**c3
 
-u_equ = Matrix([
-[u11],
-[u21],
-[u31]
-])
+# ~ u_equ = Matrix([
+# ~ [u11],
+# ~ [u21],
+# ~ [u31]
+# ~ ])
 
-u_num = (t, R, speed, xc, yc, thetac, m1_rpm, c_rpm1, m2_rpm, c_rpm2, m3_rpm, c_rpm3)
-u_final = lambdify(u_num, u_equ, modules='numpy')
-u2 = u_final(30,0.2,0.3,1,1,1,1,1,1,1,1,1)
+# ~ u_num = (t, R, speed, xc, yc, thetac, m1_rpm, c_rpm1, m2_rpm, c_rpm2, m3_rpm, c_rpm3)
+# ~ u_final = lambdify(u_num, u_equ, modules='numpy')
+# ~ u2 = u_final(30,0.2,0.3,1,1,1,1,1,1,1,1,1)
 
 # ~ print (vd_dot[2])
 
@@ -133,8 +133,26 @@ u2 = u_final(30,0.2,0.3,1,1,1,1,1,1,1,1,1)
 
 
 
+beta1_dot_11 = -(15*K/(r*np.pi)) * (np.sin(thetac) + K*np.cos(thetac) + np.sqrt(3)*np.cos(thetac) -a1*np.cos(thetac) + np.sqrt(3)*a1*np.sin(thetac)-np.sqrt(3)*K*np.sin(thetac))
+beta1_dot_12 = (15*K/(r*np.pi)) * (np.cos(thetac) - K*np.sin(thetac) - np.sqrt(3)*np.sin(thetac) +a1*np.sin(thetac) + np.sqrt(3)*a1*np.cos(thetac)-np.sqrt(3)*K*np.cos(thetac))
+beta1_dot_13 = 0
 
+beta1_dot_21 = (30*K/(r*np.pi))*(np.sin(thetac) + K*np.cos(thetac) - a1*np.cos(thetac))
+beta1_dot_22 = -(30*K/(r*np.pi))*(np.cos(thetac) - K*np.sin(thetac) + a1*np.sin(thetac))
+beta1_dot_23 = 0
 
+beta1_dot_31 = -(15*K/(r*np.pi)) * (np.sin(thetac) + K*np.cos(thetac) - np.sqrt(3)*np.cos(thetac) - a1*np.cos(thetac) - np.sqrt(3)*a1*np.sin(thetac) + np.sqrt(3)*K*np.sin(thetac))
+beta1_dot_32 = (15*K/(r*np.pi)) * (np.cos(thetac) - K*np.sin(thetac) + np.sqrt(3)*np.sin(thetac) + a1*np.sin(thetac) - np.sqrt(3)*a1*np.cos(thetac) + np.sqrt(3)*K*np.cos(thetac))
+beta1_dot_33 = 0
+
+beta1_dot = np.array([beta1_dot_11,beta1_dot_12,beta1_dot_13,beta1_dot_21,beta1_dot_22,beta1_dot_23,beta1_dot_31,beta1_dot_32,beta1_dot_33]).reshape(3,3)
+
+gama1_dot_1 = (15*R*speed*speed)/(r*np.pi) * (np.sin(thetac + speed*t) + np.sqrt(3)*np.cos(thetac + speed*t) - a1 * np.cos(thetac + speed*t) + speed * np.sin(thetac + speed*t) + np.sqrt(3) * a1 * np.sin(thetac+speed*t) + np.sqrt(3)*speed*np.cos(thetac+speed*t))
+gama1_dot_2 = -(30*R*speed*speed)/(r*np.pi) * (np.sin(thetac + speed*t) - a1 * np.cos(thetac + speed*t) + speed * np.sin(thetac + speed*t)) 
+gama1_dot_3 = -(15*R*speed*speed)/(r*np.pi) * (-np.sin(thetac + speed*t) + np.sqrt(3)*np.cos(thetac + speed*t) + a1*np.cos(thetac + speed*t) - speed*np.sin(thetac + speed*t) + np.sqrt(3)*a1*np.sin(thetac+speed*t) + np.sqrt(3)*speed*np.cos(thetac+speed*t))
+gama1_dot = np.array([gama1_dot_1,gama1_dot_2,gama1_dot_3]).reshape(3,1)
+
+print(beta1_dot)
 
 
 
