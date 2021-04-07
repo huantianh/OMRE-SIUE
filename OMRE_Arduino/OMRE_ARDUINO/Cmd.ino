@@ -30,7 +30,7 @@ void parseCommand()
       PRINT_IR                              = '0';
       PRINT_RPM                             = '0';
       PRINT_MCUR                            = '0';
-      PRINT_MVOL                            = '1';
+      PRINT_MVOL                            = '0';
       PRINT_CURS                            = '0';
       PRINT_DYNM                            = '0';
       break;

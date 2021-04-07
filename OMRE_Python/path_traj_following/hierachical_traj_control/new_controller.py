@@ -200,7 +200,7 @@ try:
 			R = 0.8
 			############################################################		Value for t and delta_t
 			t = 0
-			delay = 0.005
+			delay = 0.01
 			speed = 0.5
 			###### filter gain
 			dt_tau = 0.5           #1   
@@ -238,6 +238,13 @@ try:
 				
 				q_ddot_d = np.array([x_ddot_d,y_ddot_d,theta_ddot_d]).reshape(3,1)
 				
+				########################################################		q_dddot_d
+				x_dddot_d = -R*speed*speed*speed*np.cos(speed*t)
+				y_dddot_d = R*speed*speed*speed*np.sin(speed*t)
+				theta_dddot_d = 0
+				
+				q_dddot_d = np.array([x_dddot_d,y_dddot_d,theta_dddot_d]).reshape(3,1)
+				
 				########################################################		J_inverse
 				r = 0.03
 				l = 0.19
@@ -245,10 +252,10 @@ try:
 				j_inv = np.linalg.inv(j).reshape(3,3)
 				j_trans = np.transpose(j).reshape(3,3)
 				
-				j_dot = theta_dot*np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
-				j_inv_dot = theta_dot*np.array([(30*np.cos(thetac+np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/3))/(r*np.pi), 0, -(30*np.cos(thetac))/(r*np.pi), -(30*np.sin(thetac))/(r*np.pi), 0, (30*np.cos(thetac-np.pi/3))/(r*np.pi), -(30*np.cos(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
-				j_trans_dot = theta_dot*np.array([(r*np.pi/45)*np.cos(thetac+ np.pi/3),(r*np.pi/45)*np.sin(thetac+np.pi/3),0,-(r*np.pi/45)*np.cos(thetac),-(r*np.pi/45)*np.sin(thetac),0,(r*np.pi/45)*np.cos(thetac-np.pi/3),(r*np.pi/45)*np.sin(thetac-np.pi/3),0]).reshape(3,3)
-				
+				j_dot = np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
+				j_inv_dot = np.array([(30*np.cos(thetac+np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/3))/(r*np.pi), 0, -(30*np.cos(thetac))/(r*np.pi), -(30*np.sin(thetac))/(r*np.pi), 0, (30*np.cos(thetac-np.pi/3))/(r*np.pi), -(30*np.cos(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
+				j_trans_dot = np.array([(r*np.pi/45)*np.cos(thetac+ np.pi/3),(r*np.pi/45)*np.sin(thetac+np.pi/3),0,-(r*np.pi/45)*np.cos(thetac),-(r*np.pi/45)*np.sin(thetac),0,(r*np.pi/45)*np.cos(thetac-np.pi/3),(r*np.pi/45)*np.sin(thetac-np.pi/3),0]).reshape(3,3)
+				j_inv_ddot = np.array([(-30*np.sin(thetac+np.pi/3))/(r*np.pi), (30*np.cos(thetac+np.pi/3))/(r*np.pi), 0, (30*np.sin(thetac))/(r*np.pi), -(30*np.cos(thetac))/(r*np.pi), 0, -(30*np.sin(thetac-np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
 				
 				########################################################		Robust Controller
 				############			Parameters
@@ -259,24 +266,27 @@ try:
 				gama1 = -a1*np.dot(j_inv,q_dot_d,out = None) - np.dot(j_inv_dot,q_dot_d,out = None) - np.dot(j_inv,q_ddot_d,out = None)
 				e = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 
 				
-				beta1_dot_11 = -(15*K/(r*np.pi)) * (np.sin(thetac) + K*np.cos(thetac) + np.sqrt(3)*np.cos(thetac) -a1*np.cos(thetac) + np.sqrt(3)*a1*np.sin(thetac)-np.sqrt(3)*K*np.sin(thetac))
-				beta1_dot_12 = (15*K/(r*np.pi)) * (np.cos(thetac) - K*np.sin(thetac) - np.sqrt(3)*np.sin(thetac) +a1*np.sin(thetac) + np.sqrt(3)*a1*np.cos(thetac)-np.sqrt(3)*K*np.cos(thetac))
-				beta1_dot_13 = 0
+				# ~ beta1_dot_11 = -(15*K/(r*np.pi)) * (np.sin(thetac) + K*np.cos(thetac) + np.sqrt(3)*np.cos(thetac) -a1*np.cos(thetac) + np.sqrt(3)*a1*np.sin(thetac)-np.sqrt(3)*K*np.sin(thetac))
+				# ~ beta1_dot_12 = (15*K/(r*np.pi)) * (np.cos(thetac) - K*np.sin(thetac) - np.sqrt(3)*np.sin(thetac) +a1*np.sin(thetac) + np.sqrt(3)*a1*np.cos(thetac)-np.sqrt(3)*K*np.cos(thetac))
+				# ~ beta1_dot_13 = 0
 				
-				beta1_dot_21 = (30*K/(r*np.pi))*(np.sin(thetac) + K*np.cos(thetac) - a1*np.cos(thetac))
-				beta1_dot_22 = -(30*K/(r*np.pi))*(np.cos(thetac) - K*np.sin(thetac) + a1*np.sin(thetac))
-				beta1_dot_23 = 0
+				# ~ beta1_dot_21 = (30*K/(r*np.pi))*(np.sin(thetac) + K*np.cos(thetac) - a1*np.cos(thetac))
+				# ~ beta1_dot_22 = -(30*K/(r*np.pi))*(np.cos(thetac) - K*np.sin(thetac) + a1*np.sin(thetac))
+				# ~ beta1_dot_23 = 0
 				
-				beta1_dot_31 = -(15*K/(r*np.pi)) * (np.sin(thetac) + K*np.cos(thetac) - np.sqrt(3)*np.cos(thetac) - a1*np.cos(thetac) - np.sqrt(3)*a1*np.sin(thetac) + np.sqrt(3)*K*np.sin(thetac))
-				beta1_dot_32 = (15*K/(r*np.pi)) * (np.cos(thetac) - K*np.sin(thetac) + np.sqrt(3)*np.sin(thetac) + a1*np.sin(thetac) - np.sqrt(3)*a1*np.cos(thetac) + np.sqrt(3)*K*np.cos(thetac))
-				beta1_dot_33 = 0
+				# ~ beta1_dot_31 = -(15*K/(r*np.pi)) * (np.sin(thetac) + K*np.cos(thetac) - np.sqrt(3)*np.cos(thetac) - a1*np.cos(thetac) - np.sqrt(3)*a1*np.sin(thetac) + np.sqrt(3)*K*np.sin(thetac))
+				# ~ beta1_dot_32 = (15*K/(r*np.pi)) * (np.cos(thetac) - K*np.sin(thetac) + np.sqrt(3)*np.sin(thetac) + a1*np.sin(thetac) - np.sqrt(3)*a1*np.cos(thetac) + np.sqrt(3)*K*np.cos(thetac))
+				# ~ beta1_dot_33 = 0
 				
-				beta1_dot = theta_dot*np.array([beta1_dot_11,beta1_dot_12,beta1_dot_13,beta1_dot_21,beta1_dot_22,beta1_dot_23,beta1_dot_31,beta1_dot_32,beta1_dot_33]).reshape(3,3)
+				# ~ beta1_dot = theta_dot*np.array([beta1_dot_11,beta1_dot_12,beta1_dot_13,beta1_dot_21,beta1_dot_22,beta1_dot_23,beta1_dot_31,beta1_dot_32,beta1_dot_33]).reshape(3,3)
 				
-				gama1_dot_1 = (15*R*speed*speed)/(r*np.pi) * (np.sin(thetac + speed*t) + np.sqrt(3)*np.cos(thetac + speed*t) - a1 * np.cos(thetac + speed*t) + speed * np.sin(thetac + speed*t) + np.sqrt(3) * a1 * np.sin(thetac+speed*t) + np.sqrt(3)*speed*np.cos(thetac+speed*t))
-				gama1_dot_2 = -(30*R*speed*speed)/(r*np.pi) * (np.sin(thetac + speed*t) - a1 * np.cos(thetac + speed*t) + speed * np.sin(thetac + speed*t)) 
-				gama1_dot_3 = -(15*R*speed*speed)/(r*np.pi) * (-np.sin(thetac + speed*t) + np.sqrt(3)*np.cos(thetac + speed*t) + a1*np.cos(thetac + speed*t) - speed*np.sin(thetac + speed*t) + np.sqrt(3)*a1*np.sin(thetac+speed*t) + np.sqrt(3)*speed*np.cos(thetac+speed*t))
-				gama1_dot = theta_dot*np.array([gama1_dot_1,gama1_dot_2,gama1_dot_3]).reshape(3,1)
+				# ~ gama1_dot_1 = (15*R*speed*speed)/(r*np.pi) * (np.sin(thetac + speed*t) + np.sqrt(3)*np.cos(thetac + speed*t) - a1 * np.cos(thetac + speed*t) + speed * np.sin(thetac + speed*t) + np.sqrt(3) * a1 * np.sin(thetac+speed*t) + np.sqrt(3)*speed*np.cos(thetac+speed*t))
+				# ~ gama1_dot_2 = -(30*R*speed*speed)/(r*np.pi) * (np.sin(thetac + speed*t) - a1 * np.cos(thetac + speed*t) + speed * np.sin(thetac + speed*t)) 
+				# ~ gama1_dot_3 = -(15*R*speed*speed)/(r*np.pi) * (-np.sin(thetac + speed*t) + np.sqrt(3)*np.cos(thetac + speed*t) + a1*np.cos(thetac + speed*t) - speed*np.sin(thetac + speed*t) + np.sqrt(3)*a1*np.sin(thetac+speed*t) + np.sqrt(3)*speed*np.cos(thetac+speed*t))
+				
+				beta1_dot = a1*np.dot(j_inv_dot,K,out=None) + K*j_inv_ddot  - K*K*j_inv_dot 
+				gama1_dot = -a1*np.dot(j_inv_dot,q_dot_d,out=None) -a1*np.dot(j_inv,q_ddot_d,out=None)  -np.dot(j_inv_ddot,q_dot_d,out=None) -np.dot(j_inv_dot,q_ddot_d,out=None) -np.dot(j_inv_dot,q_ddot_d,out=None) -np.dot(j_inv,q_dddot_d,out=None) 
+				# ~ gama1_dot = theta_dot*np.array([gama1_dot_1,gama1_dot_2,gama1_dot_3]).reshape(3,1)
 				
 				########################################################		reading actual RPM
 				############		actual RPM (Wc)
@@ -346,30 +356,43 @@ try:
 				z2 = np.array([(m2_vol_f-c_vol2),(m1_vol_f-c_vol1),(m3_vol_f-c_vol3)]).reshape(3,1)
 				# ~ z2 = np.array([(m2_vol-c_vol2),(m1_vol-c_vol1),(m3_vol-c_vol3)]).reshape(3,1)
 				
-				alpha2 = 1/b1 * (-gama1)
-				beta2 = 1/b1 *(-beta1-j_trans)
-				gama2 = 1/b1 * (-K)
+				
+				alpha2 = (1/b1) * (-gama1)
+				beta2 = (1/b1) *(-beta1-j_trans)
+				gama2 = (1/b1) * (-K)
 				
 				beta2_dot = (-1/b1)*beta1_dot - (1/b1) * j_trans_dot
 				alpha2_dot = (-1/b1) * gama1_dot
 				
-				alpha3 = -a2*z2 - gama2 * b1
+				alpha3 = -a2 - gama2 * b1
 				beta3 = gama2*a1 - gama2*a2 - np.dot(beta2,j,out = None) 
 				gama3 = -a2*beta2 + beta2 * K - beta2_dot + np.dot(gama2,j_trans,out=None)
 				zeta3 = -a2*alpha2 - alpha2_dot
 				
-				######################################################## Control Input u
-				u = (1/b2)*(-zeta3 - np.dot(gama3,e,out=None) - np.dot(beta3,z1,out=None) + np.dot(gama2,b1*z2,out=None) - b1*z1) 
-				print(u)
+				######################################################## Control Input 
+				# ~ u1 = (1/b2)*(-np.dot(alpha3,z2,out=None) -zeta3 - np.dot(gama3,e,out=None) - np.dot(beta3,z1,out=None) + np.dot(gama2,b1*z2,out=None) - b1*z1) 
+				u1 = (1/b2)*(-zeta3 - np.dot(gama3,e,out=None) - np.dot(beta3,z1,out=None) + np.dot(gama2,b1*z2,out=None) - b1*z1) 
+				
+				c3 = 1/c2
+				u11 = np.sign(u1[0]) * (np.abs(u1[0])) ** (c3)
+				u21 = np.sign(u1[1]) * (np.abs(u1[1])) ** (c3)
+				u31 = np.sign(u1[2]) * (np.abs(u1[2])) ** (c3)
+				
+				u  = np.array([u11,u21,u31]).reshape(3,1)
+				print(u1)
 				 
 				########################################################		commanded RPM
-				wheel1RPM = float(u[0]) # motor 2 speed [rpm]
-				wheel0RPM = float(u[1]) # motor 1 speed [rpm]
-				wheel2RPM = float(u[2]) # motor 3 speed [rpm]
+				# ~ wheel1RPM = float(u[0]) # motor 2 speed [rpm]
+				# ~ wheel0RPM = float(u[1]) # motor 1 speed [rpm]
+				# ~ wheel2RPM = float(u[2]) # motor 3 speed [rpm]
+				
+				wheel1RPM = float(u1[0]) # motor 2 speed [rpm]
+				wheel0RPM = float(u1[1]) # motor 1 speed [rpm]
+				wheel2RPM = float(u1[2]) # motor 3 speed [rpm]
 				
 				data_c_rpm = str(wheel0RPM)+' , ' +str(wheel1RPM)+ ' , ' +str(wheel2RPM)
 				########################################################		Sending input RPM to Arduino
-				robot.motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
+				robot.motor_pwm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 				
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
