@@ -53,6 +53,9 @@ int    rpmValues[3]                        = {0, 0, 0};
 float    m_cur[3]                          = {0, 0, 0};
 int    vol_sen                             = 0;
 
+double cur[3]                              = {0, 0, 0};
+double cur_setpoint[3]                     = {0, 0, 0};
+
 double duration_US[6]                      = {0, 0, 0, 0, 0, 0};
 double m_US[6]                             = {0, 0, 0, 0, 0, 0};
 double m_IR[4]                             = {0, 0, 0, 0};
@@ -76,6 +79,7 @@ char rcv_buffer[64];  // holds commands recieved
 //char TXBuffer[64];    // temp storage for large data sent
 
 char pidSwitch                             = '0';
+char pidCurSwitch                          = '0';
 char ultrasonicSwitch                      = '0';
 char IRSwitch                              = '0';
 char MCURSwitch                            = '0';
@@ -167,7 +171,10 @@ void loop()
   {
     current_sensor();
   }
-
-
+  /////////////////////////////////////    PID for current
+  if (pidCurSwitch == '1')
+  {
+    cur_pid();
+  }
 }
 /***************************************************************************************************************************************/

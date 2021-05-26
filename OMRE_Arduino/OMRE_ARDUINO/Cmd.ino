@@ -21,6 +21,7 @@ void parseCommand()
       int  motorPWM;
       sscanf(&rcv_buffer[1], " %d %d \r", &motorNumber, &motorPWM);
       pidSwitch                             = '0';
+      pidCurSwitch                          = '0';
       MVOLSwitch                            = '1';
       MCURSwitch                            = '1';
 
@@ -29,7 +30,7 @@ void parseCommand()
       PRINT_ULTRASOUND                      = '0';
       PRINT_IR                              = '0';
       PRINT_RPM                             = '0';
-      PRINT_MCUR                            = '0';
+      PRINT_MCUR                            = '1';
       PRINT_MVOL                            = '0';
       PRINT_CURS                            = '0';
       PRINT_DYNM                            = '0';
@@ -130,6 +131,7 @@ void parseCommand()
       int rpm2;
       sscanf(&rcv_buffer[1], "%d %d %d \r", &rpm0, &rpm1, &rpm2);
       pidSwitch                             = '1';
+      pidCurSwitch                          = '0';
       MCURSwitch                            = '1';
 
       PRINT_ULTRASOUND                      = '0';
@@ -159,6 +161,55 @@ void parseCommand()
       rpm_setpoint[0] = rpm0;
       rpm_setpoint[1] = rpm1;
       rpm_setpoint[2] = rpm2;
+
+      break;
+
+    ////////////////////////////////////////////////////////////////              CUR PID
+    case 'n':
+    case 'N':
+
+      int cur0;
+      int cur1;
+      int cur2;
+      sscanf(&rcv_buffer[1], "%d %d %d \r", &cur0, &cur1, &cur2);
+      pidCurSwitch                          = '1';
+      pidSwitch                             = '0';
+      MCURSwitch                            = '1';
+
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_RPM                             = '0';
+      PRINT_MCUR                            = '1';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
+
+      cur[0] = cur0;
+      cur[1] = cur1;
+      cur[2] = cur2;
+
+
+      for (int i = 0; i < 3; i++)
+      {
+        if (cur[i] > 0)
+        {
+          pwm_dir[i]   = '0';
+        }
+        if (cur[i] < 0)
+        {
+          pwm_dir[i]   = '1';;
+        }
+      }
+
+      cur_setpoint[0] = cur0 * 0.1;
+      cur_setpoint[1] = cur1 * 0.1;
+      cur_setpoint[2] = cur2 * 0.1;
+
+      //      cur_setpoint[0] = cur0;
+      //      cur_setpoint[1] = cur1;
+      //      cur_setpoint[2] = cur2;
+
+      Serial.println(cur_setpoint[1]);
       break;
 
     ////////////////////////////////////////////////////////////////              Check  RPM
@@ -167,6 +218,15 @@ void parseCommand()
       int rpmNum;
       sscanf(&rcv_buffer[1], " %d \r", &rpmNum);
       PRINT_RPM                             = '1';
+
+      PRINT_ULTRASOUND                      = '0';
+      PRINT_IR                              = '0';
+      PRINT_RPM                             = '0';
+      PRINT_MCUR                            = '0';
+      PRINT_MVOL                            = '0';
+      PRINT_CURS                            = '0';
+      PRINT_DYNM                            = '0';
+
       Serial.println(rpmValues[rpmNum]);
       //      Serial.print("  ,  ");
       //      Serial.print(rpmValues[1]);
@@ -180,6 +240,7 @@ void parseCommand()
     case 'S':
 
       pidSwitch                             = '0';
+      pidCurSwitch                          = '0';
       ultrasonicSwitch                      = '0';
       IRSwitch                              = '0';
       MCURSwitch                            = '0';

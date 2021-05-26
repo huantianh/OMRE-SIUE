@@ -33,6 +33,10 @@ def motor_pwm(m1,m2,m3):
 def motor_rpm(m1,m2,m3):
 	motorV= [m1,m2,m3]
 	ser.write(("v %d %d %d \r" %(motorV[0],motorV[1],motorV[2])).encode())
+	
+def motor_current_pid(m1,m2,m3):
+	motorV= [m1,m2,m3]
+	ser.write(("n %d %d %d \r" %(motorV[0],motorV[1],motorV[2])).encode())	
 
 #read encoder value from motor number given
 def encoder(encoderNum):

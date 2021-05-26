@@ -47,7 +47,14 @@ last_output2 = 0
 last_output3 = 0
 last_yaw = 0
 dt      = 0
+omega = 0
 
+output_vol1 = 0
+output_vol2 = 0
+output_vol3 = 0
+last_output_vol1 = 0
+last_output_vol2 = 0
+last_output_vol3 = 0
 
 
 
@@ -186,17 +193,20 @@ try:
 			R = 0.8
 			############################################################		Value for t and delta_t
 			t = 0
-			delay = 0.01
+			delay = 0.001
 			speed = 0.5
 			###### filter gain
-			dt_tau = 0.5           #1   
+			dt_tau = 0.7           #1   
 			tau = 2                #0.05
 			############################################################		gains
-			K1 = 4
-			K2 = 1.2
-			K3 = 1
+			Kv = 10
+			Kp = 10
 			
-			test_t = 30
+			m = 4.49
+			Jn = 0.8289
+			Kt = 0.3535
+			
+			test_t = 8
 			
 			while t < test_t:
 				
@@ -206,47 +216,70 @@ try:
 				yd = R*np.cos(speed*t)
 				thetad = 0
 				
-				qd = np.array([xd,yd,thetad]).reshape(3,1)
-				# ~ print(qd)
-				
-				file = open(save_folder + "Robust"+"_K1_"+str(K1)+"_K2_"+str(K2)+"_K3_"+str(K3)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
+				file = open(save_folder + "Dynamics_Based"+"_Kv_"+str(Kv)+"_Kp_"+str(Kp)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
 				
 				xc = current_x
 				yc = current_y
 				thetac = current_theta
 				
-				########################################################		q_dot_d
-				x_dot_d =  R*speed*np.cos(speed*t)
-				y_dot_d = -R*speed*np.sin(speed*t)
-				theta_dot_d = 0
 				
-				q_dot_d = np.array([x_dot_d,y_dot_d,theta_dot_d]).reshape(3,1)
+				q = np.array([xc,yc,thetac]).reshape(3,1)
 				
-				########################################################		q_ddot_d
-				x_ddot_d = -R*speed*speed*np.sin(speed*t)
-				y_ddot_d = -R*speed*speed*np.cos(speed*t)
-				theta_ddot_d = 0
+				q_dot = np.array([vel_x,vel_y,omega]).reshape(3,1)
 				
-				q_ddot_d = np.array([x_ddot_d,y_ddot_d,theta_ddot_d]).reshape(3,1)
+				print(q_dot)
 				
-				########################################################		J_inverse
+				qd = np.array([xd,yd,thetad]).reshape(3,1)
+				
+				########################################################		qd_dot
+				xd_dot =  R*speed*np.cos(speed*t)
+				yd_dot = -R*speed*np.sin(speed*t)
+				thetad_dot = 0
+				
+				qd_dot = np.array([xd_dot,yd_dot,thetad_dot]).reshape(3,1)
+				
+				########################################################		qd_ddot
+				xd_ddot = -R*speed*speed*np.sin(speed*t)
+				yd_ddot = -R*speed*speed*np.cos(speed*t)
+				thetad_ddot = 0
+				
+				qd_ddot = np.array([xd_ddot,yd_ddot,thetad_ddot]).reshape(3,1)
+				
+				########################################################		Parameters
 				r = 0.03
 				l = 0.19
-				j = (2*np.pi*r/60)*np.array([(2/3)*np.sin(thetac+np.pi/3),(-2/3)*np.sin(thetac),(2/3)*np.sin(thetac-np.pi/3),(-2/3)*np.cos(thetac+np.pi/3),(2/3)*np.cos(thetac),(-2/3)*np.cos(thetac-np.pi/3),-1/(3*l),-1/(3*l),-1/(3*l)]).reshape(3,3)
-				j_inv = np.linalg.inv(j).reshape(3,3)
-				j_trans = np.transpose(j).reshape(3,3)
+							
+				########################################################		Dynamics Based Controller
+					
+				C = np.array([0, -m*omega, 0, m*omega, 0, 0, 0, 0, 0]).reshape(3,3)
+				M = np.array([m, 0, 0, 0, m, 0, 0, 0, Jn]).reshape(3,3)
 				
-				j_dot = theta_dot*np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
-				j_inv_dot = theta_dot*np.array([(30*np.cos(thetac+np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/3))/(r*np.pi), 0, -(30*np.cos(thetac))/(r*np.pi), -(30*np.sin(thetac))/(r*np.pi), 0, (30*np.cos(thetac-np.pi/3))/(r*np.pi), -(30*np.cos(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
+				e1 = qd_dot - q_dot
+				e2 = q - qd
 				
-				########################################################		Robust Controller
-				############			Parameters
-				a1 = 12.17; b1 = 224.46; a2 = 4.74; b2 = 10.08; c2 = 0.32;
+				J1 = qd_ddot + np.dot(Kv,e1,out = None) + np.dot(Kp,e2,out = None)
 				
-				alpha1 = -a1 + K1
-				beta1 = a1*np.dot(K1,j_inv,out = None) + np.dot(K1,j_inv_dot,out = None) - np.dot(K1*K1,j_inv,out = None)
-				gama1 = -a1*np.dot(j_inv,q_dot_d,out = None) - np.dot(j_inv_dot,q_dot_d,out = None) - np.dot(j_inv,q_ddot_d,out = None)
-				e = np.array([(xc-xd),(yc-yd),(thetac-thetad)]).reshape(3,1) 
+				f = np.dot(C,q_dot,out = None) + np.dot(M,J1,out = None)
+				
+				Jf = np.array([0, np.sqrt(3)/2, -np.sqrt(3)/2, -1, 1/2, 1/2, l, l, l]).reshape(3,3)
+				Jf_inv = np.linalg.inv(Jf).reshape(3,3)
+				
+				Rot = np.array([np.cos(thetac), np.sin(thetac), 0, -np.sin(thetac), np.cos(thetac), 0, 0, 0, 1]).reshape(3,3)
+				J2 = np.dot(Rot,f, out = None)
+				
+				torque = r * np.dot(Jf_inv,J2,out = None)
+			
+				
+				current_ref = torque * (1/Kt)
+				current_ref_convert = current_ref * 10
+				
+				# ~ print(current_ref_convert)
+				
+				current_input1 = int(current_ref_convert[0]) 
+				current_input2 = int(current_ref_convert[1]) 
+				current_input3 = int(current_ref_convert[2])
+				
+				robot.motor_current_pid(current_input1,current_input2,current_input3) 
 				
 				########################################################		reading actual RPM
 				############		actual RPM (Wc)
@@ -269,31 +302,36 @@ try:
 				m3_rpm_f = output3
 				
 				data_rpm = str(m1_rpm_f)+' , ' +str(m2_rpm_f)+ ' , ' +str(m3_rpm_f)
-				# ~ data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
+				# ~ data_pwm = str(current_input1)+" , "+str(current_input2)+" , "+str(current_input3)
+				data_pwm = str(1)+" , "+str(2)+" , "+str(3)
 				
-				########################################################		wd
-				wd = np.dot(j_inv,-K1*e + q_dot_d,out = None)
+				########################################################		
+				m1_vol = float(robot.motor_voltage(0))
+				m2_vol = float(robot.motor_voltage(1))
+				m3_vol = float(robot.motor_voltage(2))
 				
-				############		commanded (Wd)
-				c_rpm2 = float(wd[0])
-				c_rpm1 = float(wd[1])
-				c_rpm3 = float(wd[2])
+				input_vol1 = float(m1_vol)
+				input_vol2 = float(m2_vol)
+				input_vol3 = float(m3_vol)
 				
-				z1 = np.array([(m2_rpm_f-c_rpm2),(m1_rpm_f-c_rpm1),(m3_rpm_f-c_rpm3)]).reshape(3,1) 
-				# ~ z1 = np.array([(m2_rpm-c_rpm2),(m1_rpm-c_rpm1),(m3_rpm-c_rpm3)]).reshape(3,1)  
+				output_vol1 += alpha*(input_vol1 - last_output_vol1)
+				output_vol2 += alpha*(input_vol2 - last_output_vol2)
+				output_vol3 += alpha*(input_vol3 - last_output_vol3)
 				
-				########################################################		Input V	(RPM)	
+				m1_vol_f = output_vol1
+				m2_vol_f = output_vol2
+				m3_vol_f = output_vol3
 				
-				v = (1/b1)*(-gama1 - np.dot(j_trans,e,out = None) - np.dot(beta1,e,out = None)) - K2*z1 - K3*np.sign(z1) 
-				########################################################		commanded RPM
-				wheel1RPM = float(v[0]) # motor 2 speed [rpm]
-				wheel0RPM = float(v[1]) # motor 1 speed [rpm]
-				wheel2RPM = float(v[2]) # motor 3 speed [rpm]
+				data_vol = str(m1_vol_f)+' , ' +str(m2_vol_f)+ ' , ' +str(m3_vol_f)
 				
-				data_c_rpm = str(wheel0RPM)+' , ' +str(wheel1RPM)+ ' , ' +str(wheel2RPM)
-				########################################################		Sending input RPM to Arduino
-				# ~ robot.motor_rpm(int(wheel0RPM),int(wheel1RPM),int(wheel2RPM))
 				
+				########################################################
+				m1_cur = robot.motor_current(0)
+				m2_cur = robot.motor_current(1)
+				m3_cur = robot.motor_current(2)
+				data_cur = str(m1_cur)+' , '+str(m2_cur)+' , '+str(m3_cur)
+				
+				# ~ print(data_cur)
 				########################################################		odometry using encoder
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
@@ -312,23 +350,34 @@ try:
 				# ~ dyaw = yaw - last_yaw
 				dyaw = current_theta - last_yaw
 				theta_dot = dyaw/dt
+				omega = theta_dot
 				data_vel = str(vel_x)+' , '+str(vel_y)+' , '+str(theta_dot) 
+				data_acc = str(acc_x)+' , '+str(acc_y)+' , '+str(acc_z)
 				
 				########################################################		Recording data
 				time_running = time.time()
-				data_pose = str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])
-				data_pos  = str(pos_x)+" , "+str(pos_y)
+				# ~ data_pose = str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])
+				data_pos = str(pose[0][0])+" , "+str(pose[1][0])+" , "+str(pose[2][0])
+				# ~ data_pos  = str(pos_x)+" , "+str(pos_y)+" , "+str(pose[2][0])
 				data_qd   = str(xd)+" , "+str(yd)+" , "+str(thetad) 
-				file.writelines(str(data_pose)+" , "+str(data_pos)+" , "+str(data_rpm)+" , "+str(data_c_rpm)+" , "+str(data_vel)+" , "+str(data_qd)+" , "+str(time_running)+"\n")	
+				
+				file.writelines(str(data_pos)+" , "+str(data_vel)+' , '+str(data_acc)+" , "+str(data_pwm)+" , "+str(data_rpm)+" , "+str(data_vol)+" , "+str(data_cur)+" , "+str(time_running)+"\n")	
+				
 				########################################################		Remembering value for new loop			
 				time.sleep(delay)
 				elapsed_time = (time.time() - start)
 				t = t + elapsed_time
 				
+				# ~ print(elapsed_time)
+				
 				last_output1 = output1
 				last_output2 = output2
 				last_output3 = output3
-				# ~ last_yaw     = yaw  
+				
+				last_output_vol1 = output_vol1
+				last_output_vol2 = output_vol2
+				last_output_vol3 = output_vol3
+				
 				last_yaw     = current_theta 
 				
 			robot.stop()
