@@ -206,7 +206,7 @@ try:
 			Jn = 0.8289
 			Kt = 0.3535
 			
-			test_t = 8
+			test_t = 5
 			
 			while t < test_t:
 				
@@ -227,7 +227,7 @@ try:
 				
 				q_dot = np.array([vel_x,vel_y,omega]).reshape(3,1)
 				
-				print(q_dot)
+				# ~ print(q_dot)
 				
 				qd = np.array([xd,yd,thetad]).reshape(3,1)
 				
@@ -336,14 +336,14 @@ try:
 				pose = odometryCalc(xc,yc,thetac)	
 				pos  = odometry_RealSense()
 				
-				current_x = pose.item(0)
-				current_y = pose.item(1)
-				current_theta = pose.item(2)
+				# ~ current_x = pose.item(0)
+				# ~ current_y = pose.item(1)
+				# ~ current_theta = pose.item(2)
 				
 				########################################################		odometry using RealSense
-				# ~ current_x = pos_x
-				# ~ current_y = pos_y
-				# ~ current_theta = pose.item(2)		
+				current_x = pos_x
+				current_y = pos_y
+				current_theta = pose.item(2)		
 				
 				########################################################		RealSense velocities
 				dt = (time.time() - start)

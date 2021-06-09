@@ -209,7 +209,7 @@ void parseCommand()
       //      cur_setpoint[1] = cur1;
       //      cur_setpoint[2] = cur2;
 
-      Serial.println(cur_setpoint[1]);
+      //      Serial.println(cur_setpoint[1]);
       break;
 
     ////////////////////////////////////////////////////////////////              Check  RPM

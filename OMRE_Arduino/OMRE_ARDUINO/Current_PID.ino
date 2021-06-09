@@ -41,13 +41,13 @@ void cur_pid()
         error1[i] = cur_setpoint[i] - m_cur[i];
         ITerm1[i] += (Ki1[i] * error1[i]);
 
-        if (ITerm1[i] > 255)
+        if (ITerm1[i] > 12)
         {
-          ITerm1[i] = 255;
+          ITerm1[i] = 12;
         }
-        if (ITerm1[i] < -255)
+        if (ITerm1[i] < -12)
         {
-          ITerm1[i] = -255;
+          ITerm1[i] = -12;
         }
 
         dInput1[i] = (m_cur[i] - lastInput1[i]);
