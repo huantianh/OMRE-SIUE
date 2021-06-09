@@ -188,15 +188,15 @@ try:
 			R = 0.8
 			############################################################		Value for t and delta_t
 			t = 0
-			delay = 0.03
-			speed = 0.5
+			delay = 0.01
+			speed = 1
 			###### filter gain
 			dt_tau = 0.5           #1   
 			tau = 2                #0.05
 			############################################################		gains
-			K1 = 80
+			K1 = 100
 			K2 = 5
-			K3 = 10
+			K3 = 20
 			
 			test_t = 20
 			
@@ -205,7 +205,7 @@ try:
 				start = time.time()
 						
 				xd = R*np.sin(speed*t)
-				yd = R*np.cos(speed*t)
+				yd = R*np.cos(speed*t)-0.8
 				thetad = 0
 				
 				file = open(save_folder + "Robust"+"_K1_"+str(K1)+"_K2_"+str(K2)+"_K3_"+str(K3)+"_delay_"+str(delay)+"_speed_"+str(speed)+"_test_t_"+str(test_t)+".txt","a")
@@ -246,10 +246,11 @@ try:
 				j_inv = np.linalg.inv(j).reshape(3,3)
 				j_trans = np.transpose(j).reshape(3,3)
 				
-				j_dot = np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
-				j_inv_dot = np.array([(30*np.cos(thetac+np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/3))/(r*np.pi), 0, -(30*np.cos(thetac))/(r*np.pi), -(30*np.sin(thetac))/(r*np.pi), 0, (30*np.cos(thetac-np.pi/3))/(r*np.pi), -(30*np.cos(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
-				j_trans_dot = np.array([(r*np.pi/45)*np.cos(thetac+ np.pi/3),(r*np.pi/45)*np.sin(thetac+np.pi/3),0,-(r*np.pi/45)*np.cos(thetac),-(r*np.pi/45)*np.sin(thetac),0,(r*np.pi/45)*np.cos(thetac-np.pi/3),(r*np.pi/45)*np.sin(thetac-np.pi/3),0]).reshape(3,3)
-				j_inv_ddot = np.array([(-30*np.sin(thetac+np.pi/3))/(r*np.pi), (30*np.cos(thetac+np.pi/3))/(r*np.pi), 0, (30*np.sin(thetac))/(r*np.pi), -(30*np.cos(thetac))/(r*np.pi), 0, -(30*np.sin(thetac-np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
+				# ~ j_dot = np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
+				# ~ j_inv_dot = np.array([(30*np.cos(thetac+np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/3))/(r*np.pi), 0, -(30*np.cos(thetac))/(r*np.pi), -(30*np.sin(thetac))/(r*np.pi), 0, (30*np.cos(thetac-np.pi/3))/(r*np.pi), -(30*np.cos(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
+				
+				j_dot = theta_dot*np.array([(r*np.pi*np.cos(thetac+np.pi/3))/45, -(r*np.pi*np.cos(thetac))/45, (r*np.pi*np.cos(thetac-np.pi/3))/45, (r*np.pi*np.sin(thetac+np.pi/3))/45, -(r*np.pi*np.sin(thetac))/45, (r*np.pi*np.sin(thetac-np.pi/3))/45, 0, 0, 0]).reshape(3,3)
+				j_inv_dot = theta_dot*np.array([(30*np.cos(thetac+np.pi/3))/(r*np.pi), (30*np.sin(thetac+np.pi/3))/(r*np.pi), 0, -(30*np.cos(thetac))/(r*np.pi), -(30*np.sin(thetac))/(r*np.pi), 0, (30*np.cos(thetac-np.pi/3))/(r*np.pi), -(30*np.cos(thetac+np.pi/6))/(r*np.pi), 0]).reshape(3,3)
 				
 				
 				########################################################		Robust Controller
@@ -286,8 +287,7 @@ try:
 				# ~ data_rpm = str(m1_rpm)+' , ' +str(m2_rpm)+ ' , ' +str(m3_rpm)
 				
 				########################################################		wd
-				wd1 = -K1*e1 + qd_dot
-				wd = np.dot(j_inv,wd1,out = None)
+				wd = np.dot(j_inv, -K1*e1 + qd_dot,out = None)
 				
 				############		commanded (Wd)
 				c_rpm2 = float(wd[0])
@@ -345,6 +345,7 @@ try:
 				dyaw = current_theta - last_yaw
 				theta_dot = dyaw/dt
 				theta_dot = omega
+				print(theta_dot)
 				data_vel = str(vel_x)+' , '+str(vel_y)+' , '+str(theta_dot) 
 				
 				########################################################		Recording data

@@ -95,7 +95,7 @@ theta = np.linspace(0, 2*np.pi, 100)
 b = 0.8
 r = b
 x1 = r*np.cos(theta) 
-x2 = r*np.sin(theta)
+x2 = r*np.sin(theta)-0.8
 test_t = 30
 
 fig = plt.figure()
